@@ -44,8 +44,8 @@
         <h1 class="text-3xl md:text-4xl font-extrabold mb-4">Simile Completion Activity</h1>
         <p class="text-gray-600 mb-6 text-center">Drag the simile phrases from the bottom to complete the sentences.</p>
         
-        <!-- Canvas width increased for longer sentences -->
-        <canvas id="gameCanvas" width="850" height="500"></canvas>
+        <!-- Canvas height increased from 500 to 550 to accommodate wrapped options -->
+        <canvas id="gameCanvas" width="850" height="550"></canvas>
         
         <div id="message" class="w-full bg-yellow-100 text-yellow-800 border border-yellow-300">
             Drag a simile to begin!
@@ -130,26 +130,33 @@
             const shuffledSimiles = similes.slice().sort(() => Math.random() - 0.5);
 
             let currentX = PADDING;
+            let currentY = DRAGGABLE_Y_START; // Start Y position
+
             shuffledSimiles.forEach(s => {
                 ctx.font = `${FONT_SIZE} Arial`;
                 const textWidth = ctx.measureText(s.text).width + PADDING * 2;
                 
-                // Adjust position for layout
-                if (currentX + textWidth > canvas.width) {
-                    // Start next line if needed, or just let it overflow if space is constrained
-                    // Given the 850px width, one line should generally be fine for this data.
+                // --- LINE WRAPPING LOGIC ---
+                // Check if the current item goes beyond the right edge of the canvas (with padding margin)
+                if (currentX + textWidth > canvas.width - PADDING) {
+                    // Move to the next line (reset X, increment Y)
+                    currentX = PADDING;
+                    currentY += BOX_HEIGHT + PADDING; // Move down by box height + padding gap
                 }
+                // --- END LINE WRAPPING LOGIC ---
 
                 draggables.push({
                     text: s.text,
                     x: currentX,
-                    y: DRAGGABLE_Y_START,
+                    y: currentY, // Use dynamic Y
                     width: textWidth,
                     height: BOX_HEIGHT,
                     isCorrectlyPlaced: false,
                     originalX: currentX,
-                    originalY: DRAGGABLE_Y_START
+                    originalY: currentY // Store dynamic Y as original
                 });
+                
+                // Advance X position for the next item
                 currentX += textWidth + PADDING;
             });
         }
