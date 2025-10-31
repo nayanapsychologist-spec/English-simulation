@@ -23,21 +23,45 @@
             min-height: 40px;
             border: 2px dashed #9ca3af;
             transition: all 0.2s ease;
+            /* Ensure the text inside the drop target is not visible when the draggable element is in it */
+            color: transparent; 
+        }
+        .drop-target:empty {
+            color: #9ca3af; /* Show 'Drag Tense Here' only when empty */
         }
         .drop-target.drag-over {
             background-color: #e0f2f1; /* Light Teal */
             border-color: #0d9488;
         }
         .drop-target.filled {
-            border: 2px solid #34d399; /* Green for filled */
-            background-color: #f0fdf4;
+            border: 2px solid #9ca3af; 
+            background-color: #f9fafb;
         }
         .drop-target.correct {
             border-color: #10b981;
-            background-color: #d1fae5;
+            background-color: #d1fae5; /* Light Green */
+            color: #065f46; /* Text color for correct match */
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .sentence-card {
             border-left: 4px solid #3b82f6; /* Blue border for sentences */
+        }
+        /* Style the draggable element when inside the drop target */
+        .drop-target > .draggable {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default; /* Change cursor back when dropped */
+        }
+        .feedback-description {
+            grid-column: 1 / -1; /* Span all columns */
+            transition: opacity 0.3s ease;
         }
     </style>
 </head>
@@ -46,7 +70,6 @@
     <script>
         // Data for the activity
         const tenseData = [
-            // Updated sentences to use <b> tags instead of ** for correct HTML bolding
             { id: 1, sentence: "The <b>School Fair</b> always <b>raises</b> money for new library books.", tense: "Simple Present Tense", description: "<b>Simple Present:</b> Used for general truths, facts, or routine actions." },
             { id: 2, sentence: "We <b>uploaded</b> the final draft of the main article yesterday afternoon.", tense: "Simple Past Tense", description: "<b>Simple Past:</b> Used for an action that was completed at a specific, definite time in the past." },
             { id: 3, sentence: "The photo editor <b>has been resizing</b> the images for over two hours now.", tense: "Present Perfect Continuous Tense", description: "<b>Present Perfect Continuous:</b> Used for an action that started in the past and is still continuing now, emphasizing the duration." },
@@ -74,9 +97,13 @@
 
             // 1. Render Sentences and Drop Zones
             tenseData.forEach(item => {
-                // Main grid row for sentence + dropzone
+                const wrapper = document.createElement('div');
+                wrapper.id = `wrapper-${item.id}`;
+                wrapper.className = 'mb-6'; 
+
+                // Grid row for sentence + dropzone
                 const row = document.createElement('div');
-                row.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 items-center';
+                row.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 items-center';
 
                 // Sentence Column
                 const sentenceCol = document.createElement('div');
@@ -96,7 +123,20 @@
                 
                 row.appendChild(sentenceCol);
                 row.appendChild(dropZoneCol);
-                container.appendChild(row);
+                wrapper.appendChild(row);
+
+
+                // Description Feedback Element (Initially hidden, inline feedback)
+                const descDiv = document.createElement('div');
+                descDiv.id = `desc-${item.id}`;
+                descDiv.className = 'hidden feedback-description mt-2 p-3 bg-green-100 border-l-4 border-green-500 text-sm rounded-lg shadow-inner text-gray-700';
+                
+                // Set the initial content of the description (it will be updated in checkCompletion)
+                const fullDescription = item.description;
+                descDiv.innerHTML = `<span class="font-bold text-green-700">${item.tense}:</span> ${fullDescription}`;
+                
+                wrapper.appendChild(descDiv);
+                container.appendChild(wrapper);
             });
 
             // 2. Render Draggable Tenses
@@ -139,13 +179,16 @@
         // --- Drag & Drop Handlers ---
 
         function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.getAttribute('data-tense-name'));
+            const tenseName = e.target.getAttribute('data-tense-name');
+            e.dataTransfer.setData('text/plain', tenseName);
             e.dataTransfer.setData('source-id', e.target.id);
             
             // If the item is being dragged from a drop zone, track its origin
             const parentDropZone = e.target.closest('.drop-target');
             if (parentDropZone) {
                 e.dataTransfer.setData('origin-dropzone-id', parentDropZone.id);
+                // Temporarily revert the drop zone content so it looks empty
+                parentDropZone.textContent = 'Drag Tense Here';
             } else {
                 e.dataTransfer.setData('origin-dropzone-id', '');
             }
@@ -156,7 +199,7 @@
 
         function dragOver(e) {
             e.preventDefault();
-            // Allow drag-over on drop-targets and the list container
+            // Allow drag-over on drop-targets only if they are empty
             if (e.target.classList.contains('drop-target') && e.target.children.length === 0) {
                 e.target.classList.add('drag-over');
             } else if (e.currentTarget.id === 'draggable-list-dropzone' || e.currentTarget.id === 'draggable-tenses') {
@@ -177,14 +220,20 @@
 
             const tenseName = e.dataTransfer.getData('text/plain');
             const sourceId = e.dataTransfer.getData('source-id');
+            const originDropZoneId = e.dataTransfer.getData('origin-dropzone-id');
             const sourceElement = document.getElementById(sourceId);
             const dropTarget = e.target.closest('.drop-target'); 
 
+            // If the drop fails to find a valid dropTarget, put the original item back 
             if (!dropTarget) {
-                // Not dropped on a valid drop zone, return to draggable list (handled by handleReturnToDraggableList if dropped on list area)
                 if (sourceElement) {
-                    document.getElementById('draggable-tenses').appendChild(sourceElement);
                     sourceElement.classList.remove('hidden');
+                }
+                // If it came from a drop zone, restore the drop zone's content visually 
+                // (The state will be corrected by checkCompletion when handleReturnToDraggableList is called)
+                if (originDropZoneId) {
+                    const previousDropZone = document.getElementById(originDropZoneId);
+                    if(previousDropZone) previousDropZone.textContent = tenseName;
                 }
                 return;
             }
@@ -197,14 +246,16 @@
                 if (tenseName !== expectedTense) {
                     // --- INCORRECT MATCH: Snap back and flash red ---
                     
-                    // Temporary visual feedback (override existing styles)
+                    // Temporary visual feedback
                     dropTarget.style.backgroundColor = '#fee2e2'; /* Red-100 */
                     dropTarget.style.borderColor = '#ef4444'; /* Red-500 */
+                    dropTarget.textContent = tenseName; // Show the incorrect drop momentarily
 
                     // Revert feedback after a short delay
                     setTimeout(() => {
                         dropTarget.style.backgroundColor = ''; 
                         dropTarget.style.borderColor = ''; 
+                        dropTarget.textContent = 'Drag Tense Here'; // Clear the text again
                     }, 700); 
 
                     // Put item back into the draggable list immediately
@@ -212,6 +263,12 @@
                         document.getElementById('draggable-tenses').appendChild(sourceElement);
                         sourceElement.classList.remove('hidden');
                     }
+                    // If it came from an old drop zone, restore that old drop zone visually 
+                    if (originDropZoneId) {
+                         const previousDropZone = document.getElementById(originDropZoneId);
+                         if(previousDropZone) previousDropZone.textContent = tenseName;
+                    }
+                    checkCompletion(); 
                     return; // Stop execution for incorrect drop
                 }
 
@@ -219,7 +276,7 @@
                 
                 if (sourceElement) sourceElement.classList.remove('hidden');
                 
-                // Remove old state from matches if the item was dragged from a previous drop zone (SWAP functionality)
+                // 1. Clear old state from matches if the item was dragged from a previous drop zone (SWAP functionality)
                 const previousDropZoneId = Object.keys(matches).find(key => matches[key] === tenseName);
                 if (previousDropZoneId) {
                     const previousDropZone = document.getElementById(previousDropZoneId);
@@ -228,22 +285,22 @@
                     delete matches[previousDropZoneId];
                 }
 
-                // Move the item to the new drop zone
+                // 2. Move the item to the new drop zone
                 dropTarget.appendChild(sourceElement);
-                dropTarget.classList.add('filled');
-                dropTarget.textContent = ''; // Clear "Drag Here" text
+                dropTarget.classList.add('filled', 'correct');
+                dropTarget.textContent = tenseName; // Display the name in the drop zone
 
-                // Update matches state
+                // 3. Update matches state
                 matches[dropTarget.id] = tenseName;
                 
-                // Check for completion (this handles the green styling for correct drops)
+                // 4. Check for completion (this handles the green styling for correct drops and inline feedback)
                 checkCompletion();
             } else {
-                 // Drop target is already filled, put the source item back in the draggable list
-                if (sourceElement) {
-                    document.getElementById('draggable-tenses').appendChild(sourceElement);
-                    sourceElement.classList.remove('hidden');
-                }
+                 // Drop target is already filled, put the source item back where it belongs
+                 if (sourceElement) {
+                     document.getElementById('draggable-tenses').appendChild(sourceElement);
+                     sourceElement.classList.remove('hidden');
+                 }
             }
         }
         
@@ -272,48 +329,56 @@
                 listContainer.appendChild(sourceElement);
                 sourceElement.classList.remove('hidden');
 
-                // Re-check completion to update visual state of other drop zones if necessary
+                // Re-check completion to update visual state of other drop zones (especially hiding feedback)
                 checkCompletion();
             }
         }
 
 
-        // --- Touch Handlers (Simplified for basic placement) ---
+        // --- Touch Handlers (Needs significant refactoring for accurate touch behavior, simplifying for now) ---
+        // Keeping drag/drop as primary interaction as touch logic is complex in nested divs
 
-        let currentTenseElement = null; // Store the element being moved by touch
+        let currentTenseElement = null; 
 
         function touchStart(e) {
-            e.preventDefault();
+            // Preventing default here can interfere with scrolling. We'll use touchmove/touchend for actual drag.
+            // e.preventDefault(); 
             currentTenseElement = e.target;
             currentTenseElement.classList.add('shadow-2xl', 'scale-110');
             // Store origin ID for cleanup later
             const parentDropZone = e.target.closest('.drop-target');
             if (parentDropZone) {
                  currentTenseElement.setAttribute('data-origin-dropzone-id', parentDropZone.id);
+                 // Clear the text temporarily
+                 parentDropZone.textContent = 'Drag Tense Here';
             } else {
                  currentTenseElement.setAttribute('data-origin-dropzone-id', '');
             }
         }
+        
+        // The core touch logic remains simplified to avoid complex gesture tracking
 
         function touchEnd(e) {
-            // Find the element at the touchend location
             const touch = e.changedTouches[0];
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropTargetCandidate = document.elementFromPoint(touch.clientX, touch.clientY);
+            const dropTarget = dropTargetCandidate ? dropTargetCandidate.closest('.drop-target') : null;
             const listContainer = document.getElementById('draggable-tenses');
-
+            const listDropZone = document.getElementById('draggable-list-dropzone');
+            
             if (currentTenseElement) {
                 currentTenseElement.classList.remove('shadow-2xl', 'scale-110');
                 const tenseName = currentTenseElement.getAttribute('data-tense-name');
                 const originDropZoneId = currentTenseElement.getAttribute('data-origin-dropzone-id');
+                let successfulDrop = false;
 
-                // 1. Check if dropped onto a valid empty drop zone
-                if (dropTarget && dropTarget.classList.contains('drop-target') && dropTarget.children.length === 0) {
+                // 1. Drop onto a valid empty drop zone
+                if (dropTarget && dropTarget.children.length === 0) {
                     const expectedTense = dropTarget.getAttribute('data-target-tense');
                     
                     if (tenseName === expectedTense) {
-                         // Correct Match
+                         // Correct Match (Touch)
                          
-                         // Clear old origin drop zone if needed
+                         // Clear old origin drop zone state/content
                          if (originDropZoneId) {
                             const previousDropZone = document.getElementById(originDropZoneId);
                             if (previousDropZone) {
@@ -325,35 +390,34 @@
 
                         // Move item to new drop zone
                         dropTarget.appendChild(currentTenseElement);
-                        dropTarget.classList.add('filled');
-                        dropTarget.textContent = ''; 
+                        dropTarget.classList.add('filled', 'correct');
+                        dropTarget.textContent = tenseName; 
 
                         // Update matches state
                         matches[dropTarget.id] = tenseName;
-                        checkCompletion();
+                        successfulDrop = true;
 
                     } else {
                         // Incorrect Match (Touch) - Flash red and snap back to list
                         dropTarget.style.backgroundColor = '#fee2e2'; 
                         dropTarget.style.borderColor = '#ef4444'; 
+                        dropTarget.textContent = tenseName;
+                        
                         setTimeout(() => {
                             dropTarget.style.backgroundColor = ''; 
                             dropTarget.style.borderColor = ''; 
-                            listContainer.appendChild(currentTenseElement); // Snap back
+                            dropTarget.textContent = 'Drag Tense Here';
                         }, 700);
-                        // If it came from a drop zone, put it back there temporarily until it snaps to the list
-                        if (originDropZoneId) {
-                            document.getElementById(originDropZoneId).appendChild(currentTenseElement);
-                        } else {
-                            listContainer.appendChild(currentTenseElement);
-                        }
+                        
+                        // Snap back to list
+                        listContainer.appendChild(currentTenseElement);
                     }
 
-                // 2. Check if dropped back onto the list container (to remove it from a drop zone)
-                } else if (listContainer.contains(dropTarget) || dropTarget.id === 'draggable-list-dropzone') {
+                // 2. Drop back onto the list container (to remove it from a drop zone or if it originated from the list)
+                } else if (listContainer.contains(dropTargetCandidate) || listDropZone.contains(dropTargetCandidate)) {
                     
                     if (originDropZoneId) {
-                         // Clear old drop zone state
+                         // Clear old drop zone state/content
                          const previousDropZone = document.getElementById(originDropZoneId);
                          if (previousDropZone) {
                              previousDropZone.textContent = 'Drag Tense Here';
@@ -364,16 +428,19 @@
 
                     // Move item back to the list
                     listContainer.appendChild(currentTenseElement);
-                    checkCompletion();
-
-                } else {
-                    // Invalid drop or drop onto a filled drop zone, return item to origin (list or drop zone)
-                    if (originDropZoneId) {
-                         document.getElementById(originDropZoneId).appendChild(currentTenseElement);
-                    } else {
-                        listContainer.appendChild(currentTenseElement);
-                    }
+                    successfulDrop = true;
+                } 
+                
+                // 3. If no successful drop, return item to original location if it came from a drop zone
+                if (!successfulDrop && originDropZoneId && document.getElementById(originDropZoneId)) {
+                     const originalDropZone = document.getElementById(originDropZoneId);
+                     originalDropZone.appendChild(currentTenseElement);
+                     originalDropZone.textContent = tenseName; // Restore visual content
+                } else if (!successfulDrop) {
+                     listContainer.appendChild(currentTenseElement);
                 }
+
+                checkCompletion();
             }
             currentTenseElement = null;
         }
@@ -388,42 +455,51 @@
 
             dropTargets.forEach(target => {
                 const targetId = target.id;
+                const itemId = targetId.split('-')[1]; 
+                const descriptionElement = document.getElementById(`desc-${itemId}`);
+                
                 const expectedTense = target.getAttribute('data-target-tense');
                 const droppedTense = matches[targetId];
 
-                // Check if all targets have an item
+                // Case 1: Drop Zone is currently empty (or status needs reset)
                 if (!droppedTense) {
                     allFilled = false;
-                    target.classList.remove('correct');
+                    target.classList.remove('correct', 'filled');
+                    target.textContent = 'Drag Tense Here';
+                    // Hide description
+                    if (descriptionElement) descriptionElement.classList.add('hidden');
                     return;
                 }
 
-                // Check correctness
+                // Case 2: Drop Zone is filled (Check correctness and update feedback/state)
+                // Note: The drop() function ensures only correct items are stored in 'matches'
                 if (droppedTense === expectedTense) {
-                    target.classList.add('correct');
+                    target.classList.add('correct', 'filled');
+                    target.textContent = droppedTense; 
+                    // Show description
+                    if (descriptionElement) {
+                        descriptionElement.classList.remove('hidden');
+                    }
                 } else {
+                    // This case should ideally not happen due to the wrong match snap-back protocol, 
+                    // but keeping it for robustness
                     target.classList.remove('correct');
+                    if (descriptionElement) descriptionElement.classList.add('hidden');
                     allCorrect = false;
                 }
             });
 
             if (allFilled && allCorrect) {
-                showFeedbackModal();
+                showCompletionModal();
             }
         }
 
-        function showFeedbackModal() {
+        function showCompletionModal() {
             const modal = document.getElementById('feedback-modal');
             const feedbackContent = document.getElementById('feedback-content');
             
-            // Generate feedback content (Description/Purpose)
-            feedbackContent.innerHTML = '';
-            tenseData.forEach(item => {
-                const p = document.createElement('p');
-                p.className = 'mb-3 p-2 bg-gray-50 rounded-md';
-                p.innerHTML = `<span class="font-bold text-indigo-700">${item.tense}:</span> ${item.description}`;
-                feedbackContent.appendChild(p);
-            });
+            // Clear content since detailed feedback is now inline
+            feedbackContent.innerHTML = '<p class="text-gray-600">You successfully matched all tenses! Review the inline feedback below each sentence for a breakdown of the tense purpose.</p>';
             
             modal.classList.remove('hidden');
         }
@@ -459,28 +535,29 @@
         </div>
 
         <!-- Column 2: Sentences and Drop Zones -->
-        <div id="activity-container" class="lg:col-span-3 order-1 lg:order-2">
-            <!-- Sentences and Drop Zones will be injected here by JS -->
+        <div class="lg:col-span-3 order-1 lg:order-2">
+            <!-- Header for the Sentence/DropZone area -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 items-center font-bold text-gray-700">
                 <div class="text-left p-3 md:col-span-2">EXAMPLE SENTENCE (ACTION)</div>
                 <div class="text-center p-3">MATCHING TENSE</div>
+            </div>
+            <div id="activity-container">
+                <!-- Sentence, Drop Zones, and inline Feedback will be injected here by JS -->
             </div>
         </div>
     </div>
 
 
-    <!-- Feedback Modal -->
+    <!-- Completion Modal -->
     <div id="feedback-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-4xl w-full mx-4 transform transition-all scale-100">
-            <h2 class="text-3xl font-extrabold text-green-600 mb-4">🎉 Congratulations! All Correct!</h2>
-            <p class="text-gray-700 mb-6">You've mastered the tenses needed for a perfect newspaper article. Here is a review of why each tense is used:</p>
-            
-            <div id="feedback-content" class="max-h-96 overflow-y-auto pr-4">
-                <!-- Feedback content injected here -->
-            </div>
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full mx-4 transform transition-all scale-100">
+            <h2 class="text-3xl font-extrabold text-green-600 mb-4">🎉 Activity Complete!</h2>
+            <p id="feedback-content" class="text-gray-700 mb-6">
+                 You successfully matched all tenses! Review the inline feedback below each sentence for a breakdown of the tense purpose.
+            </p>
 
-            <button onclick="closeModal()" class="mt-6 w-full md:w-auto px-6 py-3 bg-indigo-500 text-white font-bold rounded-lg shadow-md hover:bg-indigo-600 transition-colors">
-                Close and Review
+            <button onclick="closeModal()" class="mt-4 w-full px-6 py-3 bg-indigo-500 text-white font-bold rounded-lg shadow-md hover:bg-indigo-600 transition-colors">
+                Close
             </button>
         </div>
     </div>
