@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vowel Voyager: Phonics Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF7043; /* Deep Orange */
+            --secondary: #4CAF50; /* Green */
+            --tertiary: #2196F3; /* Blue */
+            --bg-color: #F8F9FA; /* Light Gray */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+        }
+        h1, h2 {
+            font-family: 'Bungee Inline', cursive;
+        }
+        .game-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .option-button {
+            transition: all 0.2s ease-in-out;
+            border: 3px solid var(--tertiary);
+            color: #333;
+            font-weight: 700;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.5);
+            background-color: #e3f2fd;
+        }
+        .correct-answer {
+            background-color: var(--secondary) !important;
+            border-color: #1b5e20 !important;
+            color: white !important;
+            animation: pulse-green 0.5s 1;
+        }
+        .incorrect-answer {
+            background-color: #e57373 !important; /* Light Red */
+            border-color: #b71c1c !important;
+            color: white !important;
+            animation: shake 0.5s 1;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .placeholder-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #fff;
+            background-color: var(--primary);
+            border-radius: 12px;
+            height: 320px;
+            width: 100%;
+        }
+        .level-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .level-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .admin-panel-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .admin-panel-content.open {
+            max-height: 500px; /* Large enough to show content */
+            transition: max-height 0.5s ease-in;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-2xl">
+        <header class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl text-primary mb-2" style="color:var(--primary);">Vowel Voyager! 🚀</h1>
+            <p class="text-gray-600 text-lg font-semibold">Match the Picture to the Correct Spelling!</p>
+        </header>
+
+        <!-- Main Game Container -->
+        <div id="game-container" class="game-card p-6 md:p-10 rounded-3xl border-t-8 border-tertiary">
+            
+            <!-- Level Selection Screen -->
+            <div id="level-select-screen">
+                <h2 class="text-3xl text-center mb-6 text-gray-800 font-bold">Choose Your Challenge Level</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Level 1 -->
+                    <div onclick="selectLevel('level1')" class="level-card bg-green-100 p-6 rounded-xl border-b-4 border-green-500 text-center">
+                        <p class="text-3xl mb-2">🌱</p>
+                        <h3 class="text-xl font-bold text-green-700">Level 1</h3>
+                        <p class="text-sm text-gray-600">(Grades 1-2)</p>
+                        <p class="mt-2 text-sm text-green-800 font-semibold">Short Vowels & Simple CVCe</p>
+                    </div>
+                    <!-- Level 2 -->
+                    <div onclick="selectLevel('level2')" class="level-card bg-yellow-100 p-6 rounded-xl border-b-4 border-yellow-500 text-center">
+                        <p class="text-3xl mb-2">🌿</p>
+                        <h3 class="text-xl font-bold text-yellow-700">Level 2</h3>
+                        <p class="text-sm text-gray-600">(Grades 3-4)</p>
+                        <p class="mt-2 text-sm text-yellow-800 font-semibold">Vowel Teams & R-Controlled</p>
+                    </div>
+                    <!-- Level 3 -->
+                    <div onclick="selectLevel('level3')" class="level-card bg-red-100 p-6 rounded-xl border-b-4 border-red-500 text-center">
+                        <p class="text-3xl mb-2">🌲</p>
+                        <h3 class="text-xl font-bold text-red-700">Level 3</h3>
+                        <p class="text-sm text-gray-600">(Grades 5-6)</p>
+                        <p class="mt-2 text-sm text-red-800 font-semibold">Complex Vowels & Multi-Syllable</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Play Screen (Hidden initially) -->
+            <div id="game-play-screen" class="hidden">
+                <!-- Scoreboard -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                    <p class="text-xl font-bold text-gray-700">Question: <span id="question-number">1</span> / <span id="total-questions"></span></p>
+                    <p class="text-2xl font-extrabold text-secondary" style="color:var(--secondary);">Score: <span id="score-display">0</span></p>
+                </div>
+
+                <!-- Picture Area -->
+                <div class="flex justify-center mb-8">
+                    <div id="picture-area" class="placeholder-img shadow-xl">
+                        <!-- Emoji will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Word Options -->
+                <div id="options-area" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Buttons will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Customize Game Panel (New Feature) -->
+        <div class="mt-8">
+            <button onclick="toggleAdminPanel()" class="w-full bg-tertiary text-white py-3 rounded-t-xl font-bold text-lg hover:bg-blue-600 transition-colors flex justify-center items-center">
+                <span id="admin-toggle-icon" class="mr-2">➕</span> Customize Game: Add New Words
+            </button>
+            <div id="admin-panel" class="admin-panel-content bg-white p-6 rounded-b-xl border border-t-0 shadow-lg">
+                <h3 class="text-xl font-semibold mb-4 text-gray-700">Add a Custom Phonics Word</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <input type="text" id="custom-word-correct" placeholder="Correct Word (e.g., HOUSE)" class="p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 uppercase">
+                    <input type="text" id="custom-word-wrong" placeholder="Wrong Option (e.g., HOUS)" class="p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 uppercase">
+                    <input type="text" id="custom-word-emoji" placeholder="Emoji (e.g., 🏠)" class="p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button onclick="addCustomWord()" class="w-full bg-secondary text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors">
+                    Add Word to Game Pool
+                </button>
+                <button onclick="selectLevel('level1')" class="mt-4 w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors">
+                    Start New Game with All Words
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Game Over Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center transform scale-100 transition-transform duration-300 border-t-8 border-secondary">
+            <h2 class="text-4xl font-extrabold text-secondary mb-4" style="color:var(--secondary);">YOU WIN! 🏆</h2>
+            <p class="text-gray-700 text-xl mb-6">
+                You are a Phonics Champion! You scored <span id="final-score" class="font-black text-primary"></span> out of <span id="final-total" class="font-black text-primary"></span>.
+            </p>
+            <button onclick="document.getElementById('modal').classList.add('hidden'); showLevelSelect()" class="px-6 py-3 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-orange-600 transition-colors">
+                Back to Level Select
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+        const initialGameData = {
+            level1: [
+                { type: "Short A", word: "CAT", correct: "CAT", wrong: "CATT", imageText: "🐈" },
+                { type: "Short E", word: "BED", correct: "BED", wrong: "BEAD", imageText: "🛏️" },
+                { type: "Short I", word: "PIG", correct: "PIG", wrong: "PEEG", imageText: "🐖" },
+                { type: "Short O", word: "DOG", correct: "DOG", wrong: "DAWG", imageText: "🐕" },
+                { type: "Short U", word: "SUN", correct: "SUN", wrong: "SONN", imageText: "☀️" },
+                { type: "Long A (CVCe)", word: "CAKE", correct: "CAKE", wrong: "CAC", imageText: "🎂" },
+                { type: "Long I (CVCe)", word: "BIKE", correct: "BIKE", wrong: "BICK", imageText: "🚴" },
+                { type: "Long O (CVCe)", word: "ROSE", correct: "ROSE", wrong: "ROOS", imageText: "🌹" },
+            ],
+            level2: [
+                { type: "Vowel Team EE", word: "TREE", correct: "TREE", wrong: "TRE", imageText: "🌳" },
+                { type: "Vowel Team OA", word: "BOAT", correct: "BOAT", wrong: "BOTE", imageText: "⛵" },
+                { type: "Vowel Team AI", word: "RAIN", correct: "RAIN", wrong: "RANE", imageText: "🌧️" },
+                { type: "R-Controlled AR", word: "STAR", correct: "STAR", wrong: "STARR", imageText: "⭐" },
+                { type: "R-Controlled OR", word: "CORN", correct: "CORN", wrong: "KORN", imageText: "🌽" },
+                { type: "Silent G/K", word: "KNEE", correct: "KNEE", wrong: "NEE", imageText: "🦵" },
+                { type: "Vowel Team IE", word: "TIE", correct: "TIE", wrong: "TY", imageText: "👔" },
+                { type: "Long U (EW)", word: "BLUE", correct: "BLUE", wrong: "BLO", imageText: "🟦" },
+            ],
+            level3: [
+                { type: "Multi-syllable", word: "PENCIL", correct: "PENCIL", wrong: "PENSIL", imageText: "✏️" },
+                { type: "Multi-syllable", word: "DOCTOR", correct: "DOCTOR", wrong: "DOCKTER", imageText: "👨‍⚕️" },
+                { type: "R-Controlled ER", word: "BUTTER", correct: "BUTTER", wrong: "BUTTAR", imageText: "🧈" },
+                { type: "Soft C/G", word: "GIRAFFE", correct: "GIRAFFE", wrong: "GI RAF", imageText: "🦒" },
+                { type: "Three Letter Blend", word: "SCREAM", correct: "SCREAM", wrong: "SCREEM", imageText: "😱" },
+                { type: "Vowel Diphthong OU", word: "CLOUD", correct: "CLOUD", wrong: "KLOWD", imageText: "☁️" },
+                { type: "Contraction", word: "DON'T", correct: "DON'T", wrong: "DONT", imageText: "❌" },
+                { type: "Homophone", word: "PAIR", correct: "PAIR", wrong: "PARE", imageText: "🍐" },
+            ]
+        };
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledData = [];
+        let activeLevelData = []; // Holds the current level's data + custom words
+
+        // DOM Elements
+        const qNumEl = document.getElementById('question-number');
+        const totalQEl = document.getElementById('total-questions');
+        const scoreEl = document.getElementById('score-display');
+        const pictureArea = document.getElementById('picture-area');
+        const optionsArea = document.getElementById('options-area');
+        const modal = document.getElementById('modal');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalTotalEl = document.getElementById('final-total');
+        const levelSelectScreen = document.getElementById('level-select-screen');
+        const gamePlayScreen = document.getElementById('game-play-screen');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminToggleIcon = document.getElementById('admin-toggle-icon');
+
+        /**
+         * Utility function to shuffle an array (Fisher-Yates)
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        /**
+         * Shows the level selection screen and hides the game play screen.
+         */
+        function showLevelSelect() {
+            gamePlayScreen.classList.add('hidden');
+            levelSelectScreen.classList.remove('hidden');
+        }
+
+        /**
+         * Selects a level and starts the game.
+         * @param {string} level - The selected difficulty level key ('level1', 'level2', 'level3').
+         */
+        function selectLevel(level) {
+            // Combine initial data with any custom words added
+            const baseData = initialGameData[level] || initialGameData['level1'];
+            activeLevelData = [...baseData, ...initialGameData.custom || []];
+            startGame();
+            levelSelectScreen.classList.add('hidden');
+            gamePlayScreen.classList.remove('hidden');
+        }
+
+        /**
+         * Starts or restarts the game state.
+         */
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffledData = shuffleArray([...activeLevelData]); // Use the combined data
+            totalQEl.textContent = shuffledData.length;
+            modal.classList.add('hidden');
+            renderQuestion();
+            updateScoreboard();
+        }
+
+        /**
+         * Renders the current question's picture and options.
+         */
+        function renderQuestion() {
+            if (currentQuestionIndex >= shuffledData.length) {
+                showModal();
+                return;
+            }
+
+            const currentQ = shuffledData[currentQuestionIndex];
+            
+            // Update question number
+            qNumEl.textContent = currentQuestionIndex + 1;
+
+            // Update picture area (now only showing the emoji)
+            pictureArea.innerHTML = `<span>${currentQ.imageText}</span>`;
+
+            // Prepare options for shuffling
+            let options = [currentQ.correct, currentQ.wrong];
+            options = shuffleArray(options);
+            
+            // Clear and render options
+            optionsArea.innerHTML = '';
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-button p-4 rounded-xl text-2xl uppercase shadow-md';
+                button.onclick = () => checkAnswer(button, option, currentQ.correct);
+                optionsArea.appendChild(button);
+            });
+        }
+
+        /**
+         * Handles the user's answer selection.
+         */
+        function checkAnswer(button, selectedOption, correctWord) {
+            // Disable all buttons to prevent double-clicking
+            Array.from(optionsArea.children).forEach(btn => btn.disabled = true);
+
+            if (selectedOption === correctWord) {
+                score++;
+                button.classList.add('correct-answer');
+            } else {
+                button.classList.add('incorrect-answer');
+                // Highlight the correct answer
+                Array.from(optionsArea.children).forEach(btn => {
+                    if (btn.textContent === correctWord) {
+                        btn.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            updateScoreboard();
+
+            // Move to the next question after a brief delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderQuestion();
+            }, 1000); // 1 second delay for feedback
+        }
+
+        /**
+         * Updates the score and question number display.
+         */
+        function updateScoreboard() {
+            scoreEl.textContent = score;
+        }
+
+        /**
+         * Shows the game over modal with final scores.
+         */
+        function showModal() {
+            finalScoreEl.textContent = score;
+            finalTotalEl.textContent = shuffledData.length;
+            modal.classList.remove('hidden');
+        }
+
+        /**
+         * Adds a custom word to the overall game data pool.
+         */
+        function addCustomWord() {
+            const correct = document.getElementById('custom-word-correct').value.trim().toUpperCase();
+            const wrong = document.getElementById('custom-word-wrong').value.trim().toUpperCase();
+            const emoji = document.getElementById('custom-word-emoji').value.trim();
+
+            if (!correct || !wrong || !emoji) {
+                alert('Please fill in the Correct Word, Wrong Option, and Emoji.');
+                return;
+            }
+
+            if (!initialGameData.custom) {
+                initialGameData.custom = [];
+            }
+
+            initialGameData.custom.push({
+                type: "Custom",
+                word: correct,
+                correct: correct,
+                wrong: wrong,
+                imageText: emoji
+            });
+
+            // Clear inputs
+            document.getElementById('custom-word-correct').value = '';
+            document.getElementById('custom-word-wrong').value = '';
+            document.getElementById('custom-word-emoji').value = '';
+
+            // Notify user and prompt for restart
+            alert(`New word "${correct}" added! Press the "Start New Game with All Words" button to include it.`);
+        }
+        
+        /**
+         * Toggles the visibility of the admin panel.
+         */
+        function toggleAdminPanel() {
+            const isOpen = adminPanel.classList.toggle('open');
+            adminToggleIcon.textContent = isOpen ? '➖' : '➕';
+        }
+
+
+        // Initialize the game to show the level select screen
+        document.addEventListener('DOMContentLoaded', showLevelSelect);
+
+    </script>
+</body>
+</html>
