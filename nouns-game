@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noun Navigator Console</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        /* Custom Console Theme */
+        .console-screen {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #0d1a0d; /* Dark monitor color */
+            color: #38c172; /* Neon green text */
+            box-shadow: inset 0 0 10px #2a9d8f, 0 0 10px #264653;
+            border: 4px solid #5a8a77;
+        }
+
+        /* Responsive adjustments for game size */
+        .game-container {
+            max-width: 90%;
+            margin: auto;
+            min-height: 500px;
+        }
+
+        /* Button styling for a distinct console feel */
+        .console-btn {
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.1s ease-in-out;
+            box-shadow: 0 4px 0 0 #1e3a8a; /* Darker blue shadow */
+            user-select: none;
+        }
+        .console-btn:active {
+            box-shadow: 0 0px 0 0 #1e3a8a;
+            transform: translateY(4px);
+        }
+
+        /* Style for the feedback modal */
+        .feedback-modal {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Game Console Structure -->
+    <div id="game-container" class="game-container bg-gray-900 border-8 border-gray-700 rounded-3xl p-6 shadow-2xl w-full md:w-4/5 lg:w-3/5 xl:w-2/5">
+        
+        <!-- Header / Logo -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-blue-400 tracking-wider font-sans">NOUN NAVIGATOR</h1>
+            <p class="text-xs text-gray-500 font-sans mt-1">Concept Reinforcement System</p>
+        </header>
+
+        <!-- Console Screen -->
+        <div id="screen" class="console-screen p-4 h-96 rounded-lg mb-6 flex flex-col justify-between">
+            
+            <!-- Score & Level Info -->
+            <div class="flex justify-between text-xs mb-4">
+                <span id="score-display">SCORE: 00</span>
+                <span id="level-info">LEVEL: SELECT</span>
+                <span id="q-count">Q: 0/10</span>
+            </div>
+
+            <!-- Question Area -->
+            <div id="game-content" class="flex-grow flex flex-col justify-center text-sm">
+                <p class="text-center">Select a level to begin your Noun Navigation challenge!</p>
+            </div>
+
+            <!-- Input/Answer Area (Hidden until game starts) -->
+            <div id="answer-area" class="mt-4 hidden flex flex-col items-center">
+                <!-- Text Input for Correction/Identification questions -->
+                <input type="text" id="answer-input" placeholder="Type your answer here..."
+                       class="w-full md:w-3/4 p-2 text-sm bg-black text-lime-400 border-2 border-lime-500 rounded-lg focus:ring-lime-300 focus:border-lime-300 mb-3 font-sans uppercase">
+                
+                <!-- Buttons for Multiple Choice Questions -->
+                <div id="mcq-options" class="grid grid-cols-3 gap-2 w-full md:w-3/4 mb-3">
+                    <!-- Buttons will be generated here -->
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="checkAnswer()" id="submit-btn" 
+                        class="console-btn bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg w-full md:w-3/4 text-sm">
+                    SUBMIT
+                </button>
+            </div>
+        </div>
+
+        <!-- Level Selection & Control Panel -->
+        <div id="level-selection" class="grid grid-cols-3 gap-4">
+            <button onclick="startGame('easy')" class="console-btn bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg text-lg">EASY</button>
+            <button onclick="startGame('medium')" class="console-btn bg-yellow-500 hover:bg-yellow-600 text-gray-900 p-3 rounded-lg text-lg">MEDIUM</button>
+            <button onclick="startGame('difficult')" class="console-btn bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg text-lg">DIFFICULT</button>
+        </div>
+
+    </div>
+
+    <!-- Custom Feedback/Alert Modal (instead of alert()) -->
+    <div id="feedback-modal" class="feedback-modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-700 border-4 border-lime-400 rounded-xl p-6 shadow-xl w-full max-w-sm text-center font-sans">
+            <h3 id="modal-title" class="text-2xl font-bold mb-3 text-lime-400">Feedback</h3>
+            <p id="modal-message" class="text-gray-200 text-sm mb-4"></p>
+            <button onclick="hideFeedback()" class="console-btn bg-lime-500 hover:bg-lime-600 text-gray-900 p-2 rounded-lg text-sm w-1/2">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA: Question Bank based on the Noun Navigator Plan ---
+        const allQuestions = {
+            easy: [
+                { type: "Noun", skill: "Knowledge", prompt: "Q1. What is a Noun? (A) An action, (B) A describing word, (C) A person, place, thing, or idea.", answer: "C", format: "MCQ" },
+                { type: "Common Noun", skill: "Comprehension", prompt: "Q2. Identify the Common Noun: *Paris, city, Monday, love*.", answer: "city", format: "Identification" },
+                { type: "Proper Noun", skill: "Knowledge", prompt: "Q3. True or False: Proper Nouns are always capitalized. (A) True, (B) False, (C) Sometimes.", answer: "A", format: "MCQ" },
+                { type: "Abstract Noun", skill: "Comprehension", prompt: "Q4. Which word is an Abstract Noun? *Book, freedom, car, student*.", answer: "freedom", format: "Identification" },
+                { type: "Collective Noun", skill: "Knowledge", prompt: "Q5. A Collective Noun refers to a group treated as a single: (A) separate item, (B) unit, (C) action.", answer: "B", format: "MCQ" },
+                { type: "Proper Noun", skill: "Application", prompt: "Q6. Complete the sentence with a Proper Noun: I read a book by _________.", answer: "J.K. Rowling", format: "Fill-in", acceptAny: true },
+                { type: "Common Noun", skill: "Comprehension", prompt: "Q7. Find the Common Noun: 'The large **ship** sailed across the water.'", answer: "ship", format: "Identification" },
+                { type: "Abstract Noun", skill: "Knowledge", prompt: "Q8. Nouns that cannot be perceived by the five senses are called _________ Nouns.", answer: "Abstract", format: "Fill-in" },
+                { type: "Collective Noun", skill: "Comprehension", prompt: "Q9. The word 'team' is an example of what kind of noun?", answer: "Collective Noun", format: "Identification" },
+                { type: "Proper Noun", skill: "Application", prompt: "Q10. **Correct the error**: My favorite Day is **sunday**.", answer: "Sunday", format: "Correction" }
+            ],
+            medium: [
+                { type: "Proper Noun", skill: "Application", prompt: "Q1. Correct the error: The Eiffel tower is in France.", answer: "The Eiffel Tower is in France.", format: "Correction" },
+                { type: "Abstract Noun", skill: "Application", prompt: "Q2. Convert the adjective 'honest' into an Abstract Noun.", answer: "honesty", format: "Identification" },
+                { type: "Common/Proper", skill: "Comprehension", prompt: "Q3. In the sentence: 'The Doctor saw Dr. Patel.' Which is the Proper Noun?", answer: "Dr. Patel", format: "Identification" },
+                { type: "Collective Noun", skill: "Comprehension", prompt: "Q4. Which collective noun fits the group? A _________ of flowers.", answer: "bouquet", format: "Fill-in" },
+                { type: "Noun (General)", skill: "Application", prompt: "Q5. Change the verb into a noun: *To **decide**.*", answer: "decision", format: "Identification" },
+                { type: "Abstract Noun", skill: "Comprehension", prompt: "Q6. Identify the Abstract Noun in the sentence: 'She found **peace** in the forest.'", answer: "peace", format: "Identification" },
+                { type: "Common Noun", skill: "Application", prompt: "Q7. Replace the blank with a Common Noun used as an object: I drank a glass of _________.", answer: "water", format: "Fill-in", acceptAny: true },
+                { type: "Proper Noun", skill: "Comprehension", prompt: "Q8. Which sentence uses the Proper Noun correctly? (A) We visited the **Museum of Natural History**, (B) We visited the **museum** of Natural History.", answer: "A", format: "MCQ" },
+                { type: "Collective Noun", skill: "Application", prompt: "Q9. Complete the sentence with the appropriate Collective Noun for soldiers: A _________ of soldiers marched past.", answer: "army", format: "Fill-in" },
+                { type: "Abstract Noun", skill: "Application", prompt: "Q10. Change the Common Noun *friend* to the related Abstract Noun.", answer: "friendship", format: "Identification" }
+            ],
+            difficult: [
+                { type: "Proper Noun", skill: "Application", prompt: "Q1. Correct all errors: I talked to my English teacher, **mr. jones**, about the assignment.", answer: "I talked to my English teacher, Mr. Jones, about the assignment.", format: "Correction" },
+                { type: "Collective Noun", skill: "Application", prompt: "Q2. Choose the best Collective Noun: 'The judge addressed the **\_\_\_\_\_\_\_\_** of people who were deciding the case.' (A) crowd, (B) jury, (C) gang.", answer: "B", format: "MCQ" },
+                { type: "Abstract Noun", skill: "Application", prompt: "Q3. Rewrite the sentence, replacing the adjective with the related Abstract Noun: 'It is **essential** to be **patient**.'", answer: "Patience is essential.", format: "Correction" },
+                { type: "Proper Noun", skill: "Comprehension", prompt: "Q4. Why is 'Monday' capitalized, but 'day' is not? (Answer in a single sentence).", answer: "Monday is a specific, unique name (Proper Noun), while day refers to any non-specific day (Common Noun).", format: "Explanation" },
+                { type: "Collective Noun", skill: "Comprehension", prompt: "Q5. Which is the most fitting Collective Noun for *a group of singers*?", answer: "Choir", format: "Identification" },
+                { type: "Common/Abstract", skill: "Application", prompt: "Q6. The word 'art' can be a Common or Abstract Noun. Give a sentence where it is used as an **Abstract Noun**.", answer: "The art of negotiation takes practice.", format: "Explanation", acceptAny: true },
+                { type: "All Nouns", skill: "Application", prompt: "Q7. Identify one Proper Noun, one Collective Noun, and one Abstract Noun in this passage: 'Mrs. Chen showed great determination as she taught the class.' (List them separated by commas).", answer: "Mrs. Chen, class, determination", format: "Identification" },
+                { type: "Abstract Noun", skill: "Application", prompt: "Q8. Rewrite this using a single Abstract Noun: He felt great joy when he won.", answer: "His victory brought great joy.", format: "Correction" },
+                { type: "Noun Distinction", skill: "Knowledge", prompt: "Q9. Briefly explain the core difference between a Common Noun and an Abstract Noun. (One sentence).", answer: "Common Nouns are tangible and physical (like 'pen'), while Abstract Nouns are non-physical concepts or ideas (like 'bravery').", format: "Explanation" },
+                { type: "Proper Noun", skill: "Application", prompt: "Q10. The word 'mother' is usually a Common Noun. Give a sentence where it functions as a **Proper Noun**.", answer: "Mother said I should go to bed.", format: "Explanation", acceptAny: true }
+            ]
+        };
+
+        // --- GAME STATE ---
+        let currentLevel = null;
+        let questionIndex = 0;
+        let score = 0;
+        let currentQuestion = null;
+
+        // --- DOM Elements ---
+        const gameContent = document.getElementById('game-content');
+        const levelInfo = document.getElementById('level-info');
+        const scoreDisplay = document.getElementById('score-display');
+        const qCountDisplay = document.getElementById('q-count');
+        const answerArea = document.getElementById('answer-area');
+        const answerInput = document.getElementById('answer-input');
+        const mcqOptions = document.getElementById('mcq-options');
+        const submitBtn = document.getElementById('submit-btn');
+        const modal = document.getElementById('feedback-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+
+        // --- UTILITY FUNCTIONS ---
+        const sanitize = (text) => text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ");
+        const formatScore = (s) => String(s).padStart(2, '0');
+
+        // --- GAME LOGIC ---
+
+        function startGame(level) {
+            currentLevel = level;
+            questionIndex = 0;
+            score = 0;
+            
+            // Set up game state displays
+            levelInfo.textContent = `LEVEL: ${level.toUpperCase()}`;
+            scoreDisplay.textContent = `SCORE: ${formatScore(score)}`;
+            
+            // Show input area and load first question
+            answerArea.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (questionIndex >= allQuestions[currentLevel].length) {
+                endGame();
+                return;
+            }
+
+            currentQuestion = allQuestions[currentLevel][questionIndex];
+            
+            // Update Q count
+            qCountDisplay.textContent = `Q: ${questionIndex + 1}/10`;
+
+            // Display question
+            gameContent.innerHTML = `<div class="p-2 border-b border-lime-500 mb-4">
+                <p class="text-xs text-yellow-300">${currentQuestion.type} (${currentQuestion.skill})</p>
+            </div>
+            <p class="text-lg text-center leading-relaxed">${currentQuestion.prompt}</p>`;
+            
+            answerInput.value = '';
+            
+            // Handle input field visibility based on format
+            if (currentQuestion.format === 'MCQ') {
+                answerInput.classList.add('hidden');
+                mcqOptions.classList.remove('hidden');
+                submitBtn.classList.remove('hidden');
+                
+                // Parse options and create buttons
+                const options = parseMCQOptions(currentQuestion.prompt);
+                renderMCQButtons(options);
+            } else {
+                answerInput.classList.remove('hidden');
+                mcqOptions.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            }
+        }
+
+        function parseMCQOptions(prompt) {
+            // Extracts (A), (B), (C) options from the prompt string
+            const match = prompt.match(/\(A\)(.*?)\(B\)(.*?)\(C\)(.*)/i);
+            if (match) {
+                return {
+                    A: match[1].trim().replace(/\.$/, '').replace(/\*/g, ''),
+                    B: match[2].trim().replace(/\.$/, '').replace(/\*/g, ''),
+                    C: match[3].trim().replace(/\.$/, '').replace(/\*/g, '')
+                };
+            }
+            // Fallback for Q3, Q5, Q8 in Easy/Medium
+            const singleLineMatch = prompt.match(/\(A\)(.*?),(.*?)\(B\)(.*?),(.*?)\(C\)(.*)/i); 
+            if (singleLineMatch) {
+                 return {
+                    A: singleLineMatch[1].trim().replace(/\.$/, '').replace(/\*/g, ''),
+                    B: singleLineMatch[3].trim().replace(/\.$/, '').replace(/\*/g, ''),
+                    C: singleLineMatch[5].trim().replace(/\.$/, '').replace(/\*/g, '')
+                };
+            }
+            return {};
+        }
+
+        let selectedMCQOption = null;
+
+        function renderMCQButtons(options) {
+            mcqOptions.innerHTML = '';
+            selectedMCQOption = null;
+
+            ['A', 'B', 'C'].forEach(key => {
+                const text = options[key] || key;
+                const button = document.createElement('button');
+                button.textContent = `${key}. ${text}`;
+                button.dataset.key = key;
+                button.className = 'console-btn bg-gray-600 hover:bg-gray-500 text-white p-2 rounded-lg text-xs';
+                button.onclick = () => {
+                    // Visual selection logic
+                    document.querySelectorAll('#mcq-options button').forEach(btn => {
+                        btn.classList.remove('bg-lime-600');
+                        btn.classList.add('bg-gray-600');
+                    });
+                    button.classList.add('bg-lime-600');
+                    button.classList.remove('bg-gray-600');
+                    selectedMCQOption = key;
+                };
+                mcqOptions.appendChild(button);
+            });
+        }
+        
+        function checkAnswer() {
+            let userAnswer;
+            if (currentQuestion.format === 'MCQ') {
+                userAnswer = selectedMCQOption;
+            } else {
+                userAnswer = answerInput.value;
+            }
+
+            if (!userAnswer) {
+                showFeedback('Warning', 'Please enter or select an answer before submitting.', 'orange');
+                return;
+            }
+
+            let isCorrect = false;
+            let feedbackText = '';
+            const correctText = String(currentQuestion.answer);
+
+            if (currentQuestion.format === 'MCQ') {
+                isCorrect = sanitize(userAnswer) === sanitize(correctText);
+                feedbackText = isCorrect 
+                    ? `That's right! You've correctly identified the concept.`
+                    : `Incorrect. The correct answer was **${correctText}**. Review the definition of ${currentQuestion.type}.`;
+            } else if (currentQuestion.acceptAny) {
+                // For flexible answers, just ensure something meaningful was typed
+                isCorrect = sanitize(userAnswer).length > 2;
+                feedbackText = isCorrect 
+                    ? `Great job! Your answer, "${userAnswer}", is a valid ${currentQuestion.type}.`
+                    : `Please provide a more complete answer.`;
+            } else {
+                // For exact matches (case-insensitive and punctuation-stripped)
+                isCorrect = sanitize(userAnswer) === sanitize(correctText);
+                feedbackText = isCorrect 
+                    ? `Excellent work! That's the perfect answer for this ${currentQuestion.skill} question!`
+                    : `Incorrect. The correct answer was: **${correctText}**. Check your spelling or review the rule for ${currentQuestion.type}.`;
+            }
+
+            if (isCorrect) {
+                score += 10;
+                scoreDisplay.textContent = `SCORE: ${formatScore(score)}`;
+                showFeedback('CORRECT!', feedbackText, 'lime');
+            } else {
+                showFeedback('INCORRECT!', feedbackText, 'red');
+            }
+
+            // Move to the next question after feedback
+            questionIndex++;
+        }
+
+        function endGame() {
+            // Hide input area
+            answerArea.classList.add('hidden');
+            submitBtn.classList.add('hidden');
+
+            const totalQuestions = allQuestions[currentLevel].length;
+            const finalScore = score;
+            const percentage = (finalScore / (totalQuestions * 10)) * 100;
+
+            let finalMessage = '';
+            if (percentage === 100) {
+                finalMessage = `PERFECT SCORE! You are the ultimate Noun Navigator!`;
+            } else if (percentage >= 70) {
+                finalMessage = `Great work! You scored ${finalScore}/${totalQuestions * 10}. Keep practicing the tricky concepts!`;
+            } else {
+                finalMessage = `Good try! You scored ${finalScore}/${totalQuestions * 10}. Select a level to review the concepts.`;
+            }
+
+            gameContent.innerHTML = `<div class="text-center">
+                <p class="text-xl text-yellow-400 mb-4">CHALLENGE COMPLETE!</p>
+                <p class="text-2xl text-lime-400 font-extrabold mb-4">FINAL SCORE: ${formatScore(finalScore)}</p>
+                <p class="text-sm leading-relaxed">${finalMessage}</p>
+            </div>`;
+            
+            levelInfo.textContent = 'LEVEL: COMPLETE';
+            qCountDisplay.textContent = 'Q: 10/10';
+            currentLevel = null;
+        }
+
+
+        // --- FEEDBACK MODAL (Alternative to alert()) ---
+
+        function showFeedback(title, message, color) {
+            modalTitle.textContent = title;
+            modalTitle.classList.remove('text-lime-400', 'text-red-500', 'text-orange-400');
+            modalMessage.innerHTML = message;
+            
+            if (color === 'lime') {
+                modalTitle.classList.add('text-lime-400');
+                modal.querySelector('.border-lime-400').classList.add('border-lime-400');
+            } else if (color === 'red') {
+                modalTitle.classList.add('text-red-500');
+                modal.querySelector('.border-lime-400').classList.remove('border-lime-400');
+                modal.querySelector('.border-lime-400').classList.add('border-red-500');
+            } else if (color === 'orange') {
+                 modalTitle.classList.add('text-orange-400');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideFeedback() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            // Remove error color class just in case
+            modal.querySelector('.border-4').classList.remove('border-red-500');
+            modal.querySelector('.border-4').classList.add('border-lime-400');
+            
+            if (currentLevel) {
+                loadQuestion();
+            }
+        }
+
+    </script>
+</body>
+</html>
