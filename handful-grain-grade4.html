@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Emperor's Word Quest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .blue-card { background-color: #3b82f6; color: white; }
+        .red-card { background-color: #ef4444; color: white; }
+        .green-card { background-color: #10b981; color: white; }
+        .drop-zone { border: 3px dashed #cbd5e1; min-height: 80px; transition: all 0.3s; }
+        .correct { border: 3px solid #22c55e !important; background-color: #f0fdf4; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; }
+        .active-modal { display: flex; }
+        .auction-img { height: 200px; object-fit: cover; width: 100%; border-radius: 1rem; }
+        .charade-img { height: 180px; object-fit: contain; width: 100%; border-radius: 1rem; }
+        .gavel-anim { animation: gavel 0.4s ease; }
+        @keyframes gavel {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-45deg); }
+            100% { transform: rotate(0deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <!-- Navigation Header -->
+    <nav class="bg-indigo-700 text-white p-4 shadow-lg">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">👑 Word Quest</h1>
+            <div id="gold-counter" class="bg-yellow-400 text-indigo-900 px-4 py-1 rounded-full font-bold">
+                💰 0 Gold
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 md:p-8">
+        
+        <!-- Game Selection -->
+        <div id="menu" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button onclick="startActivity('auction')" class="p-8 bg-white rounded-2xl shadow-md border-b-4 border-blue-500 hover:scale-105 transition">
+                <div class="text-4xl mb-2">🔨</div>
+                <h3 class="text-xl font-bold">Word Auction</h3>
+                <p class="text-gray-500">Bid for "Smart Words"</p>
+            </button>
+            <button onclick="startActivity('train')" class="p-8 bg-white rounded-2xl shadow-md border-b-4 border-red-500 hover:scale-105 transition">
+                <div class="text-4xl mb-2">🚂</div>
+                <h3 class="text-xl font-bold">Sentence Train</h3>
+                <p class="text-gray-500">Fix the Word Order</p>
+            </button>
+            <button onclick="startActivity('traveler')" class="p-8 bg-white rounded-2xl shadow-md border-b-4 border-green-500 hover:scale-105 transition">
+                <div class="text-4xl mb-2">🔮</div>
+                <h3 class="text-xl font-bold">Time Traveler</h3>
+                <p class="text-gray-500">Future Storytelling</p>
+            </button>
+            <button onclick="startActivity('charades')" class="p-8 bg-white rounded-2xl shadow-md border-b-4 border-yellow-500 hover:scale-105 transition">
+                <div class="text-4xl mb-2">🎭</div>
+                <h3 class="text-xl font-bold">Idiom Charades</h3>
+                <p class="text-gray-500">Guess the Picture Phrase</p>
+            </button>
+        </div>
+
+        <!-- ACTIVITY: WORD AUCTION -->
+        <section id="auction" class="hidden bg-white p-6 rounded-3xl shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="goHome()" class="text-blue-600">← Back</button>
+                <div id="auction-progress" class="text-sm font-bold text-gray-400">Word 1 of 5</div>
+            </div>
+            
+            <div class="text-center">
+                <h2 class="text-2xl font-bold mb-2">🔨 Going Once... Going Twice!</h2>
+                <div class="bg-slate-100 p-2 rounded-2xl mb-6">
+                    <img id="auction-image" src="" class="auction-img shadow-inner" alt="Scene from story">
+                </div>
+                <div class="mb-6 p-4 bg-yellow-50 rounded-xl border-2 border-yellow-100">
+                    <p class="text-lg">Someone says: <span id="basic-word" class="font-bold italic text-gray-500">"..."</span></p>
+                    <p class="text-sm font-bold text-yellow-600 uppercase mt-2">Find a better word!</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4" id="auction-options"></div>
+            </div>
+        </section>
+
+        <!-- ACTIVITY: SENTENCE TRAIN -->
+        <section id="train" class="hidden bg-white p-6 rounded-3xl shadow-xl">
+            <button onclick="goHome()" class="text-blue-600 mb-4 inline-block">← Back</button>
+            <h2 class="text-2xl font-bold mb-2">The Sentence Train</h2>
+            <div id="train-container" class="space-y-8">
+                <div class="flex flex-wrap gap-2 justify-center p-4 bg-slate-100 rounded-xl" id="train-pool"></div>
+                <div class="flex flex-wrap gap-4 justify-center py-8 px-4 rounded-xl drop-zone" id="train-slots"></div>
+                <button onclick="checkTrain()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg">Check My Train! 🚂</button>
+            </div>
+        </section>
+
+        <!-- ACTIVITY: TIME TRAVELER -->
+        <section id="traveler" class="hidden bg-white p-6 rounded-3xl shadow-xl">
+            <button onclick="goHome()" class="text-blue-600 mb-4 inline-block">← Back</button>
+            <h2 class="text-2xl font-bold mb-4">🔮 The Time Traveler</h2>
+            <div class="p-6 bg-indigo-50 rounded-2xl border-2 border-indigo-200 text-center mb-6">
+                <p class="text-xl">Next week, <span class="font-bold text-blue-600" id="traveler-subject">Latha</span> <span class="font-bold text-purple-600">will be</span> <span class="bg-white px-2 border-b-2 border-purple-400" id="traveler-verb">_______</span>ing <span class="text-green-600" id="traveler-object">...</span></p>
+            </div>
+            <div class="grid grid-cols-2 gap-2" id="verb-options"></div>
+        </section>
+
+        <!-- ACTIVITY: CHARADES -->
+        <section id="charades" class="hidden bg-white p-6 rounded-3xl shadow-xl">
+            <button onclick="goHome()" class="text-blue-600 mb-4 inline-block">← Back</button>
+            <h2 class="text-2xl font-bold mb-2 text-center">🎭 Idiom Charades</h2>
+            
+            <div class="mb-6 p-4 bg-indigo-100 rounded-2xl text-center border-2 border-indigo-200">
+                <p class="text-sm font-bold uppercase text-indigo-600 mb-2">Teacher: Act this out!</p>
+                <img id="charade-action-img" src="" class="charade-img mx-auto" alt="Action to mimic">
+            </div>
+
+            <div class="text-center mb-6">
+                <p class="text-lg text-gray-600 mb-4 font-bold">Student: Which idiom matches the picture?</p>
+                <div class="grid grid-cols-1 gap-3" id="idiom-choices"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="bg-white p-8 rounded-3xl text-center max-w-xs mx-auto shadow-2xl">
+            <div id="modal-gavel" class="text-6xl mb-4">🔨</div>
+            <h2 class="text-2xl font-bold mb-2" id="modal-title">SOLD!</h2>
+            <p class="text-gray-600 mb-6" id="modal-msg">You did it!</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let gold = 0;
+        const state = {
+            currentActivity: 'menu',
+            trainSentenceIndex: 0,
+            auctionIndex: 0,
+            charadeIndex: 0
+        };
+
+        const auctionData = [
+            { basic: "Famous", options: ["Prominent", "Small"], correct: "Prominent", img: "https://images.unsplash.com/photo-1548013146-72479768b921?auto=format&fit=crop&q=80&w=800" },
+            { basic: "Poster", options: ["Paper", "Hoarding"], correct: "Hoarding", img: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&q=80&w=800" },
+            { basic: "Very good at", options: ["Well-versed", "Silly"], correct: "Well-versed", img: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=800" },
+            { basic: "Seller", options: ["Buyer", "Hawker"], correct: "Hawker", img: "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800" },
+            { basic: "Angry", options: ["Disgusted", "Jolly"], correct: "Disgusted", img: "https://images.unsplash.com/photo-1516239482977-b550ba7253f2?auto=format&fit=crop&q=80&w=800" }
+        ];
+
+        const trainSentences = [
+            { b: "The Hawker", r: "is selling", g: "firewood" },
+            { b: "Latha", r: "is reading", g: "the hoarding" },
+            { b: "The Emperor", r: "is listening", g: "to Tenali" }
+        ];
+
+        const charades = [
+            { 
+                actionImg: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800", // Pizza/Cake - Easy
+                idiom: "Piece of cake", 
+                meaning: "Very easy",
+                icon: "🍰"
+            },
+            { 
+                actionImg: "https://images.unsplash.com/photo-1590001158193-79013ac5471c?auto=format&fit=crop&q=80&w=800", // Steam/Heat - Trouble
+                idiom: "In hot water", 
+                meaning: "In trouble",
+                icon: "🔥"
+            },
+            { 
+                actionImg: "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=800", // Sleepy animal - Sleep
+                idiom: "Hit the hay", 
+                meaning: "Go to sleep",
+                icon: "💤"
+            }
+        ];
+
+        const verbs = ["cry", "travel", "study", "help", "think", "laugh"];
+
+        function startActivity(id) {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            state.currentActivity = id;
+            if(id === 'auction') initAuction();
+            if(id === 'train') initTrain();
+            if(id === 'traveler') initTraveler();
+            if(id === 'charades') initCharades();
+        }
+
+        function goHome() {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('menu').classList.remove('hidden');
+        }
+
+        function addGold(amt) {
+            gold += amt;
+            document.getElementById('gold-counter').innerText = `💰 ${gold} Gold`;
+        }
+
+        function showModal(msg, isCorrect, title = "SOLD!") {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('modal-gavel').innerText = isCorrect ? "🔨" : "❌";
+            document.getElementById('modal-gavel').className = isCorrect ? "text-6xl mb-4 gavel-anim" : "text-6xl mb-4";
+            document.getElementById('success-modal').classList.add('active-modal');
+        }
+
+        function closeModal() {
+            document.getElementById('success-modal').classList.remove('active-modal');
+            if (state.currentActivity === 'auction') {
+                state.auctionIndex++;
+                if (state.auctionIndex < auctionData.length) initAuction();
+                else goHome();
+            } else if (state.currentActivity === 'train') {
+                state.trainSentenceIndex++;
+                if (state.trainSentenceIndex < trainSentences.length) initTrain();
+                else goHome();
+            } else if (state.currentActivity === 'charades') {
+                state.charadeIndex++;
+                if (state.charadeIndex < charades.length) initCharades();
+                else goHome();
+            }
+        }
+
+        function initAuction() {
+            const data = auctionData[state.auctionIndex];
+            document.getElementById('auction-progress').innerText = `Word ${state.auctionIndex + 1} of ${auctionData.length}`;
+            document.getElementById('auction-image').src = data.img;
+            document.getElementById('basic-word').innerText = `"${data.basic}"`;
+            const optionsDiv = document.getElementById('auction-options');
+            optionsDiv.innerHTML = '';
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "py-4 px-2 bg-indigo-50 border-2 border-indigo-200 rounded-2xl text-xl font-bold hover:bg-indigo-600 hover:text-white transition";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    if(opt === data.correct) { addGold(10); showModal(`SOLD! You bought "${opt}".`, true); }
+                    else { btn.classList.add('shake', 'bg-red-200'); }
+                };
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function initTrain() {
+            const pool = document.getElementById('train-pool');
+            const slots = document.getElementById('train-slots');
+            const s = trainSentences[state.trainSentenceIndex];
+            pool.innerHTML = ''; slots.innerHTML = ''; slots.classList.remove('correct');
+            const pieces = [{text:s.b, type:'blue'}, {text:s.r, type:'red'}, {text:s.g, type:'green'}].sort(()=>Math.random()-0.5);
+            pieces.forEach(p => {
+                const el = document.createElement('div');
+                el.className = `p-4 rounded-lg cursor-pointer font-bold shadow-md ${p.type}-card`;
+                el.innerText = p.text; el.dataset.type = p.type;
+                el.onclick = () => el.parentElement.id === 'train-pool' ? slots.appendChild(el) : pool.appendChild(el);
+                pool.appendChild(el);
+            });
+        }
+
+        function checkTrain() {
+            const slots = document.getElementById('train-slots');
+            if (Array.from(slots.children).map(c=>c.dataset.type).join('-') === 'blue-red-green') {
+                slots.classList.add('correct'); addGold(10); showModal("Perfect word order!", true, "🚂 CHOO CHOO!");
+            } else { slots.classList.add('shake'); setTimeout(()=>slots.classList.remove('shake'), 500); }
+        }
+
+        function initTraveler() {
+            const opts = document.getElementById('verb-options');
+            opts.innerHTML = '';
+            verbs.forEach(v => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-white border rounded-xl hover:bg-purple-50 font-bold";
+                btn.innerText = v;
+                btn.onclick = () => { document.getElementById('traveler-verb').innerText = v; addGold(2); };
+                opts.appendChild(btn);
+            });
+        }
+
+        function initCharades() {
+            const c = charades[state.charadeIndex];
+            document.getElementById('charade-action-img').src = c.actionImg;
+            const choicesDiv = document.getElementById('idiom-choices');
+            choicesDiv.innerHTML = '';
+            [...charades].sort(()=>Math.random()-0.5).forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 bg-white border-2 border-yellow-200 rounded-xl font-bold text-lg hover:bg-yellow-100 transition flex items-center justify-between";
+                btn.innerHTML = `<span>${choice.icon} ${choice.idiom}</span>`;
+                btn.onclick = () => {
+                    if(choice.idiom === c.idiom) { addGold(15); showModal(`Correct! "${choice.idiom}" means ${choice.meaning}.`, true, "GUESSER MASTER!"); }
+                    else btn.classList.add('shake', 'bg-red-50');
+                };
+                choicesDiv.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
