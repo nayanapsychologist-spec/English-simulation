@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Bank Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+
+    <div class="max-w-md w-full text-center">
+        <h1 class="text-3xl font-bold text-emerald-700 mb-2">My Word Bank</h1>
+        <p class="text-slate-600 mb-8 italic">Click the card to reveal the meaning!</p>
+
+        <!-- Flashcard Container -->
+        <div class="card-flip w-full h-64 mb-8">
+            <div id="cardInner" class="card-inner" onclick="flipCard()">
+                <!-- Front of Card -->
+                <div class="card-front bg-white border-2 border-emerald-500">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-500 mb-4">Pronounce this word:</span>
+                    <h2 id="currentWord" class="text-4xl font-black text-slate-800 tracking-tight">Loading...</h2>
+                </div>
+                <!-- Back of Card -->
+                <div class="card-back border-2 border-emerald-300">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-4">The meaning is:</span>
+                    <p id="wordMeaning" class="text-2xl font-medium text-slate-700 leading-tight">Meaning goes here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-col gap-4">
+            <button onclick="nextWord()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-all active:scale-95 text-xl">
+                Get New Word 🎲
+            </button>
+            <div class="text-slate-400 text-sm mt-4">
+                Words remaining: <span id="counter">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data extracted from the image
+        const wordData = [
+            { word: "divine", meaning: "relating to a god; heavenly" },
+            { word: "calamity", meaning: "disaster" },
+            { word: "unconscious", meaning: "not awake or aware" },
+            { word: "accused", meaning: "charged with a crime or wrongdoing" },
+            { word: "immortal", meaning: "living forever; never dying" },
+            { word: "valiant", meaning: "brave" },
+            { word: "consoled", meaning: "calmed or comforted" },
+            { word: "revoked", meaning: "cancelled, reversed" },
+            { word: "incarnation", meaning: "a living form" },
+            { word: "warrior", meaning: "a brave or experienced soldier or fighter" },
+            { word: "fervently", meaning: "sincerely / with great passion" },
+            { word: "nourishment", meaning: "food or substances necessary for growth" },
+            { word: "apsara", meaning: "heavenly dancer" },
+            { word: "curse", meaning: "something that is harmful" },
+            { word: "gobble", meaning: "eat hurriedly" },
+            { word: "boon", meaning: "a blessing" }
+        ];
+
+        let currentIndex = -1;
+        let deck = [...wordData];
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function flipCard() {
+            const card = document.getElementById('cardInner');
+            card.classList.toggle('is-flipped');
+        }
+
+        function nextWord() {
+            const card = document.getElementById('cardInner');
+            
+            // If card is currently flipped, unflip it first then wait to change text
+            if (card.classList.contains('is-flipped')) {
+                card.classList.remove('is-flipped');
+                setTimeout(updateWordDisplay, 300);
+            } else {
+                updateWordDisplay();
+            }
+        }
+
+        function updateWordDisplay() {
+            if (deck.length === 0) {
+                deck = [...wordData];
+                shuffleDeck();
+            }
+
+            const item = deck.pop();
+            document.getElementById('currentWord').textContent = item.word;
+            document.getElementById('wordMeaning').textContent = item.meaning;
+            document.getElementById('counter').textContent = deck.length;
+        }
+
+        // Initialize game
+        window.onload = () => {
+            shuffleDeck();
+            nextWord();
+        };
+    </script>
+</body>
+</html>
