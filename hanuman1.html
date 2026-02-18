@@ -3,220 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Bank Matching Challenge</title>
+    <title>Activity: Put the Story in Order</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .word-card.selected {
-            border-color: #059669;
-            background-color: #ecfdf5;
-            transform: translateY(-2px);
+        .drag-item {
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
         }
-        .word-card.matched {
-            background-color: #d1fae5;
-            border-color: #10b981;
-            opacity: 0.6;
-            cursor: default;
-            pointer-events: none;
+        .drag-item:active {
+            cursor: grabbing;
         }
-        .meaning-card.selected {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-            transform: translateY(-2px);
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f3f4f6;
+            border: 2px dashed #9ca3af;
         }
-        .meaning-card.matched {
-            background-color: #dbeafe;
-            border-color: #3b82f6;
-            opacity: 0.6;
-            cursor: default;
-            pointer-events: none;
+        .correct-glow {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+            border-color: #22c55e !important;
         }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .error-shake {
-            animation: shake 0.3s ease-in-out;
+        .wrong-glow {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
             border-color: #ef4444 !important;
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
+<body class="bg-orange-50 min-h-screen font-sans text-gray-800 p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-emerald-700 mb-2">Vocabulary Match-Up</h1>
-            <p class="text-slate-600 italic">Match the word in the sentence to its correct meaning!</p>
-            <div id="scoreArea" class="mt-4 text-lg font-semibold text-slate-700">
-                Matches: <span id="matchCount">0</span> / 8
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Left Column: Sentences/Words -->
-            <div class="space-y-3">
-                <h3 class="text-xl font-bold text-slate-800 mb-4 px-2">Sentences</h3>
-                <div id="wordsContainer" class="space-y-3">
-                    <!-- Sentences will be injected here -->
-                </div>
-            </div>
-
-            <!-- Right Column: Meanings -->
-            <div class="space-y-3">
-                <h3 class="text-xl font-bold text-slate-800 mb-4 px-2">Meanings</h3>
-                <div id="meaningsContainer" class="space-y-3">
-                    <!-- Meanings will be injected here -->
-                </div>
-            </div>
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-orange-100">
+        <!-- Header -->
+        <div class="bg-orange-500 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold mb-2">The Legend of Maruti</h1>
+            <p class="text-orange-100 italic">Read the sentences below. They are all mixed up! Put them in the correct order by dragging them up or down.</p>
         </div>
 
-        <div class="mt-12 text-center">
-            <button onclick="resetGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition-all active:scale-95">
-                New Game 🔄
-            </button>
+        <!-- Activity Area -->
+        <div class="p-6">
+            <div id="story-list" class="space-y-3">
+                <!-- Items will be injected here -->
+            </div>
+
+            <!-- Controls -->
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-6">
+                <button id="check-btn" class="w-full sm:w-auto px-8 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-full transition-transform active:scale-95 shadow-lg">
+                    Check My Answer
+                </button>
+                <button id="reset-btn" class="w-full sm:w-auto px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-transform active:scale-95">
+                    Reset
+                </button>
+            </div>
+
+            <!-- Feedback Message -->
+            <div id="feedback" class="mt-6 text-center text-lg font-semibold hidden"></div>
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
-            <div class="text-6xl mb-4">🏆</div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">Great Job!</h2>
-            <p class="text-slate-600 mb-6">You matched all the words correctly.</p>
-            <button onclick="resetGame()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl">Play Again</button>
+    <!-- Teacher Key Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 text-orange-600 border-bottom pb-2">Answer Key (For Teachers)</h2>
+            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                <li>Anjana and Kesari have a brave and strong son named Maruti.</li>
+                <li>Little Maruti wakes up feeling very hungry and looks for food.</li>
+                <li>He sees the big, red Sun and thinks it is a delicious, ripe fruit.</li>
+                <li>Hanuman flies high into the sky to catch the glowing "fruit."</li>
+                <li>As Hanuman gets closer, the Sun starts to feel very hot.</li>
+                <li>The Sun God gets scared and calls Lord Indra for help.</li>
+            </ol>
+            <button id="close-modal" class="mt-6 w-full py-2 bg-gray-800 text-white rounded">Close</button>
         </div>
     </div>
+
+    <div class="text-center mt-6 text-gray-500 text-sm">
+        <button id="show-key" class="underline hover:text-orange-600">Show Teacher Answer Key</button>
+    </div>
+
+    <!-- Drag and Drop Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
-        const wordData = [
-            { word: "divine", sentence: "The temple was filled with a ___ light.", meaning: "relating to a god; heavenly" },
-            { word: "calamity", sentence: "The flood was a great ___ for the village.", meaning: "disaster" },
-            { word: "unconscious", sentence: "He fell and remained ___ for several minutes.", meaning: "not awake or aware" },
-            { word: "accused", sentence: "The man was ___ of stealing the crown.", meaning: "charged with a crime or wrongdoing" },
-            { word: "immortal", sentence: "Gods are believed to be ___ beings.", meaning: "living forever; never dying" },
-            { word: "valiant", sentence: "The ___ knight saved the kingdom.", meaning: "brave" },
-            { word: "consoled", sentence: "She ___ her friend who was crying.", meaning: "calmed or comforted" },
-            { word: "revoked", sentence: "His license was ___ after the accident.", meaning: "cancelled, reversed" },
-            { word: "incarnation", sentence: "Many believe he is the ___ of a hero.", meaning: "a living form" },
-            { word: "warrior", sentence: "The brave ___ led the army into battle.", meaning: "a brave or experienced soldier or fighter" },
-            { word: "fervently", sentence: "She prayed ___ for her brother's health.", meaning: "sincerely / with great passion" },
-            { word: "nourishment", sentence: "Fresh fruit provides great ___.", meaning: "food necessary for growth" },
-            { word: "apsara", sentence: "The ___ danced gracefully in the palace.", meaning: "heavenly dancer" },
-            { word: "curse", sentence: "The witch placed a dark ___ on the forest.", meaning: "something that is harmful" },
-            { word: "gobble", sentence: "Don't ___ your food so quickly!", meaning: "eat hurriedly" },
-            { word: "boon", sentence: "The rain was a ___ to the dry farmers.", meaning: "a blessing" }
+        const correctOrder = [
+            "Anjana and Kesari have a brave and strong son named Maruti.",
+            "Little Maruti wakes up feeling very hungry and looks for food.",
+            "He sees the big, red Sun and thinks it is a delicious, ripe fruit.",
+            "Hanuman flies high into the sky to catch the glowing \"fruit.\"",
+            "As Hanuman gets closer, the Sun starts to feel very hot.",
+            "The Sun God gets scared and calls Lord Indra for help."
         ];
 
-        let selectedWord = null;
-        let selectedMeaning = null;
-        let matches = 0;
-        const totalToMatch = 8; // Number of items to show per round
-
-        function resetGame() {
-            document.getElementById('successModal').classList.add('hidden');
-            matches = 0;
-            updateScore();
-            
-            // Pick 8 random words
-            const shuffled = [...wordData].sort(() => 0.5 - Math.random());
-            const roundWords = shuffled.slice(0, totalToMatch);
-            
-            renderRound(roundWords);
-        }
-
-        function renderRound(items) {
-            const wordContainer = document.getElementById('wordsContainer');
-            const meaningContainer = document.getElementById('meaningsContainer');
-            
-            wordContainer.innerHTML = '';
-            meaningContainer.innerHTML = '';
-            
-            // Prepare Word Cards
-            const wordOrder = [...items].sort(() => 0.5 - Math.random());
-            wordOrder.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "word-card bg-white border-2 border-slate-200 p-4 rounded-xl cursor-pointer transition-all shadow-sm hover:border-emerald-300 flex flex-col gap-2";
-                div.innerHTML = `
-                    <div class="text-sm text-emerald-600 font-bold uppercase tracking-tighter">${item.word}</div>
-                    <div class="text-slate-700 font-medium italic">"${item.sentence}"</div>
-                `;
-                div.onclick = () => selectWord(item.word, div);
-                wordContainer.appendChild(div);
-            });
-
-            // Prepare Meaning Cards
-            const meaningOrder = [...items].sort(() => 0.5 - Math.random());
-            meaningOrder.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "meaning-card bg-white border-2 border-slate-200 p-4 rounded-xl cursor-pointer transition-all shadow-sm hover:border-blue-300 min-h-[80px] flex items-center";
-                div.textContent = item.meaning;
-                div.onclick = () => selectMeaning(item.word, div);
-                meaningContainer.appendChild(div);
-            });
-        }
-
-        function selectWord(id, element) {
-            if (element.classList.contains('matched')) return;
-            
-            document.querySelectorAll('.word-card').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedWord = { id, element };
-            checkMatch();
-        }
-
-        function selectMeaning(id, element) {
-            if (element.classList.contains('matched')) return;
-
-            document.querySelectorAll('.meaning-card').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedMeaning = { id, element };
-            checkMatch();
-        }
-
-        function checkMatch() {
-            if (selectedWord && selectedMeaning) {
-                if (selectedWord.id === selectedMeaning.id) {
-                    // Match found
-                    selectedWord.element.classList.remove('selected');
-                    selectedMeaning.element.classList.remove('selected');
-                    selectedWord.element.classList.add('matched');
-                    selectedMeaning.element.classList.add('matched');
-                    
-                    matches++;
-                    updateScore();
-                    
-                    selectedWord = null;
-                    selectedMeaning = null;
-
-                    if (matches === totalToMatch) {
-                        setTimeout(() => {
-                            document.getElementById('successModal').classList.remove('hidden');
-                        }, 500);
-                    }
-                } else {
-                    // No match
-                    const wEl = selectedWord.element;
-                    const mEl = selectedMeaning.element;
-                    
-                    wEl.classList.add('error-shake');
-                    mEl.classList.add('error-shake');
-                    
-                    setTimeout(() => {
-                        wEl.classList.remove('error-shake', 'selected');
-                        mEl.classList.remove('error-shake', 'selected');
-                    }, 500);
-                    
-                    selectedWord = null;
-                    selectedMeaning = null;
-                }
+        // Shuffle function
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
+            return array;
         }
 
-        function updateScore() {
-            document.getElementById('matchCount').textContent = matches;
+        const listElement = document.getElementById('story-list');
+        const checkBtn = document.getElementById('check-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const feedback = document.getElementById('feedback');
+        const modal = document.getElementById('modal-overlay');
+
+        function initApp() {
+            const shuffled = shuffle([...correctOrder]);
+            listElement.innerHTML = '';
+            
+            shuffled.forEach((text, index) => {
+                const item = document.createElement('div');
+                item.className = 'drag-item p-4 bg-white border-2 border-orange-100 rounded-xl flex items-center gap-4 shadow-sm hover:border-orange-300';
+                item.dataset.text = text;
+                item.innerHTML = `
+                    <div class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">
+                        ?
+                    </div>
+                    <p class="flex-grow text-gray-700 leading-relaxed">${text}</p>
+                    <div class="text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                        </svg>
+                    </div>
+                `;
+                listElement.appendChild(item);
+            });
+
+            new Sortable(listElement, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onStart: () => {
+                    feedback.classList.add('hidden');
+                    clearStyles();
+                }
+            });
         }
 
-        window.onload = resetGame;
+        function clearStyles() {
+            document.querySelectorAll('.drag-item').forEach(el => {
+                el.classList.remove('correct-glow', 'wrong-glow', 'bg-green-50', 'bg-red-50');
+                el.querySelector('div').className = 'flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold';
+                el.querySelector('div').innerText = '?';
+            });
+        }
+
+        checkBtn.onclick = () => {
+            const currentItems = Array.from(listElement.children);
+            let score = 0;
+
+            currentItems.forEach((item, index) => {
+                const itemText = item.dataset.text;
+                const circle = item.querySelector('div');
+                
+                if (itemText === correctOrder[index]) {
+                    score++;
+                    item.classList.add('correct-glow', 'bg-green-50');
+                    circle.className = 'flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold';
+                    circle.innerText = index + 1;
+                } else {
+                    item.classList.add('wrong-glow', 'bg-red-50');
+                    circle.className = 'flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold';
+                    circle.innerText = '!';
+                }
+            });
+
+            feedback.classList.remove('hidden');
+            if (score === correctOrder.length) {
+                feedback.innerHTML = `<span class="text-green-600">🎉 Excellent! You put the story in the perfect order!</span>`;
+            } else {
+                feedback.innerHTML = `<span class="text-red-600">You got ${score} out of ${correctOrder.length} correct. Try moving the red items!</span>`;
+            }
+        };
+
+        resetBtn.onclick = () => {
+            feedback.classList.add('hidden');
+            initApp();
+        };
+
+        document.getElementById('show-key').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
+
+        // Initialize on load
+        window.onload = initApp;
     </script>
 </body>
 </html>
