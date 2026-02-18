@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Bank Matching Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .word-card.selected {
+            border-color: #059669;
+            background-color: #ecfdf5;
+            transform: translateY(-2px);
+        }
+        .word-card.matched {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            opacity: 0.6;
+            cursor: default;
+            pointer-events: none;
+        }
+        .meaning-card.selected {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+        .meaning-card.matched {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            opacity: 0.6;
+            cursor: default;
+            pointer-events: none;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .error-shake {
+            animation: shake 0.3s ease-in-out;
+            border-color: #ef4444 !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-emerald-700 mb-2">Vocabulary Match-Up</h1>
+            <p class="text-slate-600 italic">Match the word in the sentence to its correct meaning!</p>
+            <div id="scoreArea" class="mt-4 text-lg font-semibold text-slate-700">
+                Matches: <span id="matchCount">0</span> / 8
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Sentences/Words -->
+            <div class="space-y-3">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 px-2">Sentences</h3>
+                <div id="wordsContainer" class="space-y-3">
+                    <!-- Sentences will be injected here -->
+                </div>
+            </div>
+
+            <!-- Right Column: Meanings -->
+            <div class="space-y-3">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 px-2">Meanings</h3>
+                <div id="meaningsContainer" class="space-y-3">
+                    <!-- Meanings will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center">
+            <button onclick="resetGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition-all active:scale-95">
+                New Game 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Great Job!</h2>
+            <p class="text-slate-600 mb-6">You matched all the words correctly.</p>
+            <button onclick="resetGame()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const wordData = [
+            { word: "divine", sentence: "The temple was filled with a ___ light.", meaning: "relating to a god; heavenly" },
+            { word: "calamity", sentence: "The flood was a great ___ for the village.", meaning: "disaster" },
+            { word: "unconscious", sentence: "He fell and remained ___ for several minutes.", meaning: "not awake or aware" },
+            { word: "accused", sentence: "The man was ___ of stealing the crown.", meaning: "charged with a crime or wrongdoing" },
+            { word: "immortal", sentence: "Gods are believed to be ___ beings.", meaning: "living forever; never dying" },
+            { word: "valiant", sentence: "The ___ knight saved the kingdom.", meaning: "brave" },
+            { word: "consoled", sentence: "She ___ her friend who was crying.", meaning: "calmed or comforted" },
+            { word: "revoked", sentence: "His license was ___ after the accident.", meaning: "cancelled, reversed" },
+            { word: "incarnation", sentence: "Many believe he is the ___ of a hero.", meaning: "a living form" },
+            { word: "warrior", sentence: "The brave ___ led the army into battle.", meaning: "a brave or experienced soldier or fighter" },
+            { word: "fervently", sentence: "She prayed ___ for her brother's health.", meaning: "sincerely / with great passion" },
+            { word: "nourishment", sentence: "Fresh fruit provides great ___.", meaning: "food necessary for growth" },
+            { word: "apsara", sentence: "The ___ danced gracefully in the palace.", meaning: "heavenly dancer" },
+            { word: "curse", sentence: "The witch placed a dark ___ on the forest.", meaning: "something that is harmful" },
+            { word: "gobble", sentence: "Don't ___ your food so quickly!", meaning: "eat hurriedly" },
+            { word: "boon", sentence: "The rain was a ___ to the dry farmers.", meaning: "a blessing" }
+        ];
+
+        let selectedWord = null;
+        let selectedMeaning = null;
+        let matches = 0;
+        const totalToMatch = 8; // Number of items to show per round
+
+        function resetGame() {
+            document.getElementById('successModal').classList.add('hidden');
+            matches = 0;
+            updateScore();
+            
+            // Pick 8 random words
+            const shuffled = [...wordData].sort(() => 0.5 - Math.random());
+            const roundWords = shuffled.slice(0, totalToMatch);
+            
+            renderRound(roundWords);
+        }
+
+        function renderRound(items) {
+            const wordContainer = document.getElementById('wordsContainer');
+            const meaningContainer = document.getElementById('meaningsContainer');
+            
+            wordContainer.innerHTML = '';
+            meaningContainer.innerHTML = '';
+            
+            // Prepare Word Cards
+            const wordOrder = [...items].sort(() => 0.5 - Math.random());
+            wordOrder.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "word-card bg-white border-2 border-slate-200 p-4 rounded-xl cursor-pointer transition-all shadow-sm hover:border-emerald-300 flex flex-col gap-2";
+                div.innerHTML = `
+                    <div class="text-sm text-emerald-600 font-bold uppercase tracking-tighter">${item.word}</div>
+                    <div class="text-slate-700 font-medium italic">"${item.sentence}"</div>
+                `;
+                div.onclick = () => selectWord(item.word, div);
+                wordContainer.appendChild(div);
+            });
+
+            // Prepare Meaning Cards
+            const meaningOrder = [...items].sort(() => 0.5 - Math.random());
+            meaningOrder.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "meaning-card bg-white border-2 border-slate-200 p-4 rounded-xl cursor-pointer transition-all shadow-sm hover:border-blue-300 min-h-[80px] flex items-center";
+                div.textContent = item.meaning;
+                div.onclick = () => selectMeaning(item.word, div);
+                meaningContainer.appendChild(div);
+            });
+        }
+
+        function selectWord(id, element) {
+            if (element.classList.contains('matched')) return;
+            
+            document.querySelectorAll('.word-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedWord = { id, element };
+            checkMatch();
+        }
+
+        function selectMeaning(id, element) {
+            if (element.classList.contains('matched')) return;
+
+            document.querySelectorAll('.meaning-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedMeaning = { id, element };
+            checkMatch();
+        }
+
+        function checkMatch() {
+            if (selectedWord && selectedMeaning) {
+                if (selectedWord.id === selectedMeaning.id) {
+                    // Match found
+                    selectedWord.element.classList.remove('selected');
+                    selectedMeaning.element.classList.remove('selected');
+                    selectedWord.element.classList.add('matched');
+                    selectedMeaning.element.classList.add('matched');
+                    
+                    matches++;
+                    updateScore();
+                    
+                    selectedWord = null;
+                    selectedMeaning = null;
+
+                    if (matches === totalToMatch) {
+                        setTimeout(() => {
+                            document.getElementById('successModal').classList.remove('hidden');
+                        }, 500);
+                    }
+                } else {
+                    // No match
+                    const wEl = selectedWord.element;
+                    const mEl = selectedMeaning.element;
+                    
+                    wEl.classList.add('error-shake');
+                    mEl.classList.add('error-shake');
+                    
+                    setTimeout(() => {
+                        wEl.classList.remove('error-shake', 'selected');
+                        mEl.classList.remove('error-shake', 'selected');
+                    }, 500);
+                    
+                    selectedWord = null;
+                    selectedMeaning = null;
+                }
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('matchCount').textContent = matches;
+        }
+
+        window.onload = resetGame;
+    </script>
+</body>
+</html>
