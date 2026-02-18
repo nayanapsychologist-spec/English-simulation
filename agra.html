@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who, What, Where - Shah Jahan & the Agra Petha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drag-item {
+            cursor: grab;
+            transition: transform 0.2s, background-color 0.2s;
+            user-select: none;
+            touch-action: none;
+        }
+        .drag-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            min-height: 150px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .drop-zone.drag-over {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+        }
+        .correct {
+            background-color: #dcfce7 !important;
+            border: 1px solid #16a34a !important;
+        }
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border: 1px solid #dc2626 !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Shah Jahan and the Agra Petha</h1>
+            <p class="text-slate-600">Drag the words into the correct category: <strong>Who</strong>, <strong>What</strong>, or <strong>Where</strong>.</p>
+        </header>
+
+        <!-- Categories -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- WHO -->
+            <div class="bg-white rounded-xl shadow-sm border-2 border-dashed border-blue-200 p-4">
+                <h2 class="text-xl font-bold text-blue-600 text-center mb-4 uppercase tracking-wider">Who</h2>
+                <div id="who" class="drop-zone flex flex-wrap gap-2 content-start" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                </div>
+            </div>
+
+            <!-- WHAT -->
+            <div class="bg-white rounded-xl shadow-sm border-2 border-dashed border-purple-200 p-4">
+                <h2 class="text-xl font-bold text-purple-600 text-center mb-4 uppercase tracking-wider">What</h2>
+                <div id="what" class="drop-zone flex flex-wrap gap-2 content-start" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                </div>
+            </div>
+
+            <!-- WHERE -->
+            <div class="bg-white rounded-xl shadow-sm border-2 border-dashed border-orange-200 p-4">
+                <h2 class="text-xl font-bold text-orange-600 text-center mb-4 uppercase tracking-wider">Where</h2>
+                <div id="where" class="drop-zone flex flex-wrap gap-2 content-start" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Bank -->
+        <div class="bg-slate-200 rounded-xl p-6 mb-8">
+            <h3 class="text-sm font-semibold text-slate-500 uppercase mb-4 text-center">Word Bank</h3>
+            <div id="word-bank" class="flex flex-wrap justify-center gap-3 drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                <!-- Words will be injected here -->
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button onclick="checkAnswers()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all active:scale-95">
+                Check My Answers
+            </button>
+            <button onclick="resetGame()" class="ml-4 text-slate-500 hover:text-slate-800 font-medium underline">
+                Reset
+            </button>
+            <div id="feedback" class="mt-6 text-xl font-bold hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { text: "Shah Jahan", category: "who" },
+            { text: "Artisans", category: "who" },
+            { text: "Master Chef", category: "who" },
+            { text: "Ustad", category: "who" },
+            { text: "Taj Mahal", category: "what" },
+            { text: "Agra Petha", category: "what" },
+            { text: "Ash Gourd", category: "what" },
+            { text: "Monument", category: "what" },
+            { text: "Agra", category: "where" },
+            { text: "Royal Kitchen", category: "where" },
+            { text: "River Yamuna", category: "where" },
+            { text: "Construction Site", category: "where" }
+        ];
+
+        function initGame() {
+            const wordBank = document.getElementById('word-bank');
+            wordBank.innerHTML = '';
+            
+            // Shuffle data
+            const shuffled = [...data].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.innerText = item.text;
+                div.id = `word-${index}`;
+                div.className = 'drag-item bg-white px-4 py-2 rounded-lg shadow-md border border-slate-300 font-medium text-slate-700';
+                div.draggable = true;
+                div.dataset.category = item.category;
+                div.addEventListener('dragstart', drag);
+                wordBank.appendChild(div);
+            });
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            if (ev.currentTarget.classList.contains('drop-zone')) {
+                ev.currentTarget.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const zone = ev.currentTarget;
+            zone.classList.remove('drag-over');
+            
+            const dataId = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(dataId);
+            
+            // Remove correctness styles if they exist when moving back
+            draggedElement.classList.remove('correct', 'incorrect');
+            
+            if (zone.classList.contains('drop-zone')) {
+                zone.appendChild(draggedElement);
+            }
+        }
+
+        function checkAnswers() {
+            const zones = ['who', 'what', 'where'];
+            let correctCount = 0;
+            const feedback = document.getElementById('feedback');
+            
+            zones.forEach(zoneId => {
+                const zone = document.getElementById(zoneId);
+                const items = zone.querySelectorAll('.drag-item');
+                
+                items.forEach(item => {
+                    if (item.dataset.category === zoneId) {
+                        item.classList.add('correct');
+                        item.classList.remove('incorrect');
+                        correctCount++;
+                    } else {
+                        item.classList.add('incorrect');
+                        item.classList.remove('correct');
+                    }
+                });
+            });
+
+            feedback.classList.remove('hidden');
+            if (correctCount === data.length) {
+                feedback.innerText = "🎉 Perfect! You've categorized everything correctly.";
+                feedback.className = "mt-6 text-xl font-bold text-green-600 block";
+            } else {
+                feedback.innerText = `You got ${correctCount} out of ${data.length} right. Try adjusting the red ones!`;
+                feedback.className = "mt-6 text-xl font-bold text-orange-600 block";
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('who').innerHTML = '';
+            document.getElementById('what').innerHTML = '';
+            document.getElementById('where').innerHTML = '';
+            document.getElementById('feedback').classList.add('hidden');
+            initGame();
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
