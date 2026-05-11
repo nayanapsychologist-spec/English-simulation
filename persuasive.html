@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦁 Poster Maker Challenge! – Unit 6: Writing to Persuade</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1E8449;--green2:#27AE60;--green-lt:#EAFAF1;
+  --orange:#E67E22;--orange2:#F39C12;--orange-lt:#FEF9E7;
+  --purple:#8E44AD;--purple-lt:#F4ECF7;
+  --blue:#2471A3;--blue-lt:#EBF5FB;
+  --red:#C0392B;--red-lt:#FDEDEC;
+  --dark:#1C2833;--dark2:#2C3E50;
+  --bg:#FFFDE7;--white:#fff;
+  --shadow:0 6px 24px rgba(28,40,51,.12);
+  --r:20px;--rsm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;color:var(--dark);}
+
+/* ── HEADER ── */
+.hdr{background:var(--green);padding:12px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 14px rgba(0,0,0,.2);}
+.hdr-title{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--orange2);flex-shrink:0;white-space:nowrap;}
+.prog-wrap{flex:1;background:rgba(255,255,255,.25);border-radius:100px;height:14px;overflow:hidden;min-width:60px;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--orange2),#FFF176);border-radius:100px;transition:width .6s ease;}
+.star-pill{background:var(--orange2);color:var(--dark);font-family:'Fredoka One',cursive;font-size:1.1rem;padding:5px 14px;border-radius:100px;flex-shrink:0;}
+.step-pill{background:rgba(255,255,255,.2);color:#fff;font-size:.8rem;font-weight:800;padding:5px 12px;border-radius:100px;flex-shrink:0;}
+
+/* ── MAIN ── */
+.main{max-width:680px;margin:0 auto;padding:22px 14px 60px;}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);padding:26px;margin-bottom:18px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.94) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+
+/* ── POSTER PREVIEW ── */
+.poster-wrap{background:linear-gradient(145deg,#145A32,var(--green2),#1D8348);border-radius:var(--r);border:4px solid var(--orange2);padding:20px;margin-bottom:18px;box-shadow:0 8px 28px rgba(30,132,73,.3);}
+.poster-title{font-family:'Fredoka One',cursive;font-size:1.8rem;text-align:center;color:var(--orange2);text-shadow:2px 2px 6px rgba(0,0,0,.3);margin-bottom:10px;letter-spacing:.03em;}
+.poster-line{background:rgba(255,255,255,.18);border-radius:10px;padding:8px 14px;margin:6px 0;font-size:.92rem;font-weight:700;color:#fff;border-left:4px solid rgba(255,255,255,.4);}
+.poster-label{font-size:.72rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+
+/* ── INTRO HERO ── */
+.hero-box{background:linear-gradient(135deg,var(--green),#145A32);border-radius:var(--r);padding:28px;text-align:center;color:#fff;margin-bottom:18px;}
+.hero-emoji{font-size:4rem;margin-bottom:8px;display:block;animation:bounce 1.4s infinite alternate;}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.hero-box h2{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--orange2);margin-bottom:8px;}
+.hero-box p{font-size:.95rem;line-height:1.7;opacity:.95;}
+
+/* ── BADGES ── */
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;font-family:'Fredoka One',cursive;font-size:.9rem;padding:5px 14px;border-radius:100px;margin-bottom:12px;}
+.drill-badge{background:var(--purple);}
+h2.q-title{font-family:'Fredoka One',cursive;font-size:1.45rem;margin-bottom:8px;line-height:1.35;}
+.instruct{font-size:.95rem;color:var(--dark2);line-height:1.65;margin-bottom:18px;}
+.tip-box{background:var(--orange-lt);border-left:4px solid var(--orange2);border-radius:var(--rsm);padding:10px 14px;margin-bottom:16px;font-size:.9rem;line-height:1.65;}
+.tip-box strong{color:var(--orange);}
+
+/* ── OPTIONS ── */
+.options{display:flex;flex-direction:column;gap:12px;}
+.opt-btn{border:3px solid #D5D8DC;border-radius:var(--rsm);padding:14px 18px;background:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;text-align:left;line-height:1.55;transition:all .2s;color:var(--dark);display:flex;align-items:flex-start;gap:10px;}
+.opt-btn:hover{border-color:var(--green2);background:var(--green-lt);transform:translateX(5px);}
+.opt-btn.correct{border-color:var(--green2);background:var(--green-lt);color:var(--green);}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-lt);color:var(--red);}
+.opt-btn:disabled{cursor:not-allowed;}
+.opt-btn:disabled:not(.correct):not(.wrong){opacity:.5;}
+.opt-lbl{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--dark);color:#fff;font-family:'Fredoka One',cursive;font-size:.95rem;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.opt-btn.correct .opt-lbl{background:var(--green);}
+.opt-btn.wrong .opt-lbl{background:var(--red);}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.opt-btn.correct{animation:correctPop .4s ease;}
+.opt-btn.wrong{animation:shake .4s ease;}
+
+/* ── FEEDBACK ── */
+.feedback{border-radius:var(--rsm);padding:14px 16px;margin-top:12px;font-size:.93rem;line-height:1.6;display:none;}
+.feedback.show{display:block;animation:popIn .3s ease;}
+.feedback.correct-fb{background:var(--green-lt);border-left:4px solid var(--green2);color:#1A6135;}
+.feedback.wrong-fb{background:var(--red-lt);border-left:4px solid var(--red);color:#922B21;}
+.feedback strong{display:block;font-size:1rem;margin-bottom:3px;}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:100px;padding:12px 28px;font-family:'Fredoka One',cursive;font-size:1.05rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(30,132,73,.35);}
+.btn-orange{background:var(--orange);color:#fff;}
+.btn-orange:hover{background:var(--orange2);transform:translateY(-2px);}
+.btn-dark{background:var(--dark);color:#fff;}
+.btn-wrap{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ── DRILL ── */
+.drill-hero{background:linear-gradient(135deg,#5B2C6F,var(--purple));border-radius:var(--r);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;color:#fff;}
+.drill-hero .icon{font-size:2.5rem;flex-shrink:0;animation:bounce 1.2s infinite alternate;}
+.drill-hero h3{font-family:'Fredoka One',cursive;font-size:1.15rem;margin-bottom:3px;}
+.drill-hero p{font-size:.87rem;opacity:.9;line-height:1.5;}
+.dot-row{display:flex;gap:8px;margin-bottom:16px;}
+.dot{width:34px;height:12px;border-radius:100px;background:#DDD;transition:background .3s;}
+.dot.hit{background:var(--green2);}
+.dot.miss{background:var(--red);}
+.dot.now{background:var(--orange2);animation:glowPulse 1s infinite alternate;}
+@keyframes glowPulse{from{opacity:.7}to{opacity:1}}
+.q-count{font-family:'Fredoka One',cursive;font-size:.88rem;color:var(--dark2);margin-bottom:10px;}
+
+/* ── DRILL RESULT ── */
+.drill-result{background:linear-gradient(135deg,#154360,var(--blue));border-radius:var(--r);padding:26px;text-align:center;color:#fff;}
+.drill-result h2{font-family:'Fredoka One',cursive;font-size:1.6rem;margin-bottom:6px;}
+.stars-big{font-size:2rem;letter-spacing:3px;display:block;margin:8px 0;}
+.stat-row{display:flex;gap:12px;justify-content:center;margin:12px 0;}
+.stat-box{background:rgba(255,255,255,.15);border-radius:12px;padding:14px 20px;text-align:center;}
+.stat-box .num{font-family:'Fredoka One',cursive;font-size:2.2rem;line-height:1;}
+.stat-box .lbl{font-size:.8rem;opacity:.85;}
+
+/* ── FINAL REVEAL ── */
+.reveal-card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px;}
+.reveal-card-header{background:var(--dark);color:#fff;padding:12px 18px;font-size:.85rem;font-family:'Fredoka One',cursive;font-size:1rem;}
+.reveal-poster{background:linear-gradient(145deg,#0B5345,var(--green),#145A32);border-radius:var(--r);padding:24px;border:5px solid var(--orange2);box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.reveal-title{font-family:'Fredoka One',cursive;font-size:2.2rem;text-align:center;color:var(--orange2);text-shadow:2px 2px 6px rgba(0,0,0,.4);margin-bottom:12px;}
+.reveal-line{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 16px;margin:8px 0;font-size:.95rem;font-weight:700;color:#fff;line-height:1.6;}
+.reveal-web{text-align:center;font-size:.82rem;color:rgba(255,255,255,.65);margin-top:12px;font-style:italic;}
+
+/* ── HIGHLIGHTS ── */
+.h-adj{background:rgba(142,68,173,.2);border-radius:4px;padding:1px 4px;color:#8E44AD;font-weight:800;}
+.h-time{background:rgba(230,126,34,.2);border-radius:4px;padding:1px 4px;color:#E67E22;font-weight:800;}
+.h-q{background:rgba(36,113,163,.2);border-radius:4px;padding:1px 4px;color:#2471A3;font-weight:800;}
+.h-exc{background:rgba(30,132,73,.2);border-radius:4px;padding:1px 4px;color:#1E8449;font-weight:800;}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:.83rem;font-weight:700;}
+.leg-item{display:flex;align-items:center;gap:5px;}
+.leg-dot{width:14px;height:14px;border-radius:4px;}
+
+/* ── WHAT WE LEARNED ── */
+.learn-box{background:var(--orange-lt);border:2px solid var(--orange2);border-radius:var(--rsm);padding:12px 16px;font-size:.9rem;margin-bottom:10px;line-height:1.55;}
+.learn-box strong{color:var(--orange);}
+
+/* ── CONFETTI ── */
+.conf-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;overflow:hidden;}
+.conf-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confDrop linear forwards;}
+@keyframes confDrop{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+/* ── COMPLETE BANNER ── */
+.complete-strip{background:linear-gradient(90deg,var(--orange),var(--orange2));color:#fff;text-align:center;padding:10px;font-family:'Fredoka One',cursive;font-size:1rem;letter-spacing:.05em;}
+
+@media(max-width:500px){
+  .hdr-title{font-size:1rem;}
+  h2.q-title{font-size:1.2rem;}
+  .opt-btn{font-size:.88rem;}
+  .reveal-title{font-size:1.7rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">🦁 Poster Maker!</div>
+  <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+  <div class="step-pill" id="stepPill">Intro</div>
+  <div class="star-pill" id="starPill">⭐ 0</div>
+</div>
+
+<div class="main" id="app"></div>
+
+<script>
+let state = {
+  step:0, score:0, drillIdx:0, drillResults:[],
+  posterParts:{header:'', tagline:'', sentence1:'', sentence2:'', closing:''}
+};
+
+/* ══ CHOICE DATA ══════════════════════════════ */
+const choiceSteps = [
+  {
+    id:'purpose', badge:'Step 1 of 5 ⭐',
+    title:'Posters and Leaflets — What\'s Different?',
+    instruct:'You\'re making a poster AND a leaflet for Wild Wonders animal park! 🦁🌿 But first — what is the main difference between a poster and a leaflet?',
+    concept:'💡 <strong>Remember:</strong> Posters and leaflets try to PERSUADE us — to go somewhere, do something, or buy something!',
+    options:[
+      {label:'A', text:'Posters use pictures but leaflets do not use any pictures at all.',
+       correct:false, feedback:'❌ Not quite! Both posters AND leaflets can use pictures. Think about the AMOUNT of information they give...'},
+      {label:'B', text:'Leaflets usually give us MORE information than posters.',
+       correct:true, feedback:'✅ Yes, that\'s right! Posters use short, catchy phrases to grab attention. Leaflets give us LOTS more detail and information. Well done! 🎉'}
+    ],
+    posterContent:'🦁  WILD WONDERS  🦁',
+    posterKey:'header'
+  },
+  {
+    id:'adjectives', badge:'Step 2 of 5 ⭐⭐',
+    title:'Pick the Best Adjectives!',
+    instruct:'Adjectives are describing words! In posters, we use INTERESTING adjectives to persuade people to visit. Which version of this poster line sounds more exciting?',
+    concept:'💡 <strong>Top Tip:</strong> Instead of "a fun park", we can say "a new, exciting park"! More interesting adjectives make people want to visit!',
+    options:[
+      {label:'A', text:'"Come to our good, big animal park!"',
+       correct:false, feedback:'❌ "Good" and "big" are a bit boring! They don\'t make the reader feel really excited. We need more interesting, vivid adjectives to persuade people!'},
+      {label:'B', text:'"Come to our amazing, enormous animal park!"',
+       correct:true, feedback:'✅ Brilliant! "Amazing" and "enormous" are so much more exciting! These interesting adjectives make the reader want to visit straight away! 🎉'}
+    ],
+    posterContent:'Come to our amazing, enormous animal park!',
+    posterKey:'tagline'
+  },
+  {
+    id:'timeconj', badge:'Step 3 of 5 ⭐⭐⭐',
+    title:'Use a Time Conjunction!',
+    instruct:'Time conjunctions join two sentences and tell us WHEN or in what ORDER things happen. They are: before, while, after, when. Which sentence uses a time conjunction correctly?',
+    concept:'💡 <strong>Remember:</strong> <em>before</em> = this happens first, THEN that. <em>while</em> = both things happen AT THE SAME TIME. <em>after</em> = this happens, THEN that.',
+    options:[
+      {label:'A', text:'"Watch the animals after you leave the park!"',
+       correct:false, feedback:'❌ This doesn\'t make sense! If you\'ve already LEFT the park, you can\'t watch the animals there! Think carefully about the order of events.'},
+      {label:'B', text:'"Watch the animals before you visit the café!"',
+       correct:true, feedback:'✅ "Before" is perfect here! Watch the animals FIRST, then visit the café. The time conjunction tells us the right order! 🎉'}
+    ],
+    posterContent:'Watch the animals before you visit the café!',
+    posterKey:'sentence1'
+  },
+  {
+    id:'question', badge:'Step 4 of 5 ⭐⭐⭐⭐',
+    title:'Ask a Question!',
+    instruct:'Posters and leaflets can use QUESTIONS to make the reader feel curious and want to visit. Which sentence is a correctly punctuated question?',
+    concept:'💡 <strong>Remember the three sentence types!</strong> Statements end with a full stop (.) Questions end with a question mark (?) Exclamations end with an exclamation mark (!)',
+    options:[
+      {label:'A', text:'"What will you discover at Wild Wonders."',
+       correct:false, feedback:'❌ This is a question, but it ends with a FULL STOP — that\'s wrong! Questions MUST end with a question mark (?). Check the punctuation!'},
+      {label:'B', text:'"What will you discover at Wild Wonders?"',
+       correct:true, feedback:'✅ A question mark (?) at the end — perfect! This question makes the reader feel curious and want to find out! Great persuasion! 🎉'}
+    ],
+    posterContent:'What will you discover at Wild Wonders?',
+    posterKey:'sentence2'
+  },
+  {
+    id:'exclamation', badge:'Step 5 of 5 ⭐⭐⭐⭐⭐',
+    title:'Write an Exciting Closing Line!',
+    instruct:'Your poster needs an exciting final line! Which option is a correctly punctuated exclamation that will persuade people to visit?',
+    options:[
+      {label:'A', text:'"Visit us today, it will be fun."',
+       correct:false, feedback:'❌ This is just a boring statement with a full stop. Posters need an exciting exclamation mark (!) to sound enthusiastic and persuade readers!'},
+      {label:'B', text:'"Visit us today — you won\'t want to leave!"',
+       correct:true, feedback:'✅ The exclamation mark (!) makes this sound SO exciting! Your poster is complete! You did an amazing job! 🎉🦁'}
+    ],
+    posterContent:'Visit us today — you won\'t want to leave!',
+    posterKey:'closing'
+  }
+];
+
+/* ══ DRILL DATA ════════════════════════════════ */
+const drills = {
+  adjectives:{
+    badge:'Grammar Practice: Adjectives', icon:'🎨',
+    title:'Adjectives — Describing Words!',
+    intro:'Adjectives are <strong>describing words</strong>. They describe nouns — people, places and things. In posters, MORE INTERESTING adjectives persuade readers to visit! Let\'s practise!',
+    questions:[
+      {q:'Which word is an adjective (a describing word)?',
+       options:['jump','enormous'],correct:1,
+       explain:'"Enormous" is an adjective — it describes HOW BIG something is! "Jump" is a verb — a doing or action word.'},
+      {q:'Which adjective is more interesting and better for a poster?',
+       options:['nice','spectacular'],correct:1,
+       explain:'"Spectacular" is much more exciting than "nice"! More interesting adjectives persuade readers that a place is worth visiting!'},
+      {q:'True or False: Adjectives are describing words.',
+       options:['True','False'],correct:0,
+       explain:'Yes! Adjectives are describing words — they describe nouns like people, places and things. For example: a <em>huge</em> dinosaur, a <em>scary</em> room, a <em>cuddly</em> toy.'},
+      {q:'Which sentence uses the most INTERESTING adjectives for a poster?',
+       options:['Climb a big dinosaur.','Climb a huge, towering dinosaur!'],correct:1,
+       explain:'"Huge, towering" is much more exciting than "big"! Using TWO interesting adjectives together makes the image even more vivid and persuasive for the reader!'},
+      {q:'"A soft play area filled with cuddly dinosaur friends." What type of word is "cuddly"?',
+       options:['A verb (an action word)','An adjective (a describing word)'],correct:1,
+       explain:'"Cuddly" is an adjective — it describes what the dinosaur friends are LIKE! It makes the reader imagine something warm and friendly, which persuades them to visit!'}
+    ]
+  },
+  timeConjunctions:{
+    badge:'Grammar Practice: Time Conjunctions', icon:'⏰',
+    title:'Time Conjunctions!',
+    intro:'Time conjunctions join two sentences and tell us WHEN things happen or in what ORDER. The time conjunctions are: <strong>before, while, after, when</strong>. Let\'s practise using them!',
+    questions:[
+      {q:'Which word is a TIME conjunction?',
+       options:['because','before'],correct:1,
+       explain:'"Before" is a time conjunction — it tells us the ORDER of events! "Because" is a reason conjunction — it tells us WHY something happens.'},
+      {q:'"Enjoy a picnic ___ watching the animals." Which time conjunction fits?',
+       options:['before','while'],correct:1,
+       explain:'"While" means AT THE SAME TIME! You eat your picnic WHILE watching the animals — both things happen together at the same time!'},
+      {q:'True or False: Before, while, after and when are all time conjunctions.',
+       options:['True','False'],correct:0,
+       explain:'Yes! Before, while, after and when are ALL time conjunctions. They tell us when things happen or in what order they happen.'},
+      {q:'"Slide down the tail ___ you climb to the top." Which conjunction fits best?',
+       options:['after','before'],correct:0,
+       explain:'"After" is correct — you climb up FIRST, then slide down AFTER! The conjunction tells us the right order. You can\'t slide down before climbing up!'},
+      {q:'"She felt excited ___ she walked through the park." Which conjunction shows she felt excited DURING the walk?',
+       options:['while','after'],correct:0,
+       explain:'"While" means at the same time — she was excited DURING the walk! "After" would mean she felt excited once the walk was over, which is a different meaning!'}
+    ]
+  },
+  sentenceTypes:{
+    badge:'Grammar Practice: Sentence Types', icon:'✏️',
+    title:'Three Types of Sentences!',
+    intro:'In posters and leaflets we use THREE types of sentences! A <strong>statement</strong> tells us something (full stop .) A <strong>question</strong> asks something (question mark ?) An <strong>exclamation</strong> says something exciting (exclamation mark !)',
+    questions:[
+      {q:'What punctuation mark goes at the end of a QUESTION?',
+       options:['Full stop (.)','Question mark (?)'],correct:1,
+       explain:'A question mark (?) always ends a question — a sentence that ASKS something. For example: "What will you see at Wild Wonders?"'},
+      {q:'"Our brand-new animal park is loved by children of all ages!" — What type of sentence is this?',
+       options:['A statement','An exclamation'],correct:1,
+       explain:'This ends with an exclamation mark (!) — it\'s an EXCLAMATION! It tells us something exciting or surprising, which persuades the reader!'},
+      {q:'True or False: A statement ends with a question mark (?).',
+       options:['True','False'],correct:1,
+       explain:'False! A statement ends with a FULL STOP (.). Only questions end with a question mark (?). Don\'t mix them up!'},
+      {q:'"What will you enjoy at Wild Wonders?" — What type of sentence is this?',
+       options:['A question','An exclamation'],correct:0,
+       explain:'This sentence ASKS something — so it\'s a QUESTION! It ends with a question mark (?). Questions in posters make the reader curious and want to find out more!'},
+      {q:'Which sentence is correctly punctuated as an EXCLAMATION?',
+       options:['Visit us today?','Visit us today!'],correct:1,
+       explain:'An exclamation ends with an exclamation mark (!). A question mark (?) would only be used if we were asking something. The exclamation mark makes the sentence sound exciting!'}
+    ]
+  },
+  conjunctions:{
+    badge:'Grammar Practice: Joining Words', icon:'🔗',
+    title:'Joining Words: and, but, so, because',
+    intro:'We use conjunctions to <strong>join two smaller sentences together</strong>. You already know these joining words: <strong>and, but, so, because</strong>. And now you also know the time conjunctions: before, while, after, when!',
+    questions:[
+      {q:'"I wanted to ride the roller coaster ___ it was too scary." Which joining word fits?',
+       options:['and','but'],correct:1,
+       explain:'"But" shows a contrast — I WANTED to go, BUT something stopped me! "And" would just add more information without showing the contrast.'},
+      {q:'"We went to the café ___ we were hungry." Which joining word shows the REASON?',
+       options:['so','because'],correct:1,
+       explain:'"Because" gives the REASON — we went to the café FOR THE REASON that we were hungry! "So" would show the result: "We were hungry SO we went" — a slightly different meaning.'},
+      {q:'True or False: Conjunctions are used to join smaller sentences together.',
+       options:['True','False'],correct:0,
+       explain:'Yes! Conjunctions join sentences together. For example: "I like animals AND I love playing" or "I was excited BUT also a bit scared!"'},
+      {q:'"I wanted to stay longer ___ we had to go home." Which joining word fits?',
+       options:['because','but'],correct:1,
+       explain:'"But" shows a contrast — I WANTED to stay, BUT we had to go. "Because" would change the meaning: "I wanted to stay longer because we had to go home" — that doesn\'t make sense!'}
+    ]
+  }
+};
+
+const sequence=[
+  ['intro'],
+  ['choice',0],['drill','adjectives'],
+  ['choice',1],['drill','timeConjunctions'],
+  ['choice',2],['drill','sentenceTypes'],
+  ['choice',3],['drill','conjunctions'],
+  ['choice',4],
+  ['reveal']
+];
+
+/* ══ RENDER ════════════════════════════════════ */
+function render(){
+  const app=document.getElementById('app');
+  const[type,id]=sequence[state.step];
+  const pct=Math.round(state.step/(sequence.length-1)*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('starPill').textContent='⭐ '+state.score;
+  document.getElementById('stepPill').textContent=(state.step+1)+' / '+sequence.length;
+  if(type==='intro')renderIntro(app);
+  else if(type==='choice')renderChoice(app,choiceSteps[id]);
+  else if(type==='drill')renderDrill(app,drills[id]);
+  else if(type==='reveal')renderReveal(app);
+}
+
+/* ── INTRO ── */
+function renderIntro(app){
+  app.innerHTML=`
+  <div class="hero-box">
+    <span class="hero-emoji">🦁</span>
+    <h2>Poster Maker Challenge!</h2>
+    <p>Help design a poster and leaflet for <strong>Wild Wonders</strong> — a brand-new animal park!<br>
+    Make smart choices to build your poster step by step.<br>
+    Learn about <strong>adjectives, time conjunctions, sentence types</strong> and more!<br><br>
+    <strong>Earn ⭐ stars as you go!</strong></p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:1rem;color:var(--dark2);margin-bottom:18px;">🌿 5 poster-building choices + 4 grammar practice rounds 🌿</p>
+    <button class="btn btn-green" style="font-size:1.15rem;padding:14px 32px;" onclick="nextStep()">
+      🚀 Let's Start Building!
+    </button>
+  </div>`;
+}
+
+/* ── CHOICE ── */
+let currentChoice=null;
+function renderChoice(app,step){
+  currentChoice=step;
+  const ps=buildPosterSoFar();
+  const ph=ps?`<div class="poster-wrap"><div class="poster-label">🎨 Your Poster So Far...</div>${ps}</div>`:'';
+  const tip=step.concept?`<div class="tip-box">${step.concept}</div>`:'';
+  app.innerHTML=`${ph}
+  <div class="card">
+    <div class="step-badge">${step.badge}</div>
+    <h2 class="q-title">${step.title}</h2>
+    <p class="instruct">${step.instruct}</p>
+    ${tip}
+    <div class="options" id="optArea">
+      ${step.options.map((o,i)=>`<button class="opt-btn" id="opt${i}" onclick="handleChoice(${i})">
+        <span class="opt-lbl">${o.label}</span><span>${o.text}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="choiceFb"></div>
+    <div class="btn-wrap" id="choiceContinue" style="display:none;">
+      <button class="btn btn-green" onclick="nextStep()">Keep Building! →</button>
+    </div>
+  </div>`;
+}
+
+function handleChoice(idx){
+  if(!currentChoice)return;
+  const opt=currentChoice.options[idx];
+  const oa=document.getElementById('optArea');
+  const btns=oa?oa.querySelectorAll('.opt-btn'):[];
+  btns.forEach(b=>b.disabled=true);
+  const btn=document.getElementById('opt'+idx);
+  const fb=document.getElementById('choiceFb');
+  if(opt.correct){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><em style="font-size:.88rem">✍️ Added to your poster!</em>';
+    state.posterParts[currentChoice.posterKey]=currentChoice.posterContent;
+    state.score+=2;
+    document.getElementById('starPill').textContent='⭐ '+state.score;
+    document.getElementById('choiceContinue').style.display='flex';
+  }else{
+    btn.classList.add('wrong');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><br><button class="btn btn-dark" style="padding:8px 18px;font-size:.88rem;" onclick="resetChoice()">🔄 Try Again</button>';
+    btns.forEach(b=>{if(!b.classList.contains('wrong'))b.disabled=false;});
+  }
+}
+
+function resetChoice(){
+  const oa=document.getElementById('optArea');
+  if(oa)oa.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=false;b.classList.remove('wrong','correct');});
+  const fb=document.getElementById('choiceFb');
+  if(fb){fb.className='feedback';fb.innerHTML='';}
+}
+
+/* ── DRILL ── */
+let currentDrill=null;
+function renderDrill(app,drill){currentDrill=drill;state.drillIdx=0;state.drillResults=[];renderDQ(app);}
+function renderDQ(app){
+  const d=currentDrill,qi=state.drillIdx,q=d.questions[qi];
+  const dots=d.questions.map((_,i)=>{
+    let c='dot';
+    if(i<qi)c+=state.drillResults[i]?' hit':' miss';
+    if(i===qi)c+=' now';
+    return`<div class="${c}"></div>`;
+  }).join('');
+  app.innerHTML=`
+  <div class="drill-hero">
+    <div class="icon">${d.icon}</div>
+    <div><h3>${d.title}</h3><p>${d.intro}</p></div>
+  </div>
+  <div class="card">
+    <div class="step-badge drill-badge">${d.badge}</div>
+    <div class="dot-row">${dots}</div>
+    <div class="q-count">Question ${qi+1} of ${d.questions.length}</div>
+    <h2 class="q-title" style="font-size:1.15rem;margin-bottom:18px;">${q.q}</h2>
+    <div class="options" id="drillOpts">
+      ${q.options.map((o,i)=>`<button class="opt-btn" id="dopt${i}" onclick="handleDrill(${i})">
+        <span class="opt-lbl">${String.fromCharCode(65+i)}</span><span>${o}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="drillFb"></div>
+    <div class="btn-wrap" id="drillNext" style="display:none;">
+      <button class="btn btn-green" onclick="advanceDrill()">
+        ${qi+1<d.questions.length?'Next Question →':'See My Score! 🎉'}
+      </button>
+    </div>
+  </div>`;
+}
+
+function handleDrill(idx){
+  if(!currentDrill)return;
+  const q=currentDrill.questions[state.drillIdx];
+  const ok=idx===q.correct;
+  document.querySelectorAll('#drillOpts .opt-btn').forEach(b=>b.disabled=true);
+  const btn=document.getElementById('dopt'+idx);
+  const fb=document.getElementById('drillFb');
+  state.drillResults.push(ok);
+  if(ok){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML=`<strong>✅ Brilliant!</strong> ${q.explain}`;
+    state.score+=1;
+    document.getElementById('starPill').textContent='⭐ '+state.score;
+  }else{
+    btn.classList.add('wrong');
+    const cb=document.getElementById('dopt'+q.correct);
+    if(cb)cb.classList.add('correct');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML=`<strong>❌ Not quite!</strong> ${q.explain}`;
+  }
+  document.getElementById('drillNext').style.display='flex';
+}
+
+function advanceDrill(){
+  state.drillIdx++;
+  const app=document.getElementById('app');
+  if(state.drillIdx<currentDrill.questions.length)renderDQ(app);
+  else{
+    const c=state.drillResults.filter(Boolean).length;
+    const t=currentDrill.questions.length;
+    const pct=Math.round(c/t*100);
+    const stars=pct===100?'⭐⭐⭐':pct>=60?'⭐⭐':'⭐';
+    app.innerHTML=`
+    <div class="drill-result">
+      <div style="font-size:2.5rem;margin-bottom:6px;">${currentDrill.icon}</div>
+      <h2>${currentDrill.title} — Done!</h2>
+      <div class="stars-big">${stars}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">${c}/${t}</div><div class="lbl">Correct</div></div>
+        <div class="stat-box"><div class="num">${pct}%</div><div class="lbl">Score</div></div>
+      </div>
+      <p style="opacity:.9;font-size:.9rem;max-width:340px;margin:0 auto 18px;">
+        ${pct===100?'Perfect! You know this really well! 🌟':pct>=60?'Good job! Keep practising! 😊':'Don\'t worry — read the explanations and try again! 💪'}
+      </p>
+      <button class="btn" style="background:#fff;color:var(--green);" onclick="nextStep()">Continue Building! 🏗️</button>
+    </div>`;
+  }
+}
+
+/* ── REVEAL ── */
+function renderReveal(app){
+  launchConfetti();
+  if(!document.getElementById('completeBanner')){
+    const b=document.createElement('div');
+    b.id='completeBanner';b.className='complete-strip';
+    b.textContent='🎉 YOUR POSTER IS COMPLETE! Amazing work! 🦁🌿🎉';
+    document.querySelector('.hdr').insertAdjacentElement('afterend',b);
+  }
+  const p=state.posterParts;
+  app.innerHTML=`
+  <div class="card" style="text-align:center;padding:22px 24px 18px;">
+    <div style="font-size:3rem;margin-bottom:6px;">🏆</div>
+    <h2 class="q-title" style="font-size:1.7rem;">You Did It!</h2>
+    <p style="color:var(--dark2);margin-bottom:16px;">You scored <strong style="color:var(--orange);font-size:1.3rem;">⭐ ${state.score}</strong> stars and built a complete poster! Here it is with the grammar features highlighted!</p>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(142,68,173,.4)"></div>Adjectives</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(230,126,34,.4)"></div>Time conjunctions</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(36,113,163,.4)"></div>Questions (?)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(30,132,73,.4)"></div>Exclamations (!)</div>
+    </div>
+  </div>
+  <div class="reveal-poster">
+    <div class="reveal-title">${hl(p.header)}</div>
+    <div class="reveal-line">📢 ${hl(p.tagline)}</div>
+    <div class="reveal-line">🐆 ${hl(p.sentence1)}</div>
+    <div class="reveal-line">❓ ${hl(p.sentence2)}</div>
+    <div class="reveal-line">✨ ${hl(p.closing)}</div>
+    <div class="reveal-web">🌐 Visit us at www.wildwonders.com for all the details!</div>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Fredoka One',cursive;font-size:1.2rem;margin-bottom:14px;color:var(--green);">🌟 What Makes This a Great Poster?</h3>
+    <div class="learn-box">🎨 <strong>Interesting adjectives</strong> — "amazing, enormous" are much better than "good, big"!</div>
+    <div class="learn-box">⏰ <strong>Time conjunction</strong> — "before" tells us the ORDER of events!</div>
+    <div class="learn-box">❓ <strong>A question</strong> — "What will you discover?" makes the reader curious and want to visit!</div>
+    <div class="learn-box">❗ <strong>An exclamation</strong> — ends with (!) to sound exciting and persuasive!</div>
+    <div class="learn-box">📰 <strong>Leaflets give MORE information</strong> than posters — they have full paragraphs and more detail!</div>
+    <div class="btn-wrap" style="justify-content:center;margin-top:18px;">
+      <button class="btn btn-orange" onclick="restart()">🔄 Play Again!</button>
+    </div>
+  </div>`;
+}
+
+function hl(t){
+  if(!t)return t;
+  return t
+    .replace(/(amazing|enormous|huge|towering|scary|cuddly|brand-new|new|exciting)/g,'<span class="h-adj">$1</span>')
+    .replace(/(before|while|after|when)/g,'<span class="h-time">$1</span>')
+    .replace(/(\?)/g,'<span class="h-q">$1</span>')
+    .replace(/(!)/g,'<span class="h-exc">$1</span>');
+}
+
+function buildPosterSoFar(){
+  const p=state.posterParts;
+  if(!p.header&&!p.tagline&&!p.sentence1&&!p.sentence2&&!p.closing)return'';
+  let html='';
+  if(p.header)html+=`<div class="poster-title">${p.header}</div>`;
+  if(p.tagline)html+=`<div class="poster-line">📢 ${p.tagline}</div>`;
+  if(p.sentence1)html+=`<div class="poster-line">🐆 ${p.sentence1}</div>`;
+  if(p.sentence2)html+=`<div class="poster-line">❓ ${p.sentence2}</div>`;
+  if(p.closing)html+=`<div class="poster-line">✨ ${p.closing}</div>`;
+  return html;
+}
+
+function nextStep(){
+  state.step++;
+  if(state.step>=sequence.length)state.step=sequence.length-1;
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+function restart(){
+  state={step:0,score:0,drillIdx:0,drillResults:[],posterParts:{header:'',tagline:'',sentence1:'',sentence2:'',closing:''}};
+  currentChoice=null;currentDrill=null;
+  const b=document.getElementById('completeBanner');if(b)b.remove();
+  document.getElementById('progBar').style.width='0%';
+  render();
+}
+
+function launchConfetti(){
+  const cols=['#27AE60','#F39C12','#E74C3C','#8E44AD','#2471A3','#FFF176'];
+  const c=document.createElement('div');c.className='conf-wrap';document.body.appendChild(c);
+  for(let i=0;i<90;i++){
+    const p=document.createElement('div');p.className='conf-piece';
+    const top=-20-Math.random()*60;
+    p.style.cssText=`left:${Math.random()*100}%;top:${top}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1.2}s;border-radius:${Math.random()>.5?'50%':'3px'};`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.remove(),5500);
+}
+
+render();
+</script>
+</body>
+</html>
