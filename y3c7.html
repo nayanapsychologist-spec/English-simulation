@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎭 Play Script Creator! – Unit 7: Narrative Writing</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --orange:#C0392B;--orange2:#E74C3C;--orange-lt:#FDEDEC;
+  --gold:#B7770D;--gold2:#E67E22;--gold-lt:#FEF9E7;
+  --green:#1A7A4A;--green2:#27AE60;--green-lt:#EAFAF1;
+  --blue:#1A5276;--blue2:#2471A3;--blue-lt:#EBF5FB;
+  --purple:#7D3C98;--purple-lt:#F4ECF7;
+  --dark:#1C2833;--dark2:#2C3E50;
+  --bg:#FFFDF5;--cream:#FFF8EC;
+  --white:#fff;--shadow:0 6px 24px rgba(28,40,51,.11);
+  --r:18px;--rsm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;color:var(--dark);}
+
+/* ── HEADER ── */
+.hdr{background:var(--dark);padding:12px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 14px rgba(0,0,0,.25);}
+.hdr-title{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--gold2);white-space:nowrap;flex-shrink:0;}
+.hdr-title span{color:#E8A0A0;}
+.prog-wrap{flex:1;background:rgba(255,255,255,.18);border-radius:100px;height:14px;overflow:hidden;min-width:60px;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--orange2),var(--gold2));border-radius:100px;transition:width .6s ease;}
+.star-pill{background:var(--gold2);color:var(--dark);font-family:'Fredoka One',cursive;font-size:1.1rem;padding:5px 14px;border-radius:100px;flex-shrink:0;}
+.step-pill{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:.8rem;font-weight:800;padding:5px 12px;border-radius:100px;flex-shrink:0;}
+
+/* ── MAIN ── */
+.main{max-width:680px;margin:0 auto;padding:22px 14px 60px;}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);padding:26px;margin-bottom:18px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.93) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+
+/* ── SCRIPT PREVIEW ── */
+.script-wrap{background:var(--cream);border:2.5px solid var(--gold2);border-radius:var(--r);overflow:hidden;margin-bottom:18px;}
+.script-top{background:var(--dark);color:var(--gold2);padding:9px 16px;font-family:'Fredoka One',cursive;font-size:.95rem;display:flex;align-items:center;gap:6px;}
+.script-body{padding:16px 20px;font-family:'Courier New',monospace;font-size:.88rem;line-height:1.9;color:var(--dark2);}
+.s-title{text-align:center;font-weight:bold;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;color:var(--dark);}
+.s-chars{margin-bottom:4px;font-size:.85rem;color:var(--dark);}
+.s-scene{font-style:italic;color:#555;margin-bottom:10px;border-left:3px solid var(--gold2);padding-left:10px;font-family:'Nunito',sans-serif;font-size:.88rem;}
+.s-line{margin-bottom:8px;}
+.s-name{font-weight:bold;color:var(--blue2);}
+.s-dir{font-style:italic;color:var(--green2);}
+.script-label{font-size:.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+
+/* ── HERO ── */
+.hero-box{background:linear-gradient(135deg,#6E2C00,var(--orange));border-radius:var(--r);padding:26px;text-align:center;color:#fff;margin-bottom:18px;}
+.hero-emoji{font-size:4rem;display:block;margin-bottom:8px;animation:bounce 1.4s infinite alternate;}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.hero-box h2{font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--gold2);margin-bottom:8px;}
+.hero-box p{font-size:.95rem;line-height:1.7;opacity:.95;}
+
+/* ── BADGES ── */
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--orange);color:#fff;font-family:'Fredoka One',cursive;font-size:.9rem;padding:5px 14px;border-radius:100px;margin-bottom:12px;}
+.drill-badge{background:var(--purple);}
+h2.q-title{font-family:'Fredoka One',cursive;font-size:1.45rem;margin-bottom:8px;line-height:1.35;}
+.instruct{font-size:.95rem;color:var(--dark2);line-height:1.65;margin-bottom:18px;}
+.tip-box{background:var(--gold-lt);border-left:4px solid var(--gold2);border-radius:var(--rsm);padding:10px 14px;margin-bottom:16px;font-size:.9rem;line-height:1.65;}
+.tip-box strong{color:var(--gold);}
+
+/* ── OPTIONS ── */
+.options{display:flex;flex-direction:column;gap:12px;}
+.opt-btn{border:2.5px solid #D5D8DC;border-radius:var(--rsm);padding:14px 18px;background:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.93rem;font-weight:700;text-align:left;line-height:1.6;transition:all .2s;color:var(--dark);display:flex;align-items:flex-start;gap:10px;}
+.opt-btn:hover{border-color:var(--orange2);background:var(--orange-lt);transform:translateX(5px);}
+.opt-btn.correct{border-color:var(--green2);background:var(--green-lt);color:var(--green);}
+.opt-btn.wrong{border-color:var(--orange2);background:var(--orange-lt);color:var(--orange);}
+.opt-btn:disabled{cursor:not-allowed;}
+.opt-btn:disabled:not(.correct):not(.wrong){opacity:.5;}
+.opt-lbl{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--dark);color:#fff;font-family:'Fredoka One',cursive;font-size:.95rem;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.opt-btn.correct .opt-lbl{background:var(--green2);}
+.opt-btn.wrong .opt-lbl{background:var(--orange2);}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.opt-btn.correct{animation:correctPop .4s ease;}
+.opt-btn.wrong{animation:shake .4s ease;}
+
+/* ── FEEDBACK ── */
+.feedback{border-radius:var(--rsm);padding:14px 16px;margin-top:12px;font-size:.93rem;line-height:1.6;display:none;}
+.feedback.show{display:block;animation:popIn .3s ease;}
+.feedback.correct-fb{background:var(--green-lt);border-left:4px solid var(--green2);color:#1A6135;}
+.feedback.wrong-fb{background:var(--orange-lt);border-left:4px solid var(--orange2);color:#922B21;}
+.feedback strong{display:block;font-size:1rem;margin-bottom:3px;}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:100px;padding:12px 28px;font-family:'Fredoka One',cursive;font-size:1.05rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-orange{background:var(--orange);color:#fff;}
+.btn-orange:hover{background:var(--orange2);transform:translateY(-2px);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:var(--green2);transform:translateY(-2px);}
+.btn-dark{background:var(--dark);color:#fff;}
+.btn-wrap{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ── DRILL ── */
+.drill-hero{background:linear-gradient(135deg,#4A235A,var(--purple));border-radius:var(--r);padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;gap:14px;color:#fff;}
+.drill-hero .icon{font-size:2.5rem;flex-shrink:0;animation:bounce 1.2s infinite alternate;}
+.drill-hero h3{font-family:'Fredoka One',cursive;font-size:1.15rem;margin-bottom:3px;}
+.drill-hero p{font-size:.87rem;opacity:.9;line-height:1.5;}
+.dot-row{display:flex;gap:8px;margin-bottom:16px;}
+.dot{width:34px;height:12px;border-radius:100px;background:#DDD;transition:background .3s;}
+.dot.hit{background:var(--green2);}
+.dot.miss{background:var(--orange2);}
+.dot.now{background:var(--gold2);animation:glowPulse 1s infinite alternate;}
+@keyframes glowPulse{from{opacity:.7}to{opacity:1}}
+.q-count{font-family:'Fredoka One',cursive;font-size:.88rem;color:var(--dark2);margin-bottom:10px;}
+
+/* ── DRILL RESULT ── */
+.drill-result{background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:var(--r);padding:26px;text-align:center;color:#fff;}
+.drill-result h2{font-family:'Fredoka One',cursive;font-size:1.6rem;margin-bottom:6px;}
+.stars-big{font-size:2rem;letter-spacing:3px;display:block;margin:8px 0;}
+.stat-row{display:flex;gap:12px;justify-content:center;margin:12px 0;}
+.stat-box{background:rgba(255,255,255,.15);border-radius:12px;padding:14px 20px;text-align:center;}
+.stat-box .num{font-family:'Fredoka One',cursive;font-size:2.2rem;line-height:1;}
+.stat-box .lbl{font-size:.8rem;opacity:.85;}
+
+/* ── FINAL REVEAL SCRIPT ── */
+.reveal-script{background:var(--cream);border:4px solid var(--gold2);border-radius:var(--r);overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow);}
+.rs-header{background:var(--dark);padding:14px 22px;text-align:center;}
+.rs-title-big{font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--gold2);letter-spacing:.05em;}
+.rs-body{padding:22px;font-family:'Courier New',monospace;font-size:.9rem;line-height:2;color:var(--dark);}
+.rs-chars{font-size:.85rem;margin-bottom:6px;}
+.rs-scene{font-style:italic;color:#666;border-left:3px solid var(--gold2);padding-left:12px;margin-bottom:14px;font-family:'Nunito',sans-serif;font-size:.88rem;}
+.rs-line{margin-bottom:10px;}
+
+/* ── HIGHLIGHTS ── */
+.h-layout{background:rgba(230,126,34,.18);border-radius:4px;padding:1px 5px;color:var(--gold);}
+.h-name{background:rgba(36,113,163,.15);border-radius:4px;padding:1px 5px;color:var(--blue2);font-weight:800;}
+.h-dir{background:rgba(39,174,96,.15);border-radius:4px;padding:1px 5px;color:var(--green2);font-style:italic;}
+.h-adv{background:rgba(125,60,152,.15);border-radius:4px;padding:1px 5px;color:var(--purple);font-weight:800;}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;font-size:.83rem;font-weight:700;}
+.leg-item{display:flex;align-items:center;gap:5px;}
+.leg-dot{width:14px;height:14px;border-radius:4px;}
+
+/* ── LEARN BOX ── */
+.learn-box{background:var(--gold-lt);border:2px solid var(--gold2);border-radius:var(--rsm);padding:11px 14px;font-size:.9rem;margin-bottom:10px;line-height:1.55;}
+.learn-box strong{color:var(--gold);}
+
+/* ── CONFETTI / BANNER ── */
+.conf-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;overflow:hidden;}
+.conf-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confDrop linear forwards;}
+@keyframes confDrop{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+.complete-strip{background:linear-gradient(90deg,var(--orange),var(--gold2));color:#fff;text-align:center;padding:10px;font-family:'Fredoka One',cursive;font-size:1rem;letter-spacing:.05em;}
+
+@media(max-width:500px){h2.q-title{font-size:1.2rem;}.opt-btn{font-size:.88rem;}.rs-body{font-size:.8rem;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">🎭 <span>Play Script</span> Creator!</div>
+  <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+  <div class="step-pill" id="stepPill">Intro</div>
+  <div class="star-pill" id="starPill">⭐ 0</div>
+</div>
+
+<div class="main" id="app"></div>
+
+<script>
+let state={step:0,score:0,drillIdx:0,drillResults:[],
+  scriptParts:{header:'',line1:'',line2:'',line3:'',line4:''}};
+
+/* ══ CHOICE DATA ══════════════════════════════ */
+const choiceSteps=[
+{
+  id:'layout',badge:'Step 1 of 5 ⭐',
+  title:'What Goes in a Play Script?',
+  instruct:'You\'re writing a play called "The Lost Crown" about children searching for a missing treasure! 👑 But first — what MUST be in every play script?',
+  concept:'💡 <strong>Remember:</strong> A play script is different from a story! It has five special features that make it easy for actors to perform.',
+  options:[
+    {label:'A',text:'A title, some pictures, lots of long paragraphs, and a poem at the end.',
+     correct:false,feedback:'❌ Not quite! Play scripts don\'t have long paragraphs — they have dialogue (what characters say) and stage directions (what they do). And pictures aren\'t a required feature!'},
+    {label:'B',text:'A title, scene information (where the play is set), a list of characters, dialogue (what characters say), and stage directions (how to act).',
+     correct:true,feedback:'✅ Brilliant! Those are the five things every play script must include. Now let\'s start writing! 🎉'}
+  ],
+  scriptContent:'THE LOST CROWN\n\nCharacters: Sam, Lily, Dev\n\nThe children are in a dark forest. They have been searching for the lost crown for hours.',
+  scriptKey:'header'
+},
+{
+  id:'dialogue',badge:'Step 2 of 5 ⭐⭐',
+  title:'Write Dialogue the Play Script Way!',
+  instruct:'Time to write Sam\'s first line! In a play script, dialogue is written differently from a story. Which version is correct?',
+  concept:'💡 <strong>Remember:</strong> In a play script, we do NOT use speech marks. The character\'s name is written in CAPITALS before their words. Compare: <em>Story:</em> "I think the crown is here!" said Sam. <em>Play script:</em> SAM: I think the crown is here!',
+  options:[
+    {label:'A',text:'SAM: "I think the crown is near that old tree!" shouted Sam excitedly.',
+     correct:false,feedback:'❌ Two mistakes here! In a play script, we do NOT use speech marks. And we don\'t write "said Sam" or "shouted Sam" after the line — the stage direction goes BEFORE the words, in square brackets!'},
+    {label:'B',text:'SAM: [shouting excitedly] I think the crown is near that old tree!',
+     correct:true,feedback:'✅ Perfect! No speech marks, SAM\'s name is in capitals before the words, and the stage direction [shouting excitedly] is in square brackets. That\'s exactly how a play script works! 🎉'}
+  ],
+  scriptContent:'SAM: [shouting excitedly] I think the crown is near that old tree!',
+  scriptKey:'line1'
+},
+{
+  id:'stagedirections',badge:'Step 3 of 5 ⭐⭐⭐',
+  title:'Add a Stage Direction!',
+  instruct:'Now Lily needs to speak. Stage directions tell the actor HOW to say their line or what to DO. Which version has a correctly written stage direction?',
+  concept:'💡 <strong>Stage directions</strong> go in square brackets [like this] before the dialogue. They tell actors how to move, speak, or look. They are written in italic writing in a real play script.',
+  options:[
+    {label:'A',text:'LILY: She looks around carefully and she is scared. Are you sure? I can\'t see anything.',
+     correct:false,feedback:'❌ Stage directions are not written as full sentences before the line. They go in SQUARE BRACKETS and are short phrases — not complete sentences like "She looks around carefully and she is scared."'},
+    {label:'B',text:'LILY: [looking around carefully, eyes wide with fear] Are you sure? I can\'t see anything.',
+     correct:true,feedback:'✅ Excellent! The stage direction [looking around carefully, eyes wide with fear] is in square brackets and it\'s a short phrase — telling the actor HOW to perform the line. That\'s a perfect stage direction! 🎉'}
+  ],
+  scriptContent:'LILY: [looking around carefully, eyes wide with fear] Are you sure? I can\'t see anything.',
+  scriptKey:'line2'
+},
+{
+  id:'adverbs',badge:'Step 4 of 5 ⭐⭐⭐⭐',
+  title:'Use an Adverb in a Stage Direction!',
+  instruct:'Dev needs to speak! Adverbs tell us HOW something is done. Which stage direction uses the BEST adverb?',
+  concept:'💡 <strong>Adverbs</strong> tell us more about verbs — they show HOW something is done. Many adverbs end in <strong>-ly</strong>: nervous → nervously, careful → carefully, quick → quickly.',
+  options:[
+    {label:'A',text:'DEV: [speaking] Shh! I can hear something over there.',
+     correct:false,feedback:'❌ "Speaking" is not an adverb — it just says what Dev is doing, not HOW he\'s doing it! A good stage direction needs an adverb like "nervously" or "quietly" to tell the actor exactly how to perform the line.'},
+    {label:'B',text:'DEV: [whispering nervously] Shh! I can hear something over there.',
+     correct:true,feedback:'✅ Brilliant! "Nervously" is an adverb — it tells us HOW Dev whispers. We made it by adding -ly to the adjective "nervous". This stage direction tells the actor exactly how to perform! 🎉'}
+  ],
+  scriptContent:'DEV: [whispering nervously] Shh! I can hear something over there.',
+  scriptKey:'line3'
+},
+{
+  id:'convert',badge:'Step 5 of 5 ⭐⭐⭐⭐⭐',
+  title:'Turn a Story into a Play Script!',
+  instruct:'Here\'s a line from a story. Which option correctly converts it to play script format?\n\n📖 Story: "Look over there!" cried Sam, pointing excitedly at a golden shimmer in the water.',
+  options:[
+    {label:'A',text:'SAM: "Look over there!" [pointing excitedly at a golden shimmer in the water]',
+     correct:false,feedback:'❌ Almost there — but we still have speech marks! Play scripts NEVER use speech marks. Take them away, and the line is perfect. Remember: no speech marks in a play script, ever!'},
+    {label:'B',text:'SAM: [pointing excitedly at a golden shimmer in the water] Look over there! The crown!',
+     correct:true,feedback:'✅ Perfect! No speech marks, SAM\'s name is in capitals, and the stage direction [pointing excitedly] comes BEFORE the words, written in square brackets. That\'s a brilliant play script line! 🎉'}
+  ],
+  scriptContent:'SAM: [pointing excitedly at a golden shimmer in the water] Look over there! The crown!',
+  scriptKey:'line4'
+}
+];
+
+/* ══ DRILL DATA ════════════════════════════════ */
+const drills={
+layout:{
+  badge:'Grammar Practice: Play Script Layout',icon:'📋',
+  title:'Parts of a Play Script!',
+  intro:'A play script has <strong>five special features</strong>: a TITLE, SCENE INFORMATION (where it\'s set), a list of CHARACTERS, DIALOGUE (what they say), and STAGE DIRECTIONS (how to act). Let\'s practise!',
+  questions:[
+    {q:'Which feature MUST be in every play script?',
+     options:['A poem at the end','A list of characters'],correct:1,
+     explain:'A list of CHARACTERS tells everyone who is in the play. Without it, actors and readers wouldn\'t know who the people in the play are!'},
+    {q:'What do we call the words that tell an actor HOW to speak, move, or look?',
+     options:['Stage directions','Dialogue'],correct:0,
+     explain:'STAGE DIRECTIONS tell actors what to do. They say things like [running quickly] or [whispering] to guide the actor\'s performance.'},
+    {q:'True or False: In a play script, "dialogue" means what the characters say.',
+     options:['True','False'],correct:0,
+     explain:'True! Dialogue is the conversation between the characters — all the lines they speak in the play.'},
+    {q:'Where does scene information usually appear in a play script?',
+     options:['At the very end of the play','Near the beginning, before the dialogue starts'],correct:1,
+     explain:'Scene information comes near the BEGINNING — it tells us where the play is set before anything happens. This helps actors and the audience understand the setting.'},
+    {q:'True or False: Every play script needs a title.',
+     options:['True','False'],correct:0,
+     explain:'True! Every play has a TITLE — the name of the play. In "The Code of the Trees", that is the title!'}
+  ]
+},
+dialogue:{
+  badge:'Grammar Practice: Dialogue in Play Scripts',icon:'💬',
+  title:'Dialogue — The Play Script Way!',
+  intro:'In a play script, dialogue is different from a story. The big rules are: <strong>NO speech marks</strong>, the <strong>character\'s name comes first</strong>, and stage directions go in <strong>square brackets</strong>.',
+  questions:[
+    {q:'In a play script, where is the character\'s name written?',
+     options:['After what they say','Before what they say'],correct:1,
+     explain:'The character\'s name is always written BEFORE their words — on the left. This way we always know who is speaking!'},
+    {q:'True or False: Dialogue in a play script uses speech marks.',
+     options:['True','False'],correct:1,
+     explain:'FALSE! Play scripts do NOT use speech marks. We know who is speaking because the name is written before the words. Speech marks are for stories, not play scripts!'},
+    {q:'Which is written in the correct play script format?',
+     options:['"Let\'s run!" said Lily.','LILY: Let\'s run!'],correct:1,
+     explain:'"LILY: Let\'s run!" is the correct play script format — name in capitals, colon, then the words. No speech marks! The other option is story format.'},
+    {q:'A story says: "Open it!" said Mo. How is this written in a play script?',
+     options:['MO: "Open it!"','MO: Open it!'],correct:1,
+     explain:'"MO: Open it!" — no speech marks! We know Mo is speaking because her name is written before the words. This is exactly how play scripts work!'}
+  ]
+},
+adverbs:{
+  badge:'Grammar Practice: Adverbs',icon:'🏃',
+  title:'Adverbs — How Something is Done!',
+  intro:'Adverbs tell us more about verbs — they show us <strong>HOW</strong> something is done. <em>The children walk <strong>anxiously</strong>.</em> Many adverbs are made by adding <strong>-ly</strong> to an adjective. careful + ly = carefully.',
+  questions:[
+    {q:'What do adverbs tell us?',
+     options:['What colour something is','More about verbs — HOW something is done'],correct:1,
+     explain:'Adverbs tell us HOW something is done! "The children walked ANXIOUSLY" — "anxiously" tells us HOW they walked. That\'s what adverbs do!'},
+    {q:'Which word is an adverb?',
+     options:['happy','happily'],correct:1,
+     explain:'"Happily" is the adverb — we made it by adding -ly to the adjective "happy". It tells us HOW something is done. "Happy" is an adjective — it describes a noun.'},
+    {q:'True or False: Many adverbs are made by adding -ly to an adjective.',
+     options:['True','False'],correct:0,
+     explain:'True! careful → carefully, anxious → anxiously, quick → quickly, slow → slowly, nervous → nervously. Adding -ly to an adjective usually makes an adverb!'},
+    {q:'Which word correctly fills the gap: "The children walked ___ through the dark forest."',
+     options:['nervously','nervous'],correct:0,
+     explain:'"Nervously" is the adverb — it tells us HOW they walked (in a nervous way). "Nervous" is the adjective — we can\'t use it after a verb to describe how the action is done.'},
+    {q:'Which word is NOT an adverb?',
+     options:['quickly','slow'],correct:1,
+     explain:'"Slow" is an ADJECTIVE, not an adverb. The adverb would be "slowly" (slow + ly). "Quickly" IS an adverb — it tells us how fast something happens!'}
+  ]
+},
+stageDirections:{
+  badge:'Grammar Practice: Stage Directions',icon:'🎬',
+  title:'Stage Directions!',
+  intro:'Stage directions are instructions for the actors. They tell them HOW to speak, WHERE to move, and HOW to look. They are written in <strong>square brackets [like this]</strong> and shown in <em>italic</em> writing.',
+  questions:[
+    {q:'How are stage directions shown in a play script?',
+     options:['In speech marks, like dialogue','In square brackets [like this]'],correct:1,
+     explain:'Stage directions always go in SQUARE BRACKETS [like this]. They tell actors what to do — different from the dialogue which is what they say!'},
+    {q:'What do stage directions tell the actors?',
+     options:['The title of the play','How to speak, move, or look'],correct:1,
+     explain:'Stage directions guide the actor\'s PERFORMANCE — they say things like [laughing], [looking scared], or [running quickly to the door] to help the actor know what to do.'},
+    {q:'True or False: Stage directions describe what characters DO or HOW they say their lines.',
+     options:['True','False'],correct:0,
+     explain:'True! Stage directions show the ACTION and PERFORMANCE. They might say [jumping up in excitement] or [looking deep in thought] — exactly what the actor needs to do.'},
+    {q:'Which is a correctly written stage direction?',
+     options:['Dev runs fast to the tree.','[running quickly to the tree]'],correct:1,
+     explain:'"[running quickly to the tree]" is correct — it\'s in square brackets and it\'s a short phrase with an adverb (quickly). The other option is a full sentence from a story, not a play script stage direction!'}
+  ]
+}
+};
+
+const sequence=[
+  ['intro'],
+  ['choice',0],['drill','layout'],
+  ['choice',1],['drill','dialogue'],
+  ['choice',2],['drill','adverbs'],
+  ['choice',3],['drill','stageDirections'],
+  ['choice',4],
+  ['reveal']
+];
+
+/* ══ RENDER ════════════════════════════════════ */
+function render(){
+  const app=document.getElementById('app');
+  const[type,id]=sequence[state.step];
+  const pct=Math.round(state.step/(sequence.length-1)*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('starPill').textContent='⭐ '+state.score;
+  document.getElementById('stepPill').textContent=(state.step+1)+' / '+sequence.length;
+  if(type==='intro')renderIntro(app);
+  else if(type==='choice')renderChoice(app,choiceSteps[id]);
+  else if(type==='drill')renderDrill(app,drills[id]);
+  else if(type==='reveal')renderReveal(app);
+}
+
+/* ── INTRO ── */
+function renderIntro(app){
+  app.innerHTML=`
+  <div class="hero-box">
+    <span class="hero-emoji">🎭</span>
+    <h2>Play Script Creator!</h2>
+    <p>You're going to write a play called <strong>"The Lost Crown"</strong> — step by step!<br><br>
+    Make choices to build each part of the script, and practise <strong>play script layout</strong>,
+    <strong>dialogue format</strong>, <strong>stage directions</strong>, and <strong>adverbs</strong>.<br><br>
+    <strong>Earn ⭐ stars for every right answer!</strong></p>
+  </div>
+  <div class="card" style="text-align:center;">
+    <p style="font-size:.95rem;color:var(--dark2);margin-bottom:18px;">🌿 5 script-building choices + 4 grammar practice rounds 🌿</p>
+    <button class="btn btn-orange" style="font-size:1.15rem;padding:14px 32px;" onclick="nextStep()">
+      🎬 Lights, Camera, Action!
+    </button>
+  </div>`;
+}
+
+/* ── CHOICE ── */
+let currentChoice=null;
+function renderChoice(app,step){
+  currentChoice=step;
+  const sp=buildScriptSoFar();
+  const ph=sp?`<div class="script-wrap">
+    <div class="script-top">📄 Your Play Script So Far...</div>
+    <div class="script-body">${sp}</div>
+  </div>`:'';
+  const tip=step.concept?`<div class="tip-box">${step.concept}</div>`:'';
+  app.innerHTML=`${ph}
+  <div class="card">
+    <div class="step-badge">${step.badge}</div>
+    <h2 class="q-title">${step.title}</h2>
+    <p class="instruct">${step.instruct.replace(/\n/g,'<br>')}</p>
+    ${tip}
+    <div class="options" id="optArea">
+      ${step.options.map((o,i)=>`<button class="opt-btn" id="opt${i}" onclick="handleChoice(${i})">
+        <span class="opt-lbl">${o.label}</span><span>${o.text}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="choiceFb"></div>
+    <div class="btn-wrap" id="choiceContinue" style="display:none;">
+      <button class="btn btn-green" onclick="nextStep()">Keep Writing! →</button>
+    </div>
+  </div>`;
+}
+
+function handleChoice(idx){
+  if(!currentChoice)return;
+  const opt=currentChoice.options[idx];
+  const oa=document.getElementById('optArea');
+  const btns=oa?oa.querySelectorAll('.opt-btn'):[];
+  btns.forEach(b=>b.disabled=true);
+  const btn=document.getElementById('opt'+idx);
+  const fb=document.getElementById('choiceFb');
+  if(opt.correct){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><em style="font-size:.88rem">✍️ Added to your play script!</em>';
+    state.scriptParts[currentChoice.scriptKey]=currentChoice.scriptContent;
+    state.score+=2;
+    document.getElementById('starPill').textContent='⭐ '+state.score;
+    document.getElementById('choiceContinue').style.display='flex';
+  }else{
+    btn.classList.add('wrong');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><br><button class="btn btn-dark" style="padding:8px 18px;font-size:.88rem;" onclick="resetChoice()">🔄 Try Again</button>';
+    btns.forEach(b=>{if(!b.classList.contains('wrong'))b.disabled=false;});
+  }
+}
+function resetChoice(){
+  const oa=document.getElementById('optArea');
+  if(oa)oa.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=false;b.classList.remove('wrong','correct');});
+  const fb=document.getElementById('choiceFb');
+  if(fb){fb.className='feedback';fb.innerHTML='';}
+}
+
+/* ── DRILL ── */
+let currentDrill=null;
+function renderDrill(app,drill){currentDrill=drill;state.drillIdx=0;state.drillResults=[];renderDQ(app);}
+function renderDQ(app){
+  const d=currentDrill,qi=state.drillIdx,q=d.questions[qi];
+  const dots=d.questions.map((_,i)=>{
+    let c='dot';
+    if(i<qi)c+=state.drillResults[i]?' hit':' miss';
+    if(i===qi)c+=' now';
+    return`<div class="${c}"></div>`;
+  }).join('');
+  app.innerHTML=`
+  <div class="drill-hero">
+    <div class="icon">${d.icon}</div>
+    <div><h3>${d.title}</h3><p>${d.intro}</p></div>
+  </div>
+  <div class="card">
+    <div class="step-badge drill-badge">${d.badge}</div>
+    <div class="dot-row">${dots}</div>
+    <div class="q-count">Question ${qi+1} of ${d.questions.length}</div>
+    <h2 class="q-title" style="font-size:1.1rem;margin-bottom:18px;">${q.q}</h2>
+    <div class="options" id="drillOpts">
+      ${q.options.map((o,i)=>`<button class="opt-btn" id="dopt${i}" onclick="handleDrill(${i})">
+        <span class="opt-lbl">${String.fromCharCode(65+i)}</span><span>${o}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="drillFb"></div>
+    <div class="btn-wrap" id="drillNext" style="display:none;">
+      <button class="btn btn-green" onclick="advanceDrill()">${qi+1<d.questions.length?'Next Question →':'See My Score! 🎉'}</button>
+    </div>
+  </div>`;
+}
+
+function handleDrill(idx){
+  if(!currentDrill)return;
+  const q=currentDrill.questions[state.drillIdx];
+  const ok=idx===q.correct;
+  document.querySelectorAll('#drillOpts .opt-btn').forEach(b=>b.disabled=true);
+  const btn=document.getElementById('dopt'+idx);
+  const fb=document.getElementById('drillFb');
+  state.drillResults.push(ok);
+  if(ok){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML=`<strong>✅ Brilliant!</strong> ${q.explain}`;
+    state.score+=1;
+    document.getElementById('starPill').textContent='⭐ '+state.score;
+  }else{
+    btn.classList.add('wrong');
+    const cb=document.getElementById('dopt'+q.correct);
+    if(cb)cb.classList.add('correct');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML=`<strong>❌ Not quite!</strong> ${q.explain}`;
+  }
+  document.getElementById('drillNext').style.display='flex';
+}
+
+function advanceDrill(){
+  state.drillIdx++;
+  const app=document.getElementById('app');
+  if(state.drillIdx<currentDrill.questions.length)renderDQ(app);
+  else{
+    const c=state.drillResults.filter(Boolean).length;
+    const t=currentDrill.questions.length;
+    const pct=Math.round(c/t*100);
+    const stars=pct===100?'⭐⭐⭐':pct>=60?'⭐⭐':'⭐';
+    app.innerHTML=`
+    <div class="drill-result">
+      <div style="font-size:2.5rem;margin-bottom:6px;">${currentDrill.icon}</div>
+      <h2>${currentDrill.title} — Done!</h2>
+      <div class="stars-big">${stars}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">${c}/${t}</div><div class="lbl">Correct</div></div>
+        <div class="stat-box"><div class="num">${pct}%</div><div class="lbl">Score</div></div>
+      </div>
+      <p style="opacity:.9;font-size:.9rem;max-width:340px;margin:0 auto 18px;">
+        ${pct===100?'Perfect! You know this really well! 🌟':pct>=60?'Good work! Keep going! 😊':'Don\'t worry — read the explanations and you\'ll get it! 💪'}
+      </p>
+      <button class="btn" style="background:#fff;color:var(--green);" onclick="nextStep()">Continue Writing! 🎭</button>
+    </div>`;
+  }
+}
+
+/* ── REVEAL ── */
+function renderReveal(app){
+  launchConfetti();
+  if(!document.getElementById('completeBanner')){
+    const b=document.createElement('div');
+    b.id='completeBanner';b.className='complete-strip';
+    b.textContent='🎭 YOUR PLAY SCRIPT IS COMPLETE! Amazing work! 👑🌟🎉';
+    document.querySelector('.hdr').insertAdjacentElement('afterend',b);
+  }
+  const p=state.scriptParts;
+  app.innerHTML=`
+  <div class="card" style="text-align:center;padding:22px 24px 18px;">
+    <div style="font-size:3rem;margin-bottom:6px;">🏆</div>
+    <h2 class="q-title" style="font-size:1.7rem;">You Did It!</h2>
+    <p style="color:var(--dark2);margin-bottom:16px;">You scored <strong style="color:var(--orange);font-size:1.3rem;">⭐ ${state.score}</strong> stars and wrote a complete play script! Here it is with the features highlighted.</p>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(230,126,34,.4)"></div>Layout features</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(36,113,163,.4)"></div>Character names</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(39,174,96,.4)"></div>Stage directions</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(125,60,152,.4)"></div>Adverbs</div>
+    </div>
+  </div>
+  <div class="reveal-script">
+    <div class="rs-header">
+      <div class="rs-title-big">THE LOST CROWN</div>
+    </div>
+    <div class="rs-body">
+      <div class="rs-chars"><span class="h-layout">Characters</span>: Sam, Lily, Dev</div>
+      <div class="rs-scene">The children are in a dark forest. They have been searching for the lost crown for hours.</div>
+      ${hl(p.line1?`<div class="rs-line">${p.line1}</div>`:'')}
+      ${hl(p.line2?`<div class="rs-line">${p.line2}</div>`:'')}
+      ${hl(p.line3?`<div class="rs-line">${p.line3}</div>`:'')}
+      ${hl(p.line4?`<div class="rs-line">${p.line4}</div>`:'')}
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Fredoka One',cursive;font-size:1.2rem;margin-bottom:14px;color:var(--orange);">🌟 What Makes This a Great Play Script?</h3>
+    <div class="learn-box">📋 <strong>Layout</strong> — title, characters, scene information, dialogue, and stage directions</div>
+    <div class="learn-box">💬 <strong>No speech marks</strong> — the character's name before the words tells us who is speaking</div>
+    <div class="learn-box">🎬 <strong>Stage directions in [square brackets]</strong> — tell actors HOW to perform</div>
+    <div class="learn-box">🏃 <strong>Adverbs in stage directions</strong> — "nervously", "excitedly" tell us exactly HOW the action is done</div>
+    <div class="btn-wrap" style="justify-content:center;margin-top:18px;">
+      <button class="btn btn-orange" onclick="restart()">🔄 Play Again!</button>
+    </div>
+  </div>`;
+}
+
+function hl(html){
+  if(!html)return'';
+  return html
+    .replace(/(SAM|LILY|DEV|Characters|Scene)/g,'<span class="h-name">$1</span>')
+    .replace(/(\[[^\]]+\])/g,(m)=>'<span class="h-dir">'+m+'</span>')
+    .replace(/\b(nervously|excitedly|carefully|quickly|anxiously|slowly|happily)\b/g,'<span class="h-adv">$1</span>');
+}
+
+function buildScriptSoFar(){
+  const p=state.scriptParts;
+  if(!p.header&&!p.line1&&!p.line2&&!p.line3&&!p.line4)return'';
+  let html='';
+  if(p.header){
+    const lines=p.header.split('\n');
+    html+=`<div class="s-title">${lines[0]}</div>`;
+    if(lines[2])html+=`<div class="s-chars">${lines[2]}</div>`;
+    if(lines[4])html+=`<div class="s-scene">${lines[4]}</div>`;
+  }
+  if(p.line1)html+=`<div class="s-line">${fmtLine(p.line1)}</div>`;
+  if(p.line2)html+=`<div class="s-line">${fmtLine(p.line2)}</div>`;
+  if(p.line3)html+=`<div class="s-line">${fmtLine(p.line3)}</div>`;
+  if(p.line4)html+=`<div class="s-line">${fmtLine(p.line4)}</div>`;
+  return html;
+}
+
+function fmtLine(line){
+  return line
+    .replace(/^([A-Z]+):/, '<span class="s-name">$1:</span>')
+    .replace(/(\[[^\]]+\])/g,'<span class="s-dir">$1</span>');
+}
+
+function nextStep(){
+  state.step++;
+  if(state.step>=sequence.length)state.step=sequence.length-1;
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+function restart(){
+  state={step:0,score:0,drillIdx:0,drillResults:[],scriptParts:{header:'',line1:'',line2:'',line3:'',line4:''}};
+  currentChoice=null;currentDrill=null;
+  const b=document.getElementById('completeBanner');if(b)b.remove();
+  document.getElementById('progBar').style.width='0%';
+  render();
+}
+function launchConfetti(){
+  const cols=['#C0392B','#E67E22','#F1C40F','#27AE60','#2471A3','#8E44AD'];
+  const c=document.createElement('div');c.className='conf-wrap';document.body.appendChild(c);
+  for(let i=0;i<90;i++){
+    const p2=document.createElement('div');p2.className='conf-piece';
+    const top=-20-Math.random()*60;
+    p2.style.cssText=`left:${Math.random()*100}%;top:${top}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1.2}s;border-radius:${Math.random()>.5?'50%':'3px'};`;
+    c.appendChild(p2);
+  }
+  setTimeout(()=>c.remove(),5500);
+}
+render();
+</script>
+</body>
+</html>
