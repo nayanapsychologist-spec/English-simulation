@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏛️ Leaflet Builder – Unit 7: Building Information</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --crim:#8B1A1A;--crim2:#A93226;--crim-lt:#FDFAFA;
+  --gold:#9A7D0A;--gold2:#B7950B;--gold-lt:#FEF9E7;
+  --purple:#6C3483;--purple-lt:#F4ECF7;
+  --blue:#1A5276;--blue2:#2471A3;--blue-lt:#EBF5FB;
+  --green:#1E8449;--green-lt:#EAFAF1;--green2:#27AE60;
+  --red:#E74C3C;--red-lt:#FDEDEC;
+  --dark:#1C2833;--dark2:#2C3E50;
+  --bg:#FDF8F0;--parchment:#FAF0DC;
+  --white:#fff;--shadow:0 6px 24px rgba(28,40,51,.11);
+  --r:16px;--rsm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;color:var(--dark);}
+
+/* ── HEADER ── */
+.hdr{background:var(--dark);padding:13px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 16px rgba(0,0,0,.28);}
+.hdr-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold2);flex-shrink:0;white-space:nowrap;}
+.hdr-title span{color:#E8A0A0;}
+.prog-wrap{flex:1;background:rgba(255,255,255,.14);border-radius:100px;height:10px;overflow:hidden;min-width:60px;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--crim2),var(--gold2));border-radius:100px;transition:width .6s ease;}
+.score-pill{background:var(--gold2);color:var(--dark);font-family:'Playfair Display',serif;font-size:1rem;padding:4px 14px;border-radius:100px;flex-shrink:0;font-weight:700;}
+.step-pill{background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:100px;flex-shrink:0;}
+
+/* ── MAIN ── */
+.main{max-width:740px;margin:0 auto;padding:22px 16px 60px;}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);padding:28px;margin-bottom:18px;animation:slideUp .35s ease;}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* ── LEAFLET PREVIEW ── */
+.leaflet-preview{border:2.5px solid var(--gold2);border-radius:var(--r);background:var(--parchment);overflow:hidden;margin-bottom:18px;}
+.leaflet-header{background:var(--dark);color:var(--gold2);padding:10px 18px;font-family:'Playfair Display',serif;font-size:1rem;display:flex;align-items:center;gap:8px;}
+.leaflet-body{padding:16px 20px;font-size:.9rem;line-height:1.9;color:var(--dark2);}
+.leaflet-part{border-left:3px solid var(--gold2);padding:8px 14px;margin-bottom:8px;background:rgba(183,149,11,.06);border-radius:0 var(--rsm) var(--rsm) 0;}
+.leaflet-facts{background:var(--dark);color:var(--gold2);border-radius:var(--rsm);padding:10px 14px;margin-bottom:8px;font-size:.85rem;font-weight:700;letter-spacing:.03em;}
+.leaflet-label{font-size:.72rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+
+/* ── STEP BADGE ── */
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--crim);color:#fff;font-family:'Playfair Display',serif;font-size:.9rem;padding:5px 14px;border-radius:100px;margin-bottom:12px;}
+.drill-badge{background:var(--purple);}
+h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px;line-height:1.3;color:var(--dark);}
+.instruct{font-size:.95rem;color:var(--dark2);line-height:1.65;margin-bottom:18px;}
+.concept-box{background:var(--blue-lt);border-left:4px solid var(--blue2);border-radius:var(--rsm);padding:12px 16px;margin-bottom:16px;font-size:.9rem;line-height:1.7;}
+.concept-box strong{color:var(--blue);}
+.tip-box{background:var(--gold-lt);border-left:4px solid var(--gold2);border-radius:var(--rsm);padding:10px 16px;margin-bottom:14px;font-size:.88rem;line-height:1.65;}
+
+/* ── OPTIONS ── */
+.options{display:flex;flex-direction:column;gap:12px;}
+.opt-btn{border:2.5px solid #D5D8DC;border-radius:var(--rsm);padding:14px 18px;background:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.93rem;font-weight:700;text-align:left;line-height:1.6;transition:all .2s;color:var(--dark);display:flex;align-items:flex-start;gap:10px;}
+.opt-btn:hover{border-color:var(--crim2);background:var(--crim-lt);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--green2);background:var(--green-lt);color:var(--green);}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-lt);color:var(--red);}
+.opt-btn:disabled{cursor:not-allowed;}
+.opt-btn:disabled:not(.correct):not(.wrong){opacity:.5;}
+.opt-lbl{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--dark);color:#fff;font-family:'Playfair Display',serif;font-size:.95rem;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.opt-btn.correct .opt-lbl{background:var(--green);}
+.opt-btn.wrong .opt-lbl{background:var(--red);}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.opt-btn.correct{animation:correctPop .4s ease;}
+.opt-btn.wrong{animation:shake .4s ease;}
+
+/* ── FEEDBACK ── */
+.feedback{border-radius:var(--rsm);padding:13px 16px;margin-top:12px;font-size:.92rem;line-height:1.6;display:none;}
+.feedback.show{display:block;animation:slideUp .3s ease;}
+.feedback.correct-fb{background:var(--green-lt);border-left:4px solid var(--green2);color:#1A6135;}
+.feedback.wrong-fb{background:var(--red-lt);border-left:4px solid var(--red);color:#922B21;}
+.feedback strong{display:block;font-size:1rem;margin-bottom:3px;}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:100px;padding:12px 26px;font-family:'Playfair Display',serif;font-size:.95rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-crim{background:var(--crim);color:#fff;}
+.btn-crim:hover{background:var(--crim2);transform:translateY(-2px);box-shadow:0 4px 14px rgba(139,26,26,.3);}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{background:var(--blue2);transform:translateY(-2px);}
+.btn-dark{background:var(--dark);color:#fff;}
+.btn-wrap{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ── DRILL ── */
+.drill-hero{background:linear-gradient(135deg,#4A235A,var(--purple));border-radius:var(--r);padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;gap:14px;color:#fff;}
+.drill-hero .icon{font-size:2.4rem;flex-shrink:0;}
+.drill-hero h3{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:3px;}
+.drill-hero p{font-size:.87rem;opacity:.9;line-height:1.5;}
+.dot-row{display:flex;gap:8px;margin-bottom:16px;}
+.dot{width:34px;height:10px;border-radius:100px;background:#DDD;transition:background .3s;}
+.dot.hit{background:var(--green2);}
+.dot.miss{background:var(--red);}
+.dot.now{background:var(--gold2);animation:glowPulse 1s infinite alternate;}
+@keyframes glowPulse{from{opacity:.7}to{opacity:1}}
+.q-count{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--dark2);margin-bottom:10px;}
+
+/* ── DRILL RESULT ── */
+.drill-result{background:linear-gradient(135deg,#154360,var(--blue));border-radius:var(--r);padding:26px;text-align:center;color:#fff;}
+.drill-result h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px;}
+.stars-big{font-size:1.8rem;letter-spacing:3px;display:block;margin:8px 0;}
+.stat-row{display:flex;gap:12px;justify-content:center;margin:12px 0;}
+.stat-box{background:rgba(255,255,255,.15);border-radius:10px;padding:14px 20px;text-align:center;}
+.stat-box .num{font-family:'Playfair Display',serif;font-size:2.2rem;line-height:1;}
+.stat-box .lbl{font-size:.8rem;opacity:.85;}
+
+/* ── FINAL REVEAL ── */
+.final-leaflet{background:var(--parchment);border:3px solid var(--gold2);border-radius:var(--r);overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow);}
+.fl-header{background:var(--dark);padding:16px 22px;text-align:center;}
+.fl-title{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gold2);margin-bottom:2px;}
+.fl-sub{color:rgba(255,255,255,.7);font-size:.88rem;}
+.fl-body{padding:22px;font-size:.9rem;line-height:2;color:var(--dark);}
+.fl-part{margin-bottom:14px;padding-left:14px;border-left:3px solid var(--gold2);}
+.fl-facts{background:var(--dark);color:var(--gold2);padding:12px 16px;border-radius:var(--rsm);margin-bottom:14px;font-size:.86rem;font-weight:700;letter-spacing:.04em;line-height:1.9;}
+
+/* ── HIGHLIGHTS ── */
+.h-pass{background:rgba(36,113,163,.13);border-radius:4px;padding:1px 4px;color:var(--blue2);font-weight:700;}
+.h-ext{background:rgba(139,26,26,.12);border-radius:4px;padding:1px 4px;color:var(--crim);font-weight:700;}
+.h-comp{background:rgba(155,125,10,.14);border-radius:4px;padding:1px 4px;color:var(--gold);font-weight:700;}
+.h-col{background:rgba(30,132,73,.12);border-radius:4px;padding:1px 4px;color:var(--green);font-weight:700;}
+.h-dir{background:rgba(108,52,131,.13);border-radius:4px;padding:1px 4px;color:var(--purple);font-weight:700;}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;font-size:.82rem;font-weight:700;}
+.leg-item{display:flex;align-items:center;gap:5px;}
+.leg-dot{width:13px;height:13px;border-radius:3px;}
+
+/* ── SUMMARY BOX ── */
+.sum-box{background:#FAFAFA;border:1.5px solid #DDD;border-radius:var(--rsm);padding:10px 14px;font-size:.88rem;margin-bottom:10px;line-height:1.55;}
+.sum-box strong{color:var(--dark);}
+
+/* ── COMPLETE / CONFETTI ── */
+.complete-strip{background:linear-gradient(90deg,var(--crim),var(--crim2));color:#fff;text-align:center;padding:10px;font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:.05em;}
+.conf-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;overflow:hidden;}
+.conf-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confDrop linear forwards;}
+@keyframes confDrop{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+/* ── GRAMMAR TABLE ── */
+.gtable{width:100%;border-collapse:collapse;margin:10px 0;font-size:.87rem;}
+.gtable th{background:var(--blue);color:#fff;padding:7px 10px;text-align:left;font-weight:800;}
+.gtable td{padding:7px 10px;border-bottom:1px solid #E0E0E0;vertical-align:top;line-height:1.5;}
+.gtable tr:nth-child(even) td{background:#F8F9FA;}
+.tag{display:inline-block;border-radius:100px;padding:1px 8px;font-size:.78rem;font-weight:700;}
+.tag-pres{background:rgba(36,113,163,.15);color:var(--blue2);}
+.tag-past{background:rgba(139,26,26,.15);color:var(--crim2);}
+
+@media(max-width:520px){h2{font-size:1.2rem;}.opt-btn{font-size:.87rem;}.fl-title{font-size:1.3rem;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">🏛️ <span>Leaflet</span> Builder</div>
+  <div class="prog-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+  <div class="step-pill" id="stepPill">Intro</div>
+  <div class="score-pill" id="scorePill">⭐ 0</div>
+</div>
+
+<div class="main" id="app"></div>
+
+<script>
+let state={step:0,score:0,drillIdx:0,drillResults:[],
+  leafletParts:{sent1:'',sent2:'',sent3:'',facts:'',sent5:''}};
+
+/* ══ CHOICE DATA ══════════════════════════════ */
+const choiceSteps=[
+{
+  id:'passive',badge:'Step 1 of 5 — Passive Voice',
+  title:'Open with the Passive Voice',
+  instruct:'You\'re writing an informative leaflet about the Colosseum in Rome. Which sentence correctly uses the PRESENT PASSIVE to open the first paragraph?',
+  concept:'<strong>Passive voice:</strong> In descriptions of places, we use the passive voice when we don\'t need to mention who does the action. Present passive = <em>is / are + past participle</em>. Past passive = <em>was / were + past participle</em>.',
+  options:[
+    {label:'A',text:'"Workers constructed the Colosseum between 70 and 80 AD, and today millions of tourists make visits there."',
+     correct:false,feedback:'<strong>❌ Both sentences are active.</strong> "Workers constructed" and "tourists make visits" both name who does the action. In informative leaflets, passive voice shifts focus to the place, not the people — which is more appropriate.'},
+    {label:'B',text:'"The Colosseum is visited by more than 7 million tourists every year, making it one of the most popular historical sites in the world."',
+     correct:true,feedback:'<strong>✅ Correct!</strong> "Is visited" is present passive — the focus is on the Colosseum, not the tourists. The agent ("by more than 7 million tourists") is included because it\'s impressive data, not because it\'s necessary.'}
+  ],
+  leafletContent:'The Colosseum is visited by more than 7 million tourists every year, making it one of the most popular historical sites in the world.',
+  leafletKey:'sent1'
+},
+{
+  id:'extreme',badge:'Step 2 of 5 — Extreme Adjectives',
+  title:'Add an Extreme Adjective',
+  instruct:'Leaflets use "extreme" adjectives to persuade readers. Which sentence uses extreme adjectives correctly?',
+  concept:'<strong>Extreme adjectives</strong> (glorious, dazzling, breathtaking, awe-inspiring, magnificent, immense) are non-gradable — they already mean "very + adjective". You <em>cannot</em> say "very breathtaking" or "quite magnificent".',
+  options:[
+    {label:'A',text:'"The view from inside is very breathtaking and quite magnificent, making it a very dazzling experience."',
+     correct:false,feedback:'<strong>❌ Extreme adjectives cannot be modified by "very" or "quite".</strong> "Breathtaking" already means "extremely striking". Saying "very breathtaking" is redundant and grammatically incorrect. The same applies to "quite magnificent" and "very dazzling".'},
+    {label:'B',text:'"The view from inside is breathtaking — an awe-inspiring sight that will remain with you for years."',
+     correct:true,feedback:'<strong>✅ Correct!</strong> "Breathtaking" and "awe-inspiring" are used without "very" or "quite" — as extreme adjectives must be. The dash (—) also creates a dramatic pause that adds impact to the persuasive writing.'}
+  ],
+  leafletContent:'The view from inside is breathtaking — an awe-inspiring sight that will remain with you for years.',
+  leafletKey:'sent2'
+},
+{
+  id:'compound',badge:'Step 3 of 5 — Compound Adjectives',
+  title:'Use a Compound Adjective',
+  instruct:'Compound adjectives combine two or more elements and are hyphenated when placed before a noun. Which sentence uses compound adjectives correctly?',
+  concept:'<strong>Compound adjectives</strong> before a noun must be hyphenated. Types: number + noun (<em>88-storey</em>), adjective/adverb + noun + -ing (<em>breathtaking</em>), adj + past participle (<em>old-fashioned</em>). Example: "a 600 year old palace" → "<em>a 600-year-old palace</em>".',
+  options:[
+    {label:'A',text:'"The Colosseum is an 80 metres tall structure, and it is 2000 years old, once holding up to 80,000 spectators."',
+     correct:false,feedback:'<strong>❌ Two errors!</strong> When used as compound adjectives before a noun, numbers must be hyphenated and the noun becomes singular: "80-metre-tall" not "80 metres tall". Also: "2,000-year-old structure" not "2000 years old structure".'},
+    {label:'B',text:'"The Colosseum is an 80-metre-tall, 2,000-year-old structure that once held between 50,000 and 80,000 spectators."',
+     correct:true,feedback:'<strong>✅ Correct!</strong> Both "80-metre-tall" and "2,000-year-old" are correctly hyphenated compound adjectives placed before the noun "structure". Note that "metre" is singular in the compound form.'}
+  ],
+  leafletContent:'The Colosseum is an 80-metre-tall, 2,000-year-old structure that once held between 50,000 and 80,000 spectators.',
+  leafletKey:'sent3'
+},
+{
+  id:'colons',badge:'Step 4 of 5 — Colons',
+  title:'Use Colons in a Facts List',
+  instruct:'Your leaflet needs a Quick Facts box. Which version correctly uses colons to present factual information?',
+  concept:'<strong>Colons</strong> in informative texts separate a category label from its detail: <em>Location: Rome, Italy</em>. In lists of facts, colons are used instead of dashes or equal signs. This creates a clean, scannable layout — essential for leaflet design.',
+  options:[
+    {label:'A',text:'"Quick facts — Location is Rome (Italy), the height equals 48 metres, it opened in 80 AD, and capacity is 50,000-80,000 people."',
+     correct:false,feedback:'<strong>❌ Facts run together as a sentence are hard to scan.</strong> Leaflets use colons to separate each category label from its value, creating a clean, easy-to-read list. Dashes and equals signs are not the correct convention here.'},
+    {label:'B',text:'"Quick facts: Location: Rome, Italy  ·  Height: 48 metres  ·  Opened: 80 AD  ·  Capacity: 50,000–80,000"',
+     correct:true,feedback:'<strong>✅ Correct!</strong> The colon after "Quick facts" introduces the list; individual colons separate each label from its value. This format is scannable, clear, and typical of informative leaflets like the Petronas Towers example.'}
+  ],
+  leafletContent:'QUICK FACTS  ·  Location: Rome, Italy  ·  Height: 48 metres  ·  Opened: 80 AD  ·  Capacity: 50,000–80,000',
+  leafletKey:'facts'
+},
+{
+  id:'direct',badge:'Step 5 of 5 — Direct Address',
+  title:'Close with Direct Address',
+  instruct:'Your leaflet needs a persuasive closing paragraph. Which version correctly uses direct address to engage the reader?',
+  concept:'<strong>Direct address</strong> is when a text speaks directly to the reader using "you", "your", "you\'ll", etc. This creates a personal, engaging tone that draws readers in and persuades them — a key device in informative and promotional texts.',
+  options:[
+    {label:'A',text:'"Visitors should not miss the opportunity to see the Colosseum. They can book their tickets in advance online."',
+     correct:false,feedback:'<strong>❌ This is third person, not direct address.</strong> "Visitors" and "they" talk ABOUT the reader, not TO them. Direct address uses "you" and "your" to speak personally to the reader, which is far more engaging and persuasive.'},
+    {label:'B',text:'"Don\'t miss your chance to explore this magnificent landmark. Begin your visit at the western entrance — you won\'t be disappointed!"',
+     correct:true,feedback:'<strong>✅ Correct!</strong> "Your chance", "your visit" and "you won\'t be disappointed" all use direct address — speaking personally to the reader. This makes the writing engaging, persuasive, and typical of the best informative leaflets.'}
+  ],
+  leafletContent:'Don\'t miss your chance to explore this magnificent landmark. Begin your visit at the western entrance — you won\'t be disappointed!',
+  leafletKey:'sent5'
+}
+];
+
+/* ══ DRILL DATA ════════════════════════════════ */
+const drills={
+passiveVoice:{
+  badge:'Concept Drill: Passive Voice',icon:'⚙️',
+  title:'Passive Voice — Active vs Passive',
+  intro:'In descriptions of places and buildings, we use the <strong>passive voice</strong> when we don\'t need to mention who does the action. Present passive: <em>is/are + past participle</em>. Past passive: <em>was/were + past participle</em>.',
+  questions:[
+    {q:'Which sentence is in the PASSIVE voice?',
+     options:['Architects designed the towers in 1993.','The towers were designed by architects in 1993.'],correct:1,
+     explain:'"Were designed" is past passive — the focus is on the towers, not the architects. The active sentence ("Architects designed") mentions who did the action, making the architects the subject.'},
+    {q:'"The walls ___ covered with 33,000 stainless steel panels." Which is the correct PRESENT passive?',
+     options:['are','were'],correct:0,
+     explain:'"Are covered" is present passive (is/are + past participle). "Were covered" is past passive — use "are" for the current state of the building, "were" for historical events.'},
+    {q:'True or False: In the passive voice, we must always mention who did the action (the agent).',
+     options:['True','False'],correct:1,
+     explain:'False! We use passive precisely when the agent is unknown, unimportant, or obvious. "The palace was built in 1406" — we don\'t need to say who built it.'},
+    {q:'"Workers built the palace in 1406." — Which correctly converts this to PAST passive?',
+     options:['The palace built in 1406.','The palace was built in 1406.'],correct:1,
+     explain:'"The palace was built in 1406" is correct past passive (was + past participle). "The palace built" is wrong — past passive always requires "was/were".'},
+    {q:'"The towers ___ officially opened after seven years of hard work." Which tense fits a historical event?',
+     options:['are','were'],correct:1,
+     explain:'"Were opened" is past passive — used for historical events that happened at a specific time. Use present passive ("are opened") for current, ongoing states.'}
+  ]
+},
+extremeAdj:{
+  badge:'Concept Drill: Extreme Adjectives',icon:'✨',
+  title:'Extreme Adjectives',
+  intro:'Extreme adjectives (<em>glorious, dazzling, breathtaking, magnificent, awe-inspiring, immense, gorgeous, splendid, majestic</em>) are <strong>non-gradable</strong> — they already mean "very + adjective". Never add "very" or "quite" before them.',
+  questions:[
+    {q:'Which word is an extreme adjective (already means "very + adjective")?',
+     options:['big','magnificent'],correct:1,
+     explain:'"Magnificent" is an extreme adjective — it already contains the force of "very impressive/grand". "Big" is a gradable adjective: you can say "very big", but never "very magnificent".'},
+    {q:'True or False: You can say "very breathtaking" because "breathtaking" is a strong, emphatic adjective.',
+     options:['True','False'],correct:1,
+     explain:'False! "Breathtaking" is an extreme adjective — it already means "extremely striking". Adding "very" is grammatically incorrect. You simply say "breathtaking", not "very breathtaking".'},
+    {q:'Which sentence uses an extreme adjective CORRECTLY?',
+     options:['The view is very magnificent.','The view is magnificent.'],correct:1,
+     explain:'"The view is magnificent" is correct — no modifier needed. "Very magnificent" is wrong because "magnificent" is already an extreme adjective. The same rule applies to: glorious, dazzling, immense, gorgeous, etc.'},
+    {q:'Which word means "very impressive / grand" and is appropriate for a persuasive leaflet?',
+     options:['nice','majestic'],correct:1,
+     explain:'"Majestic" is an extreme adjective perfect for persuasive leaflets — it conveys grandeur and inspires awe without needing "very". "Nice" is a weak gradable adjective that does little to persuade the reader.'},
+    {q:'"The architecture is quite dazzling." — What is grammatically wrong?',
+     options:['The adjective "dazzling" is the wrong word here.','"Dazzling" is an extreme adjective and cannot be used with "quite".'],correct:1,
+     explain:'"Dazzling" is an extreme adjective — it means "extremely brilliant or impressive". Extreme adjectives cannot be modified by degree adverbs like "quite", "rather", or "very". Just say "The architecture is dazzling."'}
+  ]
+},
+compoundAdj:{
+  badge:'Concept Drill: Compound Adjectives',icon:'🔗',
+  title:'Compound Adjectives',
+  intro:'Compound adjectives combine two or more elements into one modifier. When placed <strong>before a noun</strong>, they are always hyphenated. Types from the text: number+noun (<em>two-storey, 88-storey</em>); adj/adverb+noun+-ing (<em>breathtaking, noise-reducing</em>); adj+past participle (<em>old-fashioned</em>).',
+  questions:[
+    {q:'Which is a correctly formed compound adjective?',
+     options:['a 15th century gate','a 15th-century gate'],correct:1,
+     explain:'"15th-century" is a compound adjective before "gate" and must be hyphenated. Without the hyphen, "15th century" could be misread. Rule: compound adjectives before nouns = always hyphenated.'},
+    {q:'"The palace is 600 years old." — Which rewrite correctly uses a compound adjective?',
+     options:['the 600-year-old palace','the 600 years old palace'],correct:0,
+     explain:'"The 600-year-old palace" — all three elements are hyphenated to form a single compound adjective. Note: "year" becomes singular (not "years"). This is a very common construction in informative texts.'},
+    {q:'True or False: Compound adjectives placed before a noun are always hyphenated.',
+     options:['True','False'],correct:0,
+     explain:'True! When compound adjectives come BEFORE a noun, they must be hyphenated: "a breathtaking view", "an 88-storey tower", "a 2,000-year-old structure". After a "be" verb, no hyphen: "The tower is 88 storeys tall."'},
+    {q:'Which correctly uses a compound adjective?',
+     options:['noise reducing panels','noise-reducing panels'],correct:1,
+     explain:'"Noise-reducing" is a compound adjective (noun + -ing form) placed before "panels" — it must be hyphenated. From the Petronas Towers leaflet: "specially designed noise-reducing and light-filtering panels".'},
+    {q:'Which sentence correctly forms a compound adjective from factual information?',
+     options:['a wide and ranging collection of exhibits','a wide-ranging collection of exhibits'],correct:1,
+     explain:'"Wide-ranging" (adverb + -ing form) is a compound adjective correctly hyphenated before "collection". "Wide and ranging" is not a compound adjective at all — it\'s two separate adjectives joined by "and".'}
+  ]
+},
+colonsAddress:{
+  badge:'Concept Drill: Colons, Direct Address & Connotation',icon:'📝',
+  title:'Colons, Direct Address & Connotation',
+  intro:'Three key features of effective informative texts: <strong>colons</strong> for facts lists; <strong>direct address</strong> (you/your) to engage the reader; and <strong>connotation</strong> — the ideas and associations a word or phrase brings to mind.',
+  questions:[
+    {q:'Which correctly uses a colon to present a fact?',
+     options:['Height — 451 metres','Height: 451 metres'],correct:1,
+     explain:'A colon separates the category label ("Height") from its value ("451 metres"). Dashes are less conventional for this purpose. Look at the Petronas Towers "Quick facts" box for a perfect model.'},
+    {q:'Which sentence uses DIRECT ADDRESS?',
+     options:['Visitors can enjoy the breathtaking view from the top.','You can enjoy the breathtaking view from the top.'],correct:1,
+     explain:'"You can enjoy" uses direct address — the text speaks directly to the reader. "Visitors can enjoy" speaks ABOUT the reader, not TO them. Direct address creates a more personal, engaging, persuasive tone.'},
+    {q:'True or False: Direct address means writing in the first person (using "I" and "we").',
+     options:['True','False'],correct:1,
+     explain:'False! Direct address means using second person — "you" and "your". First person would be "I" and "we". In persuasive texts, direct address speaks to the reader personally to draw them in.'},
+    {q:'The phrase "crown jewel" (used to describe the Petronas Towers) connotes which of the following?',
+     options:['Something ordinary and commonplace.','Something precious, worthy of pride, and of the highest quality.'],correct:1,
+     explain:'"Crown jewel" connotes royalty, preciousness, prestige, and something that is prized above all else. This is connotation — the ideas and emotions that a phrase evokes, beyond its literal meaning.'}
+  ]
+}
+};
+
+const sequence=[
+  ['intro'],
+  ['choice',0],['drill','passiveVoice'],
+  ['choice',1],['drill','extremeAdj'],
+  ['choice',2],['drill','compoundAdj'],
+  ['choice',3],['drill','colonsAddress'],
+  ['choice',4],
+  ['reveal']
+];
+
+/* ══ RENDER ════════════════════════════════════ */
+function render(){
+  const app=document.getElementById('app');
+  const[type,id]=sequence[state.step];
+  const pct=Math.round(state.step/(sequence.length-1)*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('scorePill').textContent='⭐ '+state.score;
+  document.getElementById('stepPill').textContent=(state.step+1)+' / '+sequence.length;
+  if(type==='intro')renderIntro(app);
+  else if(type==='choice')renderChoice(app,choiceSteps[id]);
+  else if(type==='drill')renderDrill(app,drills[id]);
+  else if(type==='reveal')renderReveal(app);
+}
+
+/* ── INTRO ── */
+function renderIntro(app){
+  app.innerHTML=`
+  <div class="card" style="text-align:center;padding:30px 28px 24px;background:linear-gradient(135deg,#1C2833,#2C3E50);color:#fff;">
+    <div style="font-size:3.5rem;margin-bottom:8px;">🏛️</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--gold2);margin-bottom:10px;">Leaflet Builder</h2>
+    <p style="font-size:.95rem;line-height:1.75;max-width:500px;margin:0 auto 20px;opacity:.9;">
+      You're writing an informative and persuasive leaflet about the <strong style="color:var(--gold2)">Colosseum, Rome</strong>
+      — step by step, building one paragraph at a time.<br><br>
+      Master <strong>Passive Voice</strong>, <strong>Extreme Adjectives</strong>,
+      <strong>Compound Adjectives</strong>, <strong>Colons</strong>, and <strong>Direct Address</strong>.
+    </p>
+    <button class="btn" style="background:var(--gold2);color:var(--dark);font-size:1.05rem;padding:14px 32px;" onclick="nextStep()">
+      🏗️ Start Building the Leaflet
+    </button>
+  </div>`;
+}
+
+/* ── CHOICE ── */
+let currentChoice=null;
+function renderChoice(app,step){
+  currentChoice=step;
+  const lf=buildLeafletSoFar();
+  const lH=lf?`<div class="leaflet-preview">
+    <div class="leaflet-header">📄 Your Leaflet So Far — The Colosseum, Rome</div>
+    <div class="leaflet-body">${lf}</div>
+  </div>`:'';
+  const tip=step.concept?`<div class="concept-box">${step.concept}</div>`:'';
+  app.innerHTML=`${lH}
+  <div class="card">
+    <div class="step-badge">${step.badge}</div>
+    <h2>${step.title}</h2>
+    <p class="instruct">${step.instruct}</p>
+    ${tip}
+    <div class="options" id="optArea">
+      ${step.options.map((o,i)=>`<button class="opt-btn" id="opt${i}" onclick="handleChoice(${i})">
+        <span class="opt-lbl">${o.label}</span><span>${o.text}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="choiceFb"></div>
+    <div class="btn-wrap" id="choiceContinue" style="display:none;">
+      <button class="btn btn-blue" onclick="nextStep()">Continue →</button>
+    </div>
+  </div>`;
+}
+
+function handleChoice(idx){
+  if(!currentChoice)return;
+  const opt=currentChoice.options[idx];
+  const oa=document.getElementById('optArea');
+  const btns=oa?oa.querySelectorAll('.opt-btn'):[];
+  btns.forEach(b=>b.disabled=true);
+  const btn=document.getElementById('opt'+idx);
+  const fb=document.getElementById('choiceFb');
+  if(opt.correct){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><em style="font-size:.88rem">✍️ Added to your leaflet!</em>';
+    state.leafletParts[currentChoice.leafletKey]=currentChoice.leafletContent;
+    state.score+=2;
+    document.getElementById('scorePill').textContent='⭐ '+state.score;
+    document.getElementById('choiceContinue').style.display='flex';
+  }else{
+    btn.classList.add('wrong');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML='<strong>'+opt.feedback+'</strong><br><br><button class="btn btn-dark" style="padding:8px 18px;font-size:.88rem;" onclick="resetChoice()">🔄 Try Again</button>';
+    btns.forEach(b=>{if(!b.classList.contains('wrong'))b.disabled=false;});
+  }
+}
+function resetChoice(){
+  const oa=document.getElementById('optArea');
+  if(oa)oa.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=false;b.classList.remove('wrong','correct');});
+  const fb=document.getElementById('choiceFb');
+  if(fb){fb.className='feedback';fb.innerHTML='';}
+}
+
+/* ── DRILL ── */
+let currentDrill=null;
+function renderDrill(app,drill){currentDrill=drill;state.drillIdx=0;state.drillResults=[];renderDQ(app);}
+function renderDQ(app){
+  const d=currentDrill,qi=state.drillIdx,q=d.questions[qi];
+  const dots=d.questions.map((_,i)=>{
+    let c='dot';
+    if(i<qi)c+=state.drillResults[i]?' hit':' miss';
+    if(i===qi)c+=' now';
+    return`<div class="${c}"></div>`;
+  }).join('');
+  let extra='';
+  if(d===drills.passiveVoice){
+    extra=`<div class="tip-box"><table class="gtable">
+      <tr><th>Type</th><th>Structure</th><th>Example</th></tr>
+      <tr><td><span class="tag tag-pres">Present passive</span></td><td>is/are + past participle</td><td><em>The tower <u>is visited</u> by millions.</em></td></tr>
+      <tr><td><span class="tag tag-past">Past passive</span></td><td>was/were + past participle</td><td><em>The towers <u>were opened</u> in 1999.</em></td></tr>
+      <tr><td><span class="tag tag-pres">Present passive (neg.)</span></td><td>is not / are not + past participle</td><td><em>The site <u>is not made</u> available yet.</em></td></tr>
+    </table></div>`;
+  }
+  if(d===drills.compoundAdj){
+    extra=`<div class="tip-box"><strong>Compound adjective patterns (always hyphenated before a noun):</strong>
+    <table class="gtable" style="margin-top:8px;">
+      <tr><th>Type</th><th>Example</th></tr>
+      <tr><td>Number + noun</td><td><em>two-storey building, 88-storey tower, 10-year project</em></td></tr>
+      <tr><td>Adj/adverb + noun + -ing</td><td><em>breathtaking view, wide-ranging collection</em></td></tr>
+      <tr><td>Noun + -ing (noun+participle)</td><td><em>noise-reducing panels, light-filtering glass</em></td></tr>
+      <tr><td>Adj/adverb + past participle</td><td><em>old-fashioned design, brightly painted walls</em></td></tr>
+    </table></div>`;
+  }
+  app.innerHTML=`
+  <div class="drill-hero">
+    <div class="icon">${d.icon}</div>
+    <div><h3>${d.title}</h3><p>${d.intro}</p></div>
+  </div>
+  <div class="card">
+    <div class="step-badge drill-badge">${d.badge}</div>
+    <div class="dot-row">${dots}</div>
+    ${extra}
+    <div class="q-count">Question ${qi+1} of ${d.questions.length}</div>
+    <h2 style="font-size:1.05rem;margin-bottom:18px;">${q.q}</h2>
+    <div class="options" id="drillOpts">
+      ${q.options.map((o,i)=>`<button class="opt-btn" id="dopt${i}" onclick="handleDrill(${i})">
+        <span class="opt-lbl">${String.fromCharCode(65+i)}</span><span>${o}</span>
+      </button>`).join('')}
+    </div>
+    <div class="feedback" id="drillFb"></div>
+    <div class="btn-wrap" id="drillNext" style="display:none;">
+      <button class="btn btn-blue" onclick="advanceDrill()">${qi+1<d.questions.length?'Next Question →':'See Results 🎉'}</button>
+    </div>
+  </div>`;
+}
+
+function handleDrill(idx){
+  if(!currentDrill)return;
+  const q=currentDrill.questions[state.drillIdx];
+  const ok=idx===q.correct;
+  document.querySelectorAll('#drillOpts .opt-btn').forEach(b=>b.disabled=true);
+  const btn=document.getElementById('dopt'+idx);
+  const fb=document.getElementById('drillFb');
+  state.drillResults.push(ok);
+  if(ok){
+    btn.classList.add('correct');
+    fb.className='feedback correct-fb show';
+    fb.innerHTML=`<strong>✅ Correct!</strong> ${q.explain}`;
+    state.score+=1;
+    document.getElementById('scorePill').textContent='⭐ '+state.score;
+  }else{
+    btn.classList.add('wrong');
+    const cb=document.getElementById('dopt'+q.correct);
+    if(cb)cb.classList.add('correct');
+    fb.className='feedback wrong-fb show';
+    fb.innerHTML=`<strong>❌ Not quite.</strong> ${q.explain}`;
+  }
+  document.getElementById('drillNext').style.display='flex';
+}
+
+function advanceDrill(){
+  state.drillIdx++;
+  const app=document.getElementById('app');
+  if(state.drillIdx<currentDrill.questions.length)renderDQ(app);
+  else{
+    const c=state.drillResults.filter(Boolean).length;
+    const t=currentDrill.questions.length;
+    const pct=Math.round(c/t*100);
+    const stars=pct===100?'⭐⭐⭐':pct>=60?'⭐⭐':'⭐';
+    app.innerHTML=`
+    <div class="drill-result">
+      <div style="font-size:2.8rem;margin-bottom:6px;">${currentDrill.icon}</div>
+      <h2>${currentDrill.title} — Complete!</h2>
+      <div class="stars-big">${stars}</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num">${c}/${t}</div><div class="lbl">Correct</div></div>
+        <div class="stat-box"><div class="num">${pct}%</div><div class="lbl">Score</div></div>
+      </div>
+      <p style="opacity:.9;font-size:.9rem;max-width:380px;margin:0 auto 18px;">
+        ${pct===100?'Outstanding — concept fully mastered!':pct>=60?'Good work. Review the explanations and continue.':'Keep going — these rules take practice. Review the explanations carefully.'}
+      </p>
+      <button class="btn" style="background:#fff;color:var(--blue);" onclick="nextStep()">Continue Building →</button>
+    </div>`;
+  }
+}
+
+/* ── REVEAL ── */
+function renderReveal(app){
+  launchConfetti();
+  if(!document.getElementById('completeBanner')){
+    const b=document.createElement('div');
+    b.id='completeBanner';b.className='complete-strip';
+    b.textContent='🏛️ LEAFLET COMPLETE — Excellent work! Your informative text is ready! 🏛️';
+    document.querySelector('.hdr').insertAdjacentElement('afterend',b);
+  }
+  const p=state.leafletParts;
+  app.innerHTML=`
+  <div class="card" style="text-align:center;padding:24px 28px 18px;">
+    <div style="font-size:2.8rem;margin-bottom:6px;">🎓</div>
+    <h2 style="margin-bottom:8px;">Leaflet Complete!</h2>
+    <p style="color:var(--dark2);margin-bottom:16px;">You scored <strong style="color:var(--crim);font-size:1.2rem;">⭐ ${state.score}</strong> points and built a complete informative leaflet. Here it is with all language features highlighted.</p>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(36,113,163,.4)"></div>Passive voice</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(139,26,26,.4)"></div>Extreme adjectives</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(155,125,10,.4)"></div>Compound adjectives</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(30,132,73,.4)"></div>Colons</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(108,52,131,.4)"></div>Direct address</div>
+    </div>
+  </div>
+  <div class="final-leaflet">
+    <div class="fl-header">
+      <div class="fl-title">Visit the Colosseum</div>
+      <div class="fl-sub">Rome's crown jewel • UNESCO World Heritage Site</div>
+    </div>
+    <div class="fl-body">
+      <div class="fl-part">${hl(p.sent1)}</div>
+      <div class="fl-part">${hl(p.sent2)}</div>
+      <div class="fl-part">${hl(p.sent3)}</div>
+      <div class="fl-facts">${hl(p.facts)}</div>
+      <div class="fl-part">${hl(p.sent5)}</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:14px;">📋 What Makes This an Effective Leaflet?</h3>
+    <div class="sum-box">🔵 <strong>Passive voice</strong> — "is visited by…" shifts focus to the Colosseum, not the tourists</div>
+    <div class="sum-box">🔴 <strong>Extreme adjectives</strong> — "breathtaking" and "awe-inspiring" used without "very" or "quite"</div>
+    <div class="sum-box">🟡 <strong>Compound adjectives</strong> — "80-metre-tall" and "2,000-year-old" correctly hyphenated before a noun</div>
+    <div class="sum-box">🟢 <strong>Colons</strong> — used to separate each label from its value in the facts list</div>
+    <div class="sum-box">🟣 <strong>Direct address</strong> — "your chance", "your visit", "you won't be disappointed" speak to the reader</div>
+    <div class="btn-wrap" style="justify-content:center;margin-top:18px;">
+      <button class="btn btn-crim" onclick="restartQuiz()">🔄 Play Again</button>
+    </div>
+  </div>`;
+}
+
+function hl(t){
+  if(!t)return'';
+  return t
+    .replace(/(is visited|was built|were designed|were opened|is not made|is covered|are covered|was constructed|is located|were constructed)/g,'<span class="h-pass">$1</span>')
+    .replace(/(breathtaking|awe-inspiring|magnificent|glorious|dazzling|majestic|immense|splendid)/g,'<span class="h-ext">$1</span>')
+    .replace(/(80-metre-tall|2,000-year-old|noise-reducing|light-filtering|wide-ranging|old-fashioned|88-storey)/g,'<span class="h-comp">$1</span>')
+    .replace(/([A-Za-z ]+:(?=\s*[A-Za-z0-9]))/g,'<span class="h-col">$1</span>')
+    .replace(/(your|you|you\'ll|Your|You|Don\'t miss)/g,'<span class="h-dir">$1</span>');
+}
+
+function buildLeafletSoFar(){
+  const p=state.leafletParts;
+  let html='';
+  if(p.sent1)html+=`<div class="leaflet-part">${p.sent1}</div>`;
+  if(p.sent2)html+=`<div class="leaflet-part">${p.sent2}</div>`;
+  if(p.sent3)html+=`<div class="leaflet-part">${p.sent3}</div>`;
+  if(p.facts)html+=`<div class="leaflet-facts">${p.facts}</div>`;
+  if(p.sent5)html+=`<div class="leaflet-part">${p.sent5}</div>`;
+  return html;
+}
+
+function nextStep(){
+  state.step++;
+  if(state.step>=sequence.length)state.step=sequence.length-1;
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+function restartQuiz(){
+  state={step:0,score:0,drillIdx:0,drillResults:[],leafletParts:{sent1:'',sent2:'',sent3:'',facts:'',sent5:''}};
+  currentChoice=null;currentDrill=null;
+  const b=document.getElementById('completeBanner');if(b)b.remove();
+  document.getElementById('progBar').style.width='0%';
+  render();
+}
+function launchConfetti(){
+  const cols=['#8B1A1A','#B7950B','#F1C40F','#1E8449','#2471A3','#6C3483'];
+  const c=document.createElement('div');c.className='conf-wrap';document.body.appendChild(c);
+  for(let i=0;i<80;i++){
+    const p=document.createElement('div');p.className='conf-piece';
+    const top=-20-Math.random()*60;
+    p.style.cssText=`left:${Math.random()*100}%;top:${top}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*1.2}s;border-radius:${Math.random()>.5?'50%':'2px'};`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.remove(),5000);
+}
+render();
+</script>
+</body>
+</html>
