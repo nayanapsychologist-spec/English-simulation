@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passive Voice Detective</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f8f9fc; min-height: 100vh; padding: 20px; }
+#app { max-width: 680px; margin: 0 auto; }
+
+.hdr { background: #1a3a6b; color: #fff; border-radius: 14px; padding: 18px 24px; margin-bottom: 18px; }
+.hdr h1 { font-size: 22px; font-weight: 900; }
+.hdr p  { font-size: 13px; opacity: .8; margin-top: 3px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.tab  { flex: 1; padding: 12px 8px; border: 2px solid #1a3a6b; border-radius: 9px;
+        font-size: 13px; font-weight: 700; cursor: pointer; background: #fff; color: #1a3a6b; }
+.tab.on { background: #1a3a6b; color: #fff; }
+
+.ref-toggle { width: 100%; background: #e8edf6; border: 2px solid #1a3a6b; border-radius: 9px;
+              padding: 10px 16px; font-size: 13px; font-weight: 700; color: #1a3a6b;
+              cursor: pointer; text-align: left; margin-bottom: 4px; }
+.ref-body { border: 2px solid #1a3a6b; border-top: none; border-radius: 0 0 9px 9px;
+            padding: 14px; background: #fff; margin-bottom: 16px; }
+.ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tcard { border-radius: 9px; padding: 12px; border: 2px solid; }
+.tcard .lbl { font-weight: 900; font-size: 12px; margin-bottom: 4px; }
+.tcard .fml { font-family: monospace; font-weight: 900; font-size: 15px; margin-bottom: 6px; }
+.tcard .sig { font-size: 11px; font-style: italic; }
+.warn-box  { margin-top: 12px; padding: 10px 14px; background: #fff8e1;
+             border: 1.5px solid #f0a500; border-radius: 8px; font-size: 12px; color: #555; }
+
+.pbar-wrap { background: #e8edf6; border-radius: 99px; height: 7px; margin-bottom: 16px; overflow: hidden; }
+.pbar      { background: #1a3a6b; height: 100%; border-radius: 99px; transition: width .3s; }
+.pbar-txt  { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 6px; }
+
+.sig-badge { display: inline-block; border-radius: 7px; padding: 4px 12px;
+             font-size: 12px; font-weight: 700; margin-bottom: 16px; border: 1.5px solid; }
+.qbox  { background: #fff; border: 2px solid #e0e0e0; border-radius: 14px;
+         padding: 28px 20px; margin-bottom: 14px; font-size: 20px;
+         line-height: 1.9; text-align: center; }
+.blank { display: inline-block; min-width: 150px; padding: 3px 12px;
+         border: 3px solid #1a3a6b; border-radius: 8px; background: #e8edf6;
+         color: #1a3a6b; font-weight: 900; text-align: center; transition: all .2s; }
+.blank.ok  { border-color: #16a34a; background: #dcfce7; color: #15803d; }
+.blank.bad { border-color: #dc2626; background: #fee2e2; color: #b91c1c; }
+
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.opt  { background: #fff; border: 2px solid #d1d5db; border-radius: 9px; padding: 14px 10px;
+        font-size: 18px; font-weight: 400; color: #111; cursor: pointer;
+        font-family: monospace; transition: all .15s; }
+.opt:disabled { cursor: default; }
+.opt.sel { background: #e8edf6; border-color: #1a3a6b; color: #1a3a6b; font-weight: 700; }
+.opt.ok  { background: #dcfce7; border-color: #16a34a; color: #15803d; font-weight: 700; }
+.opt.bad { background: #fee2e2; border-color: #dc2626; color: #b91c1c; }
+
+.fb     { border-radius: 10px; padding: 14px; margin-bottom: 14px; border: 2px solid; }
+.fb.ok  { background: #f0fdf4; border-color: #16a34a; }
+.fb.bad { background: #fff7ed; border-color: #ea580c; }
+.fb .ft    { font-weight: 900; font-size: 15px; margin-bottom: 6px; }
+.fb.ok .ft { color: #15803d; }
+.fb.bad .ft{ color: #c2410c; }
+.fb .fbody { font-size: 13px; line-height: 1.6; color: #333; }
+
+.btn      { width: 100%; padding: 14px; background: #1a3a6b; color: #fff; border: none;
+            border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn.off  { background: #9ca3af; cursor: default; }
+
+.res-hdr { background: #1a3a6b; color: #fff; border-radius: 14px; padding: 28px;
+           text-align: center; margin-bottom: 20px; }
+.res-hdr .em { font-size: 48px; }
+.res-hdr .sc { font-size: 30px; font-weight: 900; margin-top: 8px; }
+.res-hdr .ms { font-size: 14px; opacity: .85; margin-top: 4px; }
+
+.hitem     { border: 2px solid; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.hitem.ok  { background: #f0fdf4; border-color: #16a34a; }
+.hitem.bad { background: #fff7ed; border-color: #dc2626; }
+
+.err-sent  { background: #fff; border: 2px solid #ddd; border-radius: 14px;
+             padding: 24px; margin-bottom: 16px; font-size: 19px;
+             line-height: 1.8; text-align: center; }
+.err-btns  { display: flex; gap: 10px; margin-bottom: 14px; }
+.ebtn      { flex: 1; padding: 16px; border: 2px solid #d1d5db; border-radius: 10px;
+             font-size: 15px; font-weight: 700; color: #555; cursor: pointer; background: #fff; }
+.ebtn:disabled { cursor: default; }
+.ebtn.sok  { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+.ebtn.sbd  { background: #fee2e2; border-color: #dc2626; color: #b91c1c; }
+.ebtn.shw  { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+
+.howto { background: #fff8e1; border: 1.5px solid #f0a500; border-radius: 10px;
+         padding: 10px 14px; margin-bottom: 18px; font-size: 13px; }
+code { background: #dcfce7; padding: 2px 8px; border-radius: 4px;
+       color: #15803d; font-family: monospace; }
+code.bad { background: #fee2e2; color: #c62828; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const TENSE = {
+  present: {
+    label:"Present Simple Passive", formula:"IS / ARE + V3",
+    signals:["every day","always","twice a week","regularly"],
+    bg:"#dbeafe", border:"#1d4ed8", text:"#1e40af", chip:"#bfdbfe", emoji:"🔵"
+  },
+  past: {
+    label:"Past Simple Passive", formula:"WAS / WERE + V3",
+    signals:["in 1889","last year","yesterday","three weeks ago"],
+    bg:"#ffedd5", border:"#c2410c", text:"#9a3412", chip:"#fed7aa", emoji:"🟠"
+  },
+  presentPerf: {
+    label:"Present Perfect Passive", formula:"HAS / HAVE + BEEN + V3",
+    signals:["since","recently","yet","already","not yet","so far"],
+    bg:"#f3e8ff", border:"#7e22ce", text:"#6b21a8", chip:"#e9d5ff", emoji:"🟣"
+  },
+  pastPerf: {
+    label:"Past Perfect Passive", formula:"HAD + BEEN + V3",
+    signals:["before (+ past event)","when she arrived","by the time"],
+    bg:"#dcfce7", border:"#15803d", text:"#166534", chip:"#bbf7d0", emoji:"🟢"
+  }
+};
+
+const Qs = [
+  { parts:["The clock mechanism","wound by hand twice a week."], signal:"twice a week", sigType:"regular habit → present", opts:["is","was","has been","had been"], ans:"is", tense:"present", rule:'"Twice a week" = regular present habit. No past time given. → IS + V3' },
+  { parts:["The Elizabeth Tower","inaugurated in 1859."], signal:"in 1859", sigType:"specific past year → past simple", opts:["is","has been","was","had been"], ans:"was", tense:"past", rule:'"In 1859" = a specific year in the past. Always past simple. → WAS + V3' },
+  { parts:["Several artefacts","carefully preserved since the project began."], signal:"since", sigType:"connects past to present → present perfect", opts:["were","has been","have been","are"], ans:"have been", tense:"presentPerf", rule:'"Since" connects a past action to the present. Plural subject → HAVE BEEN + V3' },
+  { parts:["The restoration","not completed yet."], signal:"yet", sigType:"not finished up to now → present perfect", opts:["was","is","has been","had been"], ans:"has been", tense:"presentPerf", rule:'"Not yet" = typical present perfect signal. Something unfinished up to now. → HAS BEEN + V3' },
+  { parts:["The broadcasting licence","revoked three weeks ago."], signal:"three weeks ago", sigType:"specific past time → past simple", opts:["has been","was","is","had been"], ans:"was", tense:"past", rule:'"Three weeks ago" = a specific past time. Always past simple. → WAS + V3' },
+  { parts:["When the investigators arrived, the documents","already destroyed."], signal:"before 'arrived' (a past event)", sigType:"before another past action → past perfect", opts:["were","have been","had been","are"], ans:"had been", tense:"pastPerf", rule:'Documents destroyed BEFORE investigators arrived. One past action before another → HAD BEEN + V3' },
+  { parts:["The artefact","not yet examined by the specialists."], signal:"not yet", sigType:"unfinished up to now → present perfect", opts:["was","has been","is","had been"], ans:"has been", tense:"presentPerf", rule:'"Not yet" = the examination has not happened yet, up to now. → HAS BEEN + V3' },
+  { parts:["The maps","deteriorating for years before Amara restored them."], signal:"before Amara restored them", sigType:"before another past event → past perfect", opts:["are","were","have been","had been"], ans:"had been", tense:"pastPerf", rule:'Deteriorating happened BEFORE Amara restored them. One past action before another → HAD BEEN + V3' },
+  { parts:["Performances","held here every evening throughout the season."], signal:"every evening", sigType:"regular present habit → present simple", opts:["has been","had been","are","were"], ans:"are", tense:"present", rule:'"Every evening" = ongoing regular schedule. → ARE + V3' },
+  { parts:["The singer's new album","only just released to the public."], signal:"only just", sigType:"very recently, connected to now → present perfect", opts:["was","has been","is","had been"], ans:"has been", tense:"presentPerf", rule:'"Only just" = extremely recent, still relevant now. Treat like "just". → HAS BEEN + V3' }
+];
+
+const EQs = [
+  { s:"The tower has inaugurated in 1859.", ok:false, fix:"The tower was inaugurated in 1859.", why:'"In 1859" = specific past year → needs WAS, not HAS. Also missing BEEN.' },
+  { s:"The artefacts have been discovered last year.", ok:false, fix:"The artefacts were discovered last year.", why:'"Last year" = specific past time → WAS/WERE, not HAVE BEEN.' },
+  { s:"The documents have destroyed before she arrived.", ok:false, fix:"The documents had been destroyed before she arrived.", why:'Missing BEEN. Before a past event needs HAD BEEN.' },
+  { s:"The clock mechanism is wound by hand twice a week.", ok:true, fix:null, why:'"Twice a week" = regular habit → IS + V3. ✓ Correct.' },
+  { s:"The artefacts is not yet examined by the specialists.", ok:false, fix:"The artefacts have not been examined by the specialists yet.", why:'Two errors: plural subject needs HAVE (not is), and BEEN is missing.' }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+const S = {
+  tab:'quiz', showRef:true,
+  qi:0, sel:null, sub:false, score:0, hist:[], done:false,
+  ei:0, esel:null, esub:false, escore:0, edone:false
+};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+
+function pct(n, total) { return ((n/total)*100).toFixed(1)+'%'; }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── BUILD HTML ────────────────────────────────────────────────────────────────
+
+function render() {
+  document.getElementById('app').innerHTML = html();
+  document.querySelectorAll('[data-a]').forEach(el => el.addEventListener('click', handle));
+}
+
+function html() {
+  const q = Qs[S.qi], eq = EQs[S.ei], t = TENSE[q.tense];
+  return `
+<div class="hdr"><h1>🔍 Passive Voice Detective</h1>
+<p>IS / ARE / WAS / WERE &nbsp;vs&nbsp; HAS / HAVE / HAD + BEEN — master the difference</p></div>
+
+<div class="tabs">
+  <button class="tab ${S.tab==='quiz'?'on':''}" data-a="tab" data-v="quiz">Part 1: Choose the Auxiliary</button>
+  <button class="tab ${S.tab==='errors'?'on':''}" data-a="tab" data-v="errors">Part 2: Spot the Error</button>
+</div>
+
+<button class="ref-toggle" data-a="ref">${S.showRef?'▲':'▼'} &nbsp;Reference Card — click to ${S.showRef?'hide':'show'}</button>
+${S.showRef ? refCard() : '<div style="margin-bottom:16px"></div>'}
+
+${S.tab==='quiz'
+  ? (S.done ? quizResults() : quizScreen(q,t))
+  : (S.edone ? errResults() : errScreen(eq))}`;
+}
+
+function refCard() {
+  return `<div class="ref-body">
+  <div class="ref-grid">
+    ${Object.values(TENSE).map(t=>`
+      <div class="tcard" style="background:${t.bg};border-color:${t.border}">
+        <div class="lbl" style="color:${t.text}">${t.emoji} ${t.label}</div>
+        <div class="fml" style="color:${t.text}">${t.formula}</div>
+        <div style="font-size:11px;color:#555;margin-bottom:2px">Signal words:</div>
+        <div class="sig" style="color:${t.text}">${t.signals.slice(0,3).join(' · ')}</div>
+      </div>`).join('')}
+  </div>
+  <div class="warn-box"><strong style="color:#7a4f00">⚠️ Most common mistake:</strong>
+    Writing <code class="bad">has restored</code> instead of <code>has been restored</code>.
+    Passive always needs the extra <strong>BEEN</strong>.
+  </div></div>`;
+}
+
+function quizScreen(q,t) {
+  const bc = S.sub ? (S.sel===q.ans?'ok':'bad') : '';
+  const bt = S.sel ? S.sel : '&nbsp;&nbsp;___&nbsp;&nbsp;';
+  return `
+<div class="pbar-txt"><span>Question ${S.qi+1} of ${Qs.length}</span><span style="font-weight:700;color:#1a3a6b">Score: ${S.score}</span></div>
+<div class="pbar-wrap"><div class="pbar" style="width:${pct(S.qi+1,Qs.length)}"></div></div>
+
+<div class="qbox">
+  <div><span class="sig-badge" style="background:${t.chip};border-color:${t.border};color:${t.text}">🔑 Signal: "${q.signal}" → ${q.sigType}</span></div>
+  ${esc(q.parts[0])} <span class="blank ${bc}">${bt}</span> ${esc(q.parts[1])}
+</div>
+
+<div class="opts">
+  ${q.opts.map(o=>{
+    let c='opt';
+    if(S.sub){ if(o===q.ans) c+=' ok'; else if(o===S.sel) c+=' bad'; }
+    else if(o===S.sel) c+=' sel';
+    return `<button class="${c}" data-a="sel" data-v="${o}" ${S.sub?'disabled':''}>${o}</button>`;
+  }).join('')}
+</div>
+
+${S.sub ? `<div class="fb ${S.sel===q.ans?'ok':'bad'}">
+  <div class="ft">${S.sel===q.ans?'✓ Correct!':'✗ Answer: '+q.ans}</div>
+  <div class="fbody"><span style="font-weight:700;color:${t.text}">${t.emoji} ${t.label}</span><br>${q.rule}</div>
+</div>` : ''}
+
+${!S.sub
+  ? `<button class="btn ${S.sel?'':'off'}" data-a="chk" ${S.sel?'':'disabled'}>Check Answer</button>`
+  : `<button class="btn" data-a="nxt">${S.qi===Qs.length-1?'See Results →':'Next Question →'}</button>`}`;
+}
+
+function quizResults() {
+  const em = S.score>=8?'🏆':S.score>=6?'💪':'📚';
+  const ms = S.score>=8?"Excellent — you've mastered the patterns!":S.score>=6?"Good. Review the missed ones below.":"Keep practising — look for the signal words!";
+  return `
+<div class="res-hdr"><div class="em">${em}</div><div class="sc">${S.score} / ${Qs.length}</div><div class="ms">${ms}</div></div>
+${S.hist.map((h,i)=>{
+  const hq=Qs[i];
+  return `<div class="hitem ${h.ok?'ok':'bad'}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="font-size:13px;flex:1"><strong>Q${i+1}:</strong> ${esc(hq.parts[0])}
+        <strong style="background:${h.ok?'#bbf7d0':'#fecaca'};padding:1px 6px;border-radius:4px">${hq.ans}</strong>
+        ${esc(hq.parts[1])}</div>
+      <span style="font-size:18px;margin-left:10px">${h.ok?'✓':'✗'}</span>
+    </div>
+    ${!h.ok?`<div style="font-size:12px;color:#555;margin-top:6px">${hq.rule}</div>`:''}
+  </div>`;
+}).join('')}
+<button class="btn" data-a="rq" style="margin-top:8px">Try Again</button>`;
+}
+
+function errScreen(eq) {
+  const wasRight = S.esub && ((S.esel==='correct')===eq.ok);
+  return `
+<div class="howto"><strong style="color:#7a4f00">How to play:</strong>
+Read each sentence. Is the passive form <strong>correct</strong> or does it contain an <strong>error</strong>?</div>
+<div class="pbar-txt"><span>Sentence ${S.ei+1} of ${EQs.length}</span><span style="font-weight:700;color:#1a3a6b">Score: ${S.escore}</span></div>
+<div class="pbar-wrap"><div class="pbar" style="width:${pct(S.ei+1,EQs.length)}"></div></div>
+<div class="err-sent">${esc(eq.s)}</div>
+<div class="err-btns">
+  ${['correct','wrong'].map(v=>{
+    const lbl = v==='correct'?'✓  Correct':'✗  Contains an Error';
+    const isSel = S.esel===v;
+    const isRight = (v==='correct')===eq.ok;
+    let c='ebtn';
+    if(S.esub){ if(isSel) c+=isRight?' sok':' sbd'; else if(isRight) c+=' shw'; }
+    else if(isSel) c+=v==='correct'?' sok':' sbd';
+    return `<button class="${c}" data-a="esel" data-v="${v}" ${S.esub?'disabled':''}>${lbl}</button>`;
+  }).join('')}
+</div>
+${S.esub?`<div class="fb ${wasRight?'ok':'bad'}">
+  <div class="ft">${wasRight?'✓ Correct!':'✗ Not quite'}</div>
+  <div class="fbody">${eq.why}${eq.fix?`<br><strong>Should be:</strong> <code>${esc(eq.fix)}</code>`:''}</div>
+</div>`:''}
+${!S.esub
+  ? `<button class="btn ${S.esel===null?'off':''}" data-a="echk" ${S.esel===null?'disabled':''}>Check</button>`
+  : `<button class="btn" data-a="enxt">${S.ei===EQs.length-1?'See Results →':'Next →'}</button>`}`;
+}
+
+function errResults() {
+  return `<div style="text-align:center">
+<div class="res-hdr"><div class="em">${S.escore>=4?'🎉':'📚'}</div>
+<div class="sc">${S.escore} / ${EQs.length}</div>
+<div class="ms">${S.escore>=4?'You can spot the errors clearly!':'Review the reference card, then try again.'}</div></div>
+<button class="btn" data-a="re">Try Again</button></div>`;
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+
+function handle(e) {
+  const a=e.currentTarget.dataset.a, v=e.currentTarget.dataset.v;
+  switch(a) {
+    case 'tab': S.tab=v; break;
+    case 'ref': S.showRef=!S.showRef; break;
+    case 'sel': if(!S.sub) S.sel=v; break;
+    case 'chk':
+      if(!S.sel) return;
+      S.sub=true;
+      const ok=S.sel===Qs[S.qi].ans;
+      if(ok) S.score++;
+      S.hist.push({ok, ans:Qs[S.qi].ans});
+      break;
+    case 'nxt':
+      if(S.qi===Qs.length-1){S.done=true;}
+      else{S.qi++;S.sel=null;S.sub=false;}
+      break;
+    case 'rq': S.qi=0;S.sel=null;S.sub=false;S.score=0;S.hist=[];S.done=false; break;
+    case 'esel': if(!S.esub) S.esel=v; break;
+    case 'echk':
+      if(S.esel===null) return;
+      S.esub=true;
+      if((S.esel==='correct')===EQs[S.ei].ok) S.escore++;
+      break;
+    case 'enxt':
+      if(S.ei===EQs.length-1){S.edone=true;}
+      else{S.ei++;S.esel=null;S.esub=false;}
+      break;
+    case 're': S.ei=0;S.esel=null;S.esub=false;S.escore=0;S.edone=false; break;
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
