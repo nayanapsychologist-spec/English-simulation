@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Games Hub</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f8f9fc; min-height: 100vh; padding: 20px; }
+#app { max-width: 720px; margin: 0 auto; }
+
+.hdr { background: #1a3a6b; color: #fff; border-radius: 14px; padding: 18px 24px; margin-bottom: 18px; }
+.hdr h1 { font-size: 22px; font-weight: 900; }
+.hdr p  { font-size: 13px; opacity: .8; margin-top: 3px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab  { flex: 1; padding: 12px 8px; border: 2px solid #1a3a6b; border-radius: 9px;
+        font-size: 14px; font-weight: 700; cursor: pointer; background: #fff; color: #1a3a6b; }
+.tab.on { background: #1a3a6b; color: #fff; }
+
+.info  { background: #e8edf6; border: 1.5px solid #1a3a6b; border-radius: 10px;
+         padding: 10px 16px; margin-bottom: 18px; font-size: 13px; }
+.pbar-wrap { background: #e8edf6; border-radius: 99px; height: 7px; margin-bottom: 16px; overflow: hidden; }
+.pbar      { background: #1a3a6b; height: 100%; border-radius: 99px; transition: width .3s; }
+.pbar-txt  { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 6px; }
+
+/* ── COMMA GAME ── */
+.type-badge { display: inline-block; border: 1.5px solid; border-radius: 7px;
+              padding: 4px 12px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+.sent-box { background: #fff; border: 2px solid #e0e0e0; border-radius: 14px;
+            padding: 28px 16px; margin-bottom: 16px; text-align: center;
+            font-size: 21px; line-height: 2.8; }
+.word { color: #111; }
+.slot { display: inline-flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+        margin: 0 2px; border: 2px dashed #d1d5db;
+        font-size: 22px; font-weight: 900; color: #d1d5db;
+        transition: all .15s; vertical-align: middle; }
+.slot.on  { border: 2px solid #1d4ed8; background: #dbeafe; color: #1d4ed8; }
+.slot.ok  { border: 2px solid #16a34a; background: #dcfce7; color: #16a34a; cursor: default; }
+.slot.bad { border: 2px solid #dc2626; background: #fee2e2; color: #dc2626; cursor: default; }
+.slot.shw { border: 2px solid #16a34a; background: #dcfce7; color: #16a34a; cursor: default; }
+
+.fb     { border-radius: 10px; padding: 14px; margin-bottom: 14px; border: 2px solid; }
+.fb.ok  { background: #f0fdf4; border-color: #16a34a; }
+.fb.bad { background: #fff7ed; border-color: #ea580c; }
+.fb .ft    { font-weight: 900; font-size: 14px; margin-bottom: 5px; }
+.fb.ok .ft { color: #15803d; }
+.fb.bad .ft{ color: #c2410c; }
+.fb .fb2   { font-size: 13px; color: #333; line-height: 1.6; }
+
+.btn     { width: 100%; padding: 14px; background: #1a3a6b; color: #fff; border: none;
+           border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+/* ── PHRASAL GAME ── */
+.stats { display: flex; gap: 10px; margin-bottom: 16px; }
+.stat  { flex: 1; border-radius: 8px; padding: 8px 14px; text-align: center;
+         font-weight: 700; font-size: 13px; }
+.stat.blue   { background: #e8edf6; color: #1a3a6b; }
+.stat.orange { background: #fff3e0; color: #c2410c; }
+.legend { display: flex; gap: 10px; margin-bottom: 16px; font-size: 12px; }
+.leg-item { flex: 1; border: 2px solid; border-radius: 7px; padding: 6px 10px;
+            text-align: center; font-weight: 700; }
+.cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.card { height: 90px; border-radius: 10px; display: flex; align-items: center;
+        justify-content: center; text-align: center; padding: 8px 6px;
+        cursor: pointer; transition: all .2s; user-select: none;
+        border: 2.5px solid; font-size: 13px; font-weight: 700; line-height: 1.3; }
+.card.down    { background: #1a3a6b; border-color: #1a3a6b; color: #fff;
+                font-size: 26px; font-weight: 400;
+                box-shadow: 0 4px 12px rgba(26,58,107,.25); }
+.card.phrasal { background: #e8edf6; border-color: #1a3a6b; color: #1a3a6b; }
+.card.formal  { background: #fff3e0; border-color: #c2410c; color: #c2410c; }
+.card.matched { background: #dcfce7; border-color: #16a34a; color: #15803d; cursor: default; }
+
+/* ── RESULTS ── */
+.res-hdr { background: #1a3a6b; color: #fff; border-radius: 14px; padding: 28px;
+           text-align: center; margin-bottom: 20px; }
+.res-hdr .em { font-size: 48px; }
+.res-hdr .sc { font-size: 28px; font-weight: 900; margin-top: 8px; }
+.res-hdr .ms { font-size: 14px; opacity: .85; margin-top: 4px; }
+
+.hitem     { border: 2px solid; border-radius: 9px; padding: 12px; margin-bottom: 10px; }
+.hitem.ok  { background: #f0fdf4; border-color: #16a34a; }
+.hitem.bad { background: #fff7ed; border-color: #dc2626; }
+
+.pair-row  { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.pair-left { flex: 1; background: #e8edf6; border: 2px solid #1a3a6b; border-radius: 8px;
+             padding: 9px 14px; font-weight: 700; color: #1a3a6b; font-size: 14px; }
+.pair-mid  { color: #777; font-weight: 700; }
+.pair-right{ flex: 1; background: #fff3e0; border: 2px solid #c2410c; border-radius: 8px;
+             padding: 9px 14px; font-weight: 700; color: #c2410c; font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const CSENTS = [
+  { words:["Because","the","weather","was","severe","the","concert","was","postponed."], correct:[4], type:"Subordinating conjunction", tip:'"Because the weather was severe" is an opening clause → comma after "severe"' },
+  { words:["In","order","to","secure","the","role","she","auditioned","three","times."], correct:[5], type:"Prepositional phrase", tip:'"In order to secure the role" is an opening phrase → comma after "role"' },
+  { words:["Although","she","was","exhausted","she","continued","to","rehearse."], correct:[3], type:"Subordinating conjunction", tip:'"Although she was exhausted" is an opening clause → comma after "exhausted"' },
+  { words:["Since","the","project","began","several","artefacts","have","been","recovered."], correct:[3], type:"Subordinating conjunction", tip:'"Since the project began" is an opening clause → comma after "began"' },
+  { words:["Unless","you","arrive","early","seats","will","not","be","available."], correct:[3], type:"Subordinating conjunction", tip:'"Unless you arrive early" is an opening clause → comma after "early"' },
+  { words:["Therefore","she","decided","to","relinquish","her","position."], correct:[0], type:"Adverbial connective", tip:'"Therefore" is an adverbial connective → comma immediately after "Therefore"' },
+  { words:["As","well","as","writing","the","lyrics","she","also","composed","the","music."], correct:[5], type:"Prepositional phrase", tip:'"As well as writing the lyrics" is an opening phrase → comma after "lyrics"' },
+  { words:["When","the","results","were","announced","the","hall","fell","silent."], correct:[4], type:"Subordinating conjunction", tip:'"When the results were announced" is an opening clause → comma after "announced"' },
+  { words:["With","the","intention","of","broadening","her","skills","she","enrolled","in","the","programme."], correct:[6], type:"Prepositional phrase", tip:'"With the intention of broadening her skills" is an opening phrase → comma after "skills"' },
+  { words:["If","you","relinquish","this","opportunity","you","may","regret","it."], correct:[4], type:"Subordinating conjunction", tip:'"If you relinquish this opportunity" is an opening clause → comma after "opportunity"' }
+];
+
+const TYPE_COLORS = {
+  "Subordinating conjunction": { bg:"#e0e7ff", border:"#4338ca", text:"#3730a3" },
+  "Prepositional phrase":      { bg:"#f3e8ff", border:"#7c3aed", text:"#6d28d9" },
+  "Adverbial connective":      { bg:"#dcfce7", border:"#16a34a", text:"#15803d" }
+};
+
+const ALL_PAIRS = [
+  { p:"give up",     f:"relinquish"  },
+  { p:"make better", f:"ameliorate"  },
+  { p:"look over",   f:"scrutinise"  },
+  { p:"help out",    f:"facilitate"  },
+  { p:"call off",    f:"revoke"      },
+  { p:"put off",     f:"defer"       },
+  { p:"turn down",   f:"decline"     },
+  { p:"keep on",     f:"uphold"      },
+  { p:"round up",    f:"corral"      },
+  { p:"opt for",     f:"select"      },
+  { p:"find out",    f:"ascertain"   },
+  { p:"take over",   f:"commandeer"  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+const S = {
+  game: 'comma',
+  // comma
+  ci: 0, commas: new Set(), csub: false, cscore: 0, cdone: false, chist: [],
+  // phrasal
+  pairs: [], cards: [], flipped: [], matched: new Set(), attempts: 0, pdone: false, locked: false
+};
+
+function shuffle(a) { return [...a].sort(() => Math.random() - .5); }
+function makeCards(pairs) {
+  const c = [];
+  pairs.forEach((pair, i) => {
+    c.push({ id:'p'+i, pid:i, text:pair.p, kind:'phrasal' });
+    c.push({ id:'f'+i, pid:i, text:pair.f, kind:'formal'  });
+  });
+  return shuffle(c);
+}
+function initPhrasal() {
+  S.pairs   = shuffle(ALL_PAIRS).slice(0,6);
+  S.cards   = makeCards(S.pairs);
+  S.flipped = []; S.matched = new Set();
+  S.attempts = 0; S.pdone = false; S.locked = false;
+}
+initPhrasal();
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+
+function render() {
+  document.getElementById('app').innerHTML = html();
+  attachAll();
+}
+
+function html() {
+  return `
+<div class="hdr"><h1>🎮 Grammar Games Hub</h1>
+<p>Two games · one goal: lock in the rules for good</p></div>
+
+<div class="tabs">
+  <button class="tab ${S.game==='comma'?'on':''}" data-a="game" data-v="comma">📍 Comma Placer</button>
+  <button class="tab ${S.game==='phrasal'?'on':''}" data-a="game" data-v="phrasal">🃏 Phrasal Match</button>
+</div>
+
+${S.game==='comma'
+  ? (S.cdone ? commaResults() : commaScreen())
+  : (S.pdone  ? phrasalResults() : phrasalScreen())}`;
+}
+
+// ── COMMA GAME ────────────────────────────────────────────────────────────────
+
+function commaScreen() {
+  const cs = CSENTS[S.ci];
+  const tc = TYPE_COLORS[cs.type];
+  const isRight = S.csub && cs.correct.length === S.commas.size && cs.correct.every(c => S.commas.has(c));
+
+  const slots = cs.words.map((w, wi) => {
+    let slotHtml = '';
+    if (wi < cs.words.length - 1) {
+      let cls = 'slot';
+      const isOn    = S.commas.has(wi);
+      const isCorr  = cs.correct.includes(wi);
+      if (S.csub) {
+        if (isCorr)          cls += ' ok';
+        else if (isOn)       cls += ' bad';
+        else                 cls += ' shw shw-hidden'; // show nothing for non-selected non-correct
+      } else {
+        if (isOn) cls += ' on';
+      }
+      const shown = isOn || (S.csub && isCorr);
+      const sym = shown ? ',' : '·';
+      const disabled = S.csub ? 'data-disabled="1"' : '';
+      // Only show as "shw" (green) if correct slot not selected by user
+      if (S.csub && isCorr && !isOn) cls = 'slot shw';
+      slotHtml = `<span class="${cls}" data-a="comma" data-wi="${wi}" ${disabled}>${sym}</span>`;
+    }
+    return `<span class="word">${w}</span>${slotHtml}`;
+  }).join(' ');
+
+  return `
+<div class="info"><strong style="color:#1a3a6b">How to play:</strong>
+Click the gap between words to place a comma (·→,). Click again to remove. Press Check when ready.</div>
+
+<div class="pbar-txt"><span>Sentence ${S.ci+1} of ${CSENTS.length}</span><span style="font-weight:700;color:#1a3a6b">Score: ${S.cscore}</span></div>
+<div class="pbar-wrap"><div class="pbar" style="width:${((S.ci+1)/CSENTS.length*100).toFixed(1)}%"></div></div>
+
+<div><span class="type-badge" style="background:${tc.bg};border-color:${tc.border};color:${tc.text}">${cs.type}</span></div>
+
+<div class="sent-box">${slots}</div>
+
+${S.csub ? `<div class="fb ${isRight?'ok':'bad'}">
+  <div class="ft">${isRight?'✓ Perfect placement!':'✗ Not quite right'}</div>
+  <div class="fb2">${cs.tip}</div>
+</div>` : ''}
+
+${!S.csub
+  ? `<button class="btn" data-a="cchk">Check</button>`
+  : `<button class="btn" data-a="cnxt">${S.ci===CSENTS.length-1?'See Results →':'Next Sentence →'}</button>`}`;
+}
+
+function commaResults() {
+  return `
+<div class="res-hdr">
+  <div class="em">${S.cscore>=8?'🏆':S.cscore>=6?'💪':'📚'}</div>
+  <div class="sc">${S.cscore} / ${CSENTS.length}</div>
+  <div class="ms">${S.cscore>=8?'Comma master!':S.cscore>=6?'Good — review the ones below.':'Keep going — find the opening clause first!'}</div>
+</div>
+${S.chist.map((h,i)=>`
+  <div class="hitem ${h.ok?'ok':'bad'}">
+    <div style="font-weight:700;font-size:13px;margin-bottom:${h.ok?0:4}px">${h.ok?'✓':'✗'} Sentence ${i+1}</div>
+    ${!h.ok?`<div style="font-size:12px;color:#555">${CSENTS[i].tip}</div>`:''}
+  </div>`).join('')}
+<button class="btn" data-a="crst" style="margin-top:8px">Play Again</button>`;
+}
+
+// ── PHRASAL GAME ──────────────────────────────────────────────────────────────
+
+function phrasalScreen() {
+  return `
+<div class="info"><strong style="color:#1a3a6b">How to play:</strong>
+Flip cards to find matching pairs — each phrasal verb matches its formal equivalent. Find all 6!</div>
+
+<div class="stats">
+  <div class="stat blue">Pairs found: ${S.matched.size/2} / 6</div>
+  <div class="stat orange">Attempts: ${S.attempts}</div>
+</div>
+
+<div class="legend">
+  <div class="leg-item" style="border-color:#1a3a6b;color:#1a3a6b;background:#e8edf6">🔵 Phrasal verb</div>
+  <div class="leg-item" style="border-color:#c2410c;color:#c2410c;background:#fff3e0">🟠 Formal word</div>
+</div>
+
+<div class="cards-grid">
+  ${S.cards.map(card => {
+    const isFlipped = S.flipped.includes(card.id);
+    const isMatched = S.matched.has(card.id);
+    let cls = 'card';
+    if (isMatched)        cls += ' matched';
+    else if (isFlipped)   cls += ' ' + card.kind;
+    else                  cls += ' down';
+    const txt = (isFlipped || isMatched) ? card.text : '?';
+    return `<div class="${cls}" data-a="flip" data-id="${card.id}">${txt}</div>`;
+  }).join('')}
+</div>`;
+}
+
+function phrasalResults() {
+  const msg = S.attempts<=7?'Outstanding memory!':S.attempts<=10?'Great work!':'Good effort — try again!';
+  return `
+<div class="res-hdr">
+  <div class="em">🎉</div>
+  <div class="sc">All 6 pairs matched!</div>
+  <div class="ms">Completed in ${S.attempts} ${S.attempts===1?'attempt':'attempts'} — ${msg}</div>
+</div>
+<div style="margin-bottom:20px">
+  <div style="font-weight:700;color:#1a3a6b;font-size:14px;margin-bottom:10px">Pairs you matched:</div>
+  ${S.pairs.map(pair=>`
+    <div class="pair-row">
+      <div class="pair-left">${pair.p}</div>
+      <div class="pair-mid">↔</div>
+      <div class="pair-right">${pair.f}</div>
+    </div>`).join('')}
+</div>
+<button class="btn" data-a="prst">New Game — 6 Different Pairs</button>`;
+}
+
+// ── EVENT HANDLING ────────────────────────────────────────────────────────────
+
+function attachAll() {
+  document.querySelectorAll('[data-a]').forEach(el => {
+    if (!el.dataset.disabled) el.addEventListener('click', handle);
+  });
+}
+
+function handle(e) {
+  const a = e.currentTarget.dataset.a;
+  const v = e.currentTarget.dataset.v;
+
+  switch(a) {
+    case 'game': S.game = v; break;
+
+    // ── COMMA ──
+    case 'comma': {
+      const wi = parseInt(e.currentTarget.dataset.wi);
+      if (!S.csub) {
+        if (S.commas.has(wi)) S.commas.delete(wi);
+        else S.commas.add(wi);
+      }
+      break;
+    }
+    case 'cchk': {
+      S.csub = true;
+      const cs = CSENTS[S.ci];
+      const ok = cs.correct.length===S.commas.size && cs.correct.every(c=>S.commas.has(c));
+      if (ok) S.cscore++;
+      S.chist.push({ ok });
+      break;
+    }
+    case 'cnxt':
+      if (S.ci===CSENTS.length-1) { S.cdone=true; }
+      else { S.ci++; S.commas=new Set(); S.csub=false; }
+      break;
+    case 'crst':
+      S.ci=0; S.commas=new Set(); S.csub=false; S.cscore=0; S.cdone=false; S.chist=[];
+      break;
+
+    // ── PHRASAL ──
+    case 'flip': {
+      const id = e.currentTarget.dataset.id;
+      if (S.locked || S.matched.has(id) || S.flipped.includes(id) || S.flipped.length===2) return;
+      S.flipped = [...S.flipped, id];
+      if (S.flipped.length===2) {
+        S.attempts++;
+        const [a, b] = S.flipped.map(fid => S.cards.find(c=>c.id===fid));
+        if (a.pid===b.pid) {
+          // Match!
+          S.matched = new Set([...S.matched, a.id, b.id]);
+          S.flipped = [];
+          if (S.matched.size===S.cards.length) S.pdone=true;
+        } else {
+          // No match — flip back after delay
+          S.locked = true;
+          render(); // show both flipped briefly
+          setTimeout(() => { S.flipped=[]; S.locked=false; render(); }, 900);
+          return; // skip render below
+        }
+      }
+      break;
+    }
+    case 'prst': initPhrasal(); break;
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
