@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glossary Mastery Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f0f4f8;
+            --surface: #ffffff;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --highlight-abc: #bfdbfe;
+            --highlight-pos: #fed7aa;
+            --highlight-def: #a7f3d0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: var(--surface);
+            border-bottom: 2px solid var(--border);
+            padding: 12px 20px;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            background-color: var(--border);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats-badge {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            background-color: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        .score-badge {
+            color: var(--accent);
+            border-color: #fef3c7;
+            background-color: #fffbeb;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            padding: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .preview-pane {
+            background-color: #f8fafc;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .preview-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-book-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .preview-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-item {
+            padding: 8px 12px;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .preview-placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .instruction {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            text-align: left;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--secondary);
+            background-color: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .option-btn.correct {
+            border-color: var(--primary);
+            background-color: #ecfdf5;
+            color: var(--primary-dark);
+        }
+
+        .option-btn.wrong {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .feedback-box {
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback-box.correct {
+            display: block;
+            background-color: #d1fae5;
+            border: 1px solid var(--primary);
+            color: var(--primary-dark);
+        }
+
+        .feedback-box.wrong {
+            display: block;
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+
+        .action-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px 28px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .dot-tracker {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--border);
+        }
+
+        .dot.active {
+            background-color: var(--secondary);
+            transform: scale(1.2);
+        }
+
+        .dot.correct {
+            background-color: var(--primary);
+        }
+
+        .dot.wrong {
+            background-color: #ef4444;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .reference-table th, .reference-table td {
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .reference-table th {
+            background-color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .legend-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .hl-abc { background-color: var(--highlight-abc); padding: 2px 4px; border-radius: 4px; }
+        .hl-pos { background-color: var(--highlight-pos); padding: 2px 4px; border-radius: 4px; }
+        .hl-def { background-color: var(--highlight-def); padding: 2px 4px; border-radius: 4px; }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .center-content {
+            text-align: center;
+        }
+
+        .big-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sticky-header">
+        <div class="header-container">
+            <div class="stats-badge" id="stepLabel">Step 0 / 0</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="stats-badge score-badge" id="scoreLabel">⭐ 0 Stars</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="card" id="quizCard">
+            </div>
+    </div>
+
+    <script>
+        // Module level state object
+        const state = {
+            currentSequenceIndex: 0,
+            currentDrillIndex: 0,
+            score: 0,
+            builtGlossary: [],
+            drillWrongAttempts: 0,
+            selectedChoiceOption: null,
+            hasAnsweredDrill: false
+        };
+
+        // Static config matching the verified Chapter 8 context
+        const quizData = {
+            bookTitle: "Having Fun Playing Sport",
+            sequence: [
+                {
+                    type: "intro",
+                    title: "Welcome to the Glossary Builder! ⚽",
+                    instruction: "You are editing a new non-fiction book called <strong>Having Fun Playing Sport</strong>. Authors need your help building its glossary page. You will pick the entries to add, complete training drills on alphabetical sorting and dictionary coding, and reveal the final fully color-coded glossary table!"
+                },
+                {
+                    type: "choice",
+                    concept: "Alphabetical Order (Single Letter)",
+                    instruction: "Let's choose our very first glossary entry. Which term correctly maintains basic alphabetical order at the top of the glossary page?",
+                    options: [
+                        { text: "athlete — a person who is trained in a sport", correct: true, feedback: "Excellent! 'Athlete' starts with 'a', making it the perfect choice to lead off the glossary page in alphabetical sequence." },
+                        { text: "referee — an official who watches a game", correct: false, feedback: "Not quite. 'Referee' starts with 'r'. To start an alphabetical page effectively, we need a word starting closer to 'a'." },
+                        { text: "coach — someone who trains sports players", correct: false, feedback: "Think about the alphabet. 'Coach' starts with 'c', but we have another option available that starts with an earlier letter." }
+                    ]
+                },
+                {
+                    type: "drill_round",
+                    concept: "Alphabetical Order (Single Letter)",
+                    drills: [
+                        {
+                            q: "Sort these text codes into basic alphabetical order: <strong>k, r, a, m</strong>",
+                            options: ["a, k, m, r", "a, m, k, r", "k, a, m, r", "m, a, k, r"],
+                            correctIndex: 0,
+                            feedback: "Correct! Alphabetical order always tracks sequentially from $a \\rightarrow z$."
+                        },
+                        {
+                            q: "Which word would appear first in a standard dictionary?",
+                            options: ["stomach", "spine", "shoulder", "arm"],
+                            correctIndex: 3,
+                            feedback: "Correct! 'Arm' begins with 'a', which precedes 's' globally."
+                        },
+                        {
+                            q: "True or False: A glossary page can list words in any order the author prefers.",
+                            options: ["True", "False"],
+                            correctIndex: 1,
+                            feedback: "Correct! Both dictionaries and glossaries must strictly use alphabetical order so readers can easily locate words."
+                        }
+                    ]
+                },
+                {
+                    type: "choice",
+                    concept: "Alphabetical Order (Subsequent Letters)",
+                    instruction: "We need to add our next term, but multiple sport words start with the letter 'b'. Which entry is sorted correctly using the second and third letters?",
+                    options: [
+                        { text: "bounce, then bow, then box", correct: true, feedback: "Perfect sorting! 'bounce' (b-o-u) comes before 'bow' (b-o-w), which comes before 'box' (b-o-x)." },
+                        { text: "box, then bow, then bounce", correct: false, feedback: "Check the third letters. 'x' does not come before 'w' or 'u' in the alphabet." },
+                        { text: "bow, then bounce, then box", correct: false, feedback: "Look closely at 'bow' vs 'bounce'. 'b-o-u' has a third letter of 'u', which comes before 'w'." }
+                    ]
+                },
+                {
+                    type: "drill_round",
+                    concept: "Alphabetical Order (Subsequent Letters)",
+                    drills: [
+                        {
+                            q: "If the first two letters of two words are identical (e.g., <strong>shi</strong>n and <strong>shu</strong>f), how do you sort them?",
+                            options: ["Look at the third letter", "Look at the word length", "Place them randomly", "Look at the final letter"],
+                            correctIndex: 0,
+                            feedback: "Correct! If letters match, you systematically advance to the next differing letter position."
+                        },
+                        {
+                            q: "Arrange these body-related words correctly: <strong>skin, shin, skull</strong>",
+                            options: ["shin, skin, skull", "skin, shin, skull", "skull, shin, skin", "shin, skull, skin"],
+                            correctIndex: 0,
+                            feedback: "Correct! Comparing second letters: 'h' comes before 'k', which comes before 'u'."
+                        },
+                        {
+                            q: "Which word fits perfectly between <strong>teeth</strong> and <strong>waist</strong>?",
+                            options: ["arm", "tongue", "skipping", "wrist"],
+                            correctIndex: 1,
+                            feedback: "Correct! 'Tongue' starts with 'to', placing it after 'te' (teeth) and before 'w' (waist)."
+                        }
+                    ]
+                },
+                {
+                    type: "choice",
+                    concept: "Parts of Speech (Dictionary Coding)",
+                    instruction: "A good dictionary or detailed glossary provides parts of speech labels. Choose the entry that uses correct abbreviations.",
+                    options: [
+                        { text: "sprint (v) — to run very fast for a short distance", correct: true, feedback: "Spot on! '(v)' is the standard dictionary abbreviation for a verb (an action)." },
+                        { text: "sprint (adj) — to run very fast for a short distance", correct: false, feedback: "Incorrect. '(adj)' stands for adjective, which describes a noun. Sprinting is an action." },
+                        { text: "sprint (n) — to run very fast for a short distance", correct: false, feedback: "Not quite. While 'sprint' can be a noun (a race), the definition given here describes the action of doing it, which is a verb." }
+                    ]
+                },
+                {
+                    type: "drill_round",
+                    concept: "Parts of Speech (Dictionary Coding)",
+                    drills: [
+                        {
+                            table: [
+                                ["Abbreviation", "Part of Speech"],
+                                ["(n)", "Noun"],
+                                ["(v)", "Verb"],
+                                ["(adj)", "Adjective"]
+                            ],
+                            q: "What part of speech does the abbreviation <strong>(adj)</strong> stand for?",
+                            options: ["Adverb", "Adjective", "Action Word", "Addition"],
+                            correctIndex: 1,
+                            feedback: "Correct! '(adj)' denotes an adjective, which modifies or describes a noun."
+                        },
+                        {
+                            q: "If a dictionary page displays <strong>snack (n)</strong>, what does the (n) mean?",
+                            options: ["It is a action word", "It is a naming word (noun)", "It means it can only be eaten at night", "It means it is a describing word"],
+                            correctIndex: 1,
+                            feedback: "Correct! '(n)' stands for noun."
+                        }
+                    ]
+                },
+                {
+                    type: "choice",
+                    concept: "Word Class Sorting",
+                    instruction: "Let's check how words behave in a sports book context. Some words can fit into two different category columns depending on usage. Select the row with a correct dual categorization.",
+                    options: [
+                        { text: "smell — can be both a Noun and a Verb", correct: true, feedback: "Correct! You can track a 'smell' (noun), or you can physically 'smell' a track (verb)." },
+                        { text: "slippery — can be both a Verb and an Adjective", correct: false, feedback: "Incorrect. 'Slippery' describes a surface (adjective), but you cannot 'slippery' as an action." },
+                        { text: "elbow — can be both an Adjective and a Noun", correct: false, feedback: "Incorrect. 'Elbow' is a functional bone/joint (noun), or a verb ('to elbow past'), but it doesn't function as a standalone descriptive adjective." }
+                    ]
+                },
+                {
+                    type: "drill_round",
+                    concept: "Word Class Sorting",
+                    drills: [
+                        {
+                            q: "In the context of playing sport, what word class is <strong>smooth</strong>?",
+                            options: ["Noun", "Verb", "Adjective", "Pronoun"],
+                            correctIndex: 2,
+                            feedback: "Correct! 'Smooth' describes properties of an object or playing surface."
+                        },
+                        {
+                            q: "Identify the word that can function perfectly as both a noun (body part) and a verb (to pass something).",
+                            options: ["stomach", "hand", "tall", "chew"],
+                            correctIndex: 1,
+                            feedback: "Correct! 'Hand' is a physical noun, and you can also 'hand' a ball to a teammate."
+                        }
+                    ]
+                },
+                {
+                    type: "choice",
+                    concept: "Short and Clear Definitions",
+                    instruction: "Glossaries inside factual books require definitions to be short, clear, and focused. Pick the ideal definition for the glossary.",
+                    options: [
+                        { text: "trophy — a prize given for winning a contest", correct: true, feedback: "Beautifully clear and concise! It explains exactly what a trophy is without extra wordy phrasing." },
+                        { text: "trophy — this is a shiny gold or silver object that teams hold high in the air when the referee blows the final whistle after a hard-fought match", correct: false, feedback: "That definition is far too long and wordy. Glossaries need to stay clear and direct." }
+                    ]
+                },
+                {
+                    type: "drill_round",
+                    concept: "Short and Clear Definitions",
+                    drills: [
+                        {
+                            q: "Which definition for a body part is short, clear, and effective?",
+                            options: [
+                                "ribs — bones that protect your heart and lungs",
+                                "ribs — these are long curved skeletal things inside your chest cage that wrap around your inner organs so you don't get hurt when playing soccer",
+                                "ribs — things in your chest",
+                                "ribs — white hard lines"
+                            ],
+                            correctIndex: 0,
+                            feedback: "Correct! It delivers the core facts clearly without excessive wording."
+                        },
+                        {
+                            q: "What is the primary purpose of a glossary in a factual book?",
+                            options: [
+                                "To display pictures of characters",
+                                "To explain the meaning of unfamiliar words found in that specific book",
+                                "To list every single word in the English language",
+                                "To show the author's biography"
+                            ],
+                            correctIndex: 1,
+                            feedback: "Correct! A glossary targets specific, potentially unfamiliar terms inside that factual text."
+                        }
+                    ]
+                },
+                {
+                    type: "reveal",
+                    title: "Glossary Complete! 🏆"
+                }
+            ]
+        };
+
+        function initQuiz() {
+            state.currentSequenceIndex = 0;
+            state.currentDrillIndex = 0;
+            state.score = 0;
+            state.builtGlossary = [];
+            renderCurrentStep();
+        }
+
+        function renderCurrentStep() {
+            const currentStep = quizData.sequence[state.currentSequenceIndex];
+            const totalSteps = quizData.sequence.length;
+            
+            // Render global status info
+            document.getElementById('stepLabel').innerText = `Step ${state.currentSequenceIndex + 1} / ${totalSteps}`;
+            document.getElementById('progressBar').style.width = `${((state.currentSequenceIndex) / (totalSteps - 1)) * 100}%`;
+            document.getElementById('scoreLabel').innerText = `⭐ ${state.score} Stars`;
+
+            const card = document.getElementById('quizCard');
+            card.innerHTML = ''; // Clear previous UI components
+
+            if (currentStep.type === "intro") {
+                renderIntro(card, currentStep);
+            } else if (currentStep.type === "choice") {
+                renderChoice(card, currentStep);
+            } else if (currentStep.type === "drill_round") {
+                renderDrillRound(card, currentStep);
+            } else if (currentStep.type === "reveal") {
+                renderFinalReveal(card, currentStep);
+            }
+        }
+
+        function renderIntro(card, step) {
+            card.innerHTML = `
+                <div class="center-content">
+                    <div class="big-icon">📚</div>
+                    <h2>${step.title}</h2>
+                    <p class="instruction">${step.instruction}</p>
+                    <button class="action-btn" onclick="nextSequence()">Start Building App</button>
+                </div>
+            `;
+        }
+
+        function renderPreviewPane(card) {
+            let innerHTML = `
+                <div class="preview-pane">
+                    <div class="preview-title">📖 Content Preview Panel</div>
+                    <div class="preview-book-title">${quizData.bookTitle} — Glossary</div>
+                    <ul class="preview-list">
+            `;
+
+            if (state.builtGlossary.length === 0) {
+                innerHTML += `<li class="preview-placeholder">No terms added yet. Make a correct choice below to build your page!</li>`;
+            } else {
+                state.builtGlossary.forEach(item => {
+                    innerHTML += `<li class="preview-item">${item}</li>`;
+                });
+            }
+
+            innerHTML += `</ul></div>`;
+            card.innerHTML += innerHTML;
+        }
+
+        function renderChoice(card, step) {
+            renderPreviewPane(card);
+
+            let choiceHTML = `
+                <h2>Concept Focus: ${step.concept}</h2>
+                <p class="instruction">${step.instruction}</p>
+                <div class="options-grid">
+            `;
+
+            step.options.forEach((opt, idx) => {
+                choiceHTML += `
+                    <button class="option-btn" id="choice-opt-${idx}" onclick="handleChoiceSelection(${idx})">
+                        <span>${opt.text}</span>
+                    </button>
+                `;
+            });
+
+            choiceHTML += `
+                </div>
+                <div id="choiceFeedback" class="feedback-box"></div>
+                <button id="choiceNextBtn" class="action-btn hidden" onclick="nextSequence()">Continue to Drills →</button>
+            `;
+
+            card.innerHTML += choiceHTML;
+        }
+
+        function handleChoiceSelection(idx) {
+            const step = quizData.sequence[state.currentSequenceIndex];
+            const option = step.options[idx];
+            const feedbackBox = document.getElementById('choiceFeedback');
+            const nextBtn = document.getElementById('choiceNextBtn');
+
+            // Reset classifications
+            step.options.forEach((_, i) => {
+                const btn = document.getElementById(`choice-opt-${i}`);
+                btn.className = "option-btn";
+                btn.disabled = true;
+            });
+
+            const selectedBtn = document.getElementById(`choice-opt-${idx}`);
+
+            if (option.correct) {
+                selectedBtn.classList.add('correct');
+                feedbackBox.className = "feedback-box correct";
+                feedbackBox.innerText = option.feedback;
+                state.score += 5;
+                state.builtGlossary.push(option.text);
+                nextBtn.classList.remove('hidden');
+            } else {
+                selectedBtn.classList.add('wrong');
+                feedbackBox.className = "feedback-box wrong";
+                feedbackBox.innerText = option.feedback + " Try clicking another choice to continue building.";
+                // Re-enable for corrections
+                setTimeout(() => {
+                    step.options.forEach((_, i) => {
+                        const btn = document.getElementById(`choice-opt-${i}`);
+                        if (i !== idx) btn.disabled = false;
+                    });
+                }, 1200);
+            }
+            document.getElementById('scoreLabel').innerText = `⭐ ${state.score} Stars`;
+        }
+
+        function renderDrillRound(card, step) {
+            const currentDrill = step.drills[state.currentDrillIndex];
+            state.hasAnsweredDrill = false;
+
+            let drillHTML = `
+                <h2>Concept Training Drill (${step.concept})</h2>
+            `;
+
+            // Render Reference Table if specified in context
+            if (currentDrill.table) {
+                drillHTML += `<table class="reference-table">`;
+                currentDrill.table.forEach((row, rIdx) => {
+                    drillHTML += `<tr>`;
+                    row.forEach(cell => {
+                        if (rIdx === 0) drillHTML += `<th>${cell}</th>`;
+                        else drillHTML += `<td>${cell}</td>`;
+                    });
+                    drillHTML += `</tr>`;
+                });
+                drillHTML += `</table>`;
+            }
+
+            // Dot Row Progress tracker
+            drillHTML += `<div class="dot-tracker">`;
+            step.drills.forEach((_, dIdx) => {
+                let dotClass = "dot";
+                if (dIdx === state.currentDrillIndex) dotClass += " active";
+                drillHTML += `<div class="${dotClass}"></div>`;
+            });
+            drillHTML += `</div>`;
+
+            drillHTML += `
+                <p class="instruction" style="font-size:1.15rem; font-weight:600;">${currentDrill.q}</p>
+                <div class="options-grid">
+            `;
+
+            currentDrill.options.forEach((opt, idx) => {
+                drillHTML += `
+                    <button class="option-btn" id="drill-opt-${idx}" onclick="handleDrillSelection(${idx})">
+                        <span>${opt}</span>
+                    </button>
+                `;
+            });
+
+            drillHTML += `
+                </div>
+                <div id="drillFeedback" class="feedback-box"></div>
+                <button id="drillNextBtn" class="action-btn hidden" onclick="advanceDrill()">Next Question →</button>
+            `;
+
+            card.innerHTML = drillHTML;
+        }
+
+        function handleDrillSelection(idx) {
+            if (state.hasAnsweredDrill) return;
+
+            const step = quizData.sequence[state.currentSequenceIndex];
+            const drill = step.drills[state.currentDrillIndex];
+            const feedbackBox = document.getElementById('drillFeedback');
+            const nextBtn = document.getElementById('drillNextBtn');
+            const selectedBtn = document.getElementById(`drill-opt-${idx}`);
+
+            if (idx === drill.correctIndex) {
+                selectedBtn.classList.add('correct');
+                feedbackBox.className = "feedback-box correct";
+                feedbackBox.innerText = drill.feedback;
+                
+                // Award points relative to mistake counts
+                if (state.drillWrongAttempts === 0) state.score += 2;
+                else if (state.drillWrongAttempts === 1) state.score += 1;
+
+                state.hasAnsweredDrill = true;
+                nextBtn.classList.remove('hidden');
+            } else {
+                selectedBtn.classList.add('wrong');
+                selectedBtn.disabled = true;
+                state.drillWrongAttempts++;
+                feedbackBox.className = "feedback-box wrong";
+                feedbackBox.innerText = "That choice doesn't match the linguistic rule. Re-read the layout structure and try again!";
+            }
+            document.getElementById('scoreLabel').innerText = `⭐ ${state.score} Stars`;
+        }
+
+        function advanceDrill() {
+            const step = quizData.sequence[state.currentSequenceIndex];
+            state.drillWrongAttempts = 0;
+            
+            if (state.currentDrillIndex < step.drills.length - 1) {
+                state.currentDrillIndex++;
+                renderDrillRound(document.getElementById('quizCard'), step);
+            } else {
+                state.currentDrillIndex = 0;
+                nextSequence();
+            }
+        }
+
+        function renderFinalReveal(card, step) {
+            let revealHTML = `
+                <div class="center-content">
+                    <div class="big-icon">🏆</div>
+                    <h2>${step.title}</h2>
+                    <p class="instruction">Congratulations! You successfully structured and verified the entire glossary asset for your educational portfolio.</p>
+                </div>
+                
+                <div class="legend-box">
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--highlight-abc)"></div><span>Alphabetical Index Order</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--highlight-pos)"></div><span>Part of Speech Codes</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--highlight-def)"></div><span>Short Factual Definitions</span></div>
+                </div>
+
+                <table class="reference-table" style="background-color: white;">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Properties</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="hl-abc">athlete</span></td>
+                            <td><span class="hl-pos">(n)</span></td>
+                            <td><span class="hl-def">a person trained in sports</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="hl-abc">bounce</span></td>
+                            <td><span class="hl-pos">(v)</span></td>
+                            <td><span class="hl-def">to spring back after hitting a surface</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="hl-abc">bow</span></td>
+                            <td><span class="hl-pos">(n)</span></td>
+                            <td><span class="hl-def">a weapon used for shooting arrows</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="hl-abc">box</span></td>
+                            <td><span class="hl-pos">(v)</span></td>
+                            <td><span class="hl-def">to fight with fists in heavy gloves</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="hl-abc">sprint</span></td>
+                            <td><span class="hl-pos">(v)</span></td>
+                            <td><span class="hl-def">to run very fast over short distances</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="hl-abc">trophy</span></td>
+                            <td><span class="hl-pos">(n)</span></td>
+                            <td><span class="hl-def">a prize given for winning a contest</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="center-content" style="margin-top: 25px;">
+                    <button class="action-btn" onclick="initQuiz()">Restart Quiz Session</button>
+                </div>
+            `;
+            card.innerHTML = revealHTML;
+        }
+
+        function nextSequence() {
+            if (state.currentSequenceIndex < quizData.sequence.length - 1) {
+                state.currentSequenceIndex++;
+                renderCurrentStep();
+            }
+        }
+
+        // Initialize engine on window finish loading
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
