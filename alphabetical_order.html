@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 8 — Build a Glossary!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #4FC3F7;
+    --sky-dark: #0288D1;
+    --leaf: #66BB6A;
+    --leaf-dark: #388E3C;
+    --sun: #FFD54F;
+    --sun-dark: #F9A825;
+    --coral: #FF7043;
+    --coral-dark: #BF360C;
+    --lilac: #CE93D8;
+    --lilac-dark: #7B1FA2;
+    --mint: #80CBC4;
+    --bg: #F0F9FF;
+    --card: #FFFFFF;
+    --text: #1A2A3A;
+    --muted: #607D8B;
+    --correct: #43A047;
+    --wrong: #E53935;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--sky-dark);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  #step-counter {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem; color: #fff;
+    white-space: nowrap;
+    min-width: 64px;
+  }
+  #progress-bar-wrap {
+    flex: 1;
+    background: rgba(255,255,255,0.3);
+    border-radius: 99px; height: 10px; overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%; background: var(--sun);
+    border-radius: 99px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  #score-display {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem; color: var(--sun);
+    white-space: nowrap;
+  }
+
+  /* ── MAIN ── */
+  #app {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── WRITING PREVIEW ── */
+  #preview-box {
+    background: #fff;
+    border: 2.5px solid var(--sky);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    min-height: 80px;
+    box-shadow: var(--shadow);
+  }
+  #preview-label {
+    font-size: 0.72rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--sky-dark);
+    margin-bottom: 8px;
+  }
+  #preview-content {
+    font-size: 0.92rem; line-height: 1.9;
+    color: var(--text);
+  }
+  #preview-content .pe { color: var(--sky-dark); font-weight: 700; }
+  #preview-content .al { color: var(--coral); font-weight: 700; }
+  #preview-content .def { color: var(--leaf-dark); font-weight: 700; }
+  #preview-content .gls { color: var(--lilac-dark); font-weight: 700; }
+  #preview-content .pos { color: var(--sun-dark); font-weight: 700; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    border-radius: 6px; padding: 3px 10px;
+    margin-bottom: 14px;
+  }
+  .tag-choice  { background: #E3F2FD; color: var(--sky-dark); }
+  .tag-drill   { background: #FFF9C4; color: #F57F17; }
+  .tag-result  { background: #E8F5E9; color: var(--leaf-dark); }
+  .tag-intro   { background: #FCE4EC; color: #880E4F; }
+  .tag-reveal  { background: #EDE7F6; color: var(--lilac-dark); }
+
+  h2.q-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.35rem; margin-bottom: 8px; line-height: 1.3;
+  }
+  p.q-body {
+    font-size: 0.95rem; line-height: 1.65; margin-bottom: 20px; color: #37474F;
+  }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    background: #F1F8FE;
+    border: 2px solid #B3D9F5;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 0.95rem; font-family: 'Nunito', sans-serif;
+    font-weight: 700; cursor: pointer; text-align: left;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    line-height: 1.5;
+  }
+  .opt-btn:hover { background: #D0EFFF; border-color: var(--sky); transform: translateX(4px); }
+  .opt-btn.correct-ans {
+    background: #E8F5E9; border-color: var(--correct); color: var(--correct);
+  }
+  .opt-btn.wrong-ans {
+    background: #FFEBEE; border-color: var(--wrong); color: var(--wrong);
+  }
+  .opt-btn:disabled { cursor: default; transform: none; }
+
+  /* ── FEEDBACK ── */
+  #feedback-box {
+    margin-top: 16px;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 0.92rem; line-height: 1.6;
+    display: none;
+  }
+  #feedback-box.show { display: block; }
+  #feedback-box.fb-correct { background: #E8F5E9; border: 2px solid var(--correct); color: #1B5E20; }
+  #feedback-box.fb-wrong   { background: #FFEBEE; border: 2px solid var(--wrong);   color: #B71C1C; }
+
+  /* ── DRILL DOT TRACKER ── */
+  #drill-tracker {
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .drill-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #CFD8DC; border: 2px solid #90A4AE;
+    transition: background 0.3s;
+  }
+  .drill-dot.answered { background: var(--sky); border-color: var(--sky-dark); }
+  .drill-dot.correct  { background: var(--correct); border-color: var(--leaf-dark); }
+  .drill-dot.wrong    { background: var(--wrong); border-color: #C62828; }
+
+  /* ── REFERENCE TABLE ── */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+  }
+  .ref-table th {
+    background: var(--sky-dark); color: #fff;
+    padding: 8px 12px; text-align: left; font-weight: 800;
+  }
+  .ref-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #E0F0FF;
+  }
+  .ref-table tr:nth-child(even) td { background: #F0F9FF; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-block;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.05rem; padding: 12px 30px;
+    border-radius: 99px; border: none; cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-top: 14px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+  .btn:active { transform: translateY(1px); }
+  .btn-next   { background: var(--sky-dark); color: #fff; }
+  .btn-again  { background: var(--coral); color: #fff; }
+  .btn-restart { background: var(--muted); color: #fff; }
+  .btn-start  { background: var(--leaf-dark); color: #fff; }
+
+  /* ── STARS ── */
+  .stars { font-size: 1.6rem; letter-spacing: 4px; margin: 8px 0; }
+
+  /* ── RESULT SCREEN ── */
+  #result-screen { text-align: center; }
+  #result-screen h2 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--sky-dark); margin-bottom: 8px; }
+  #result-screen p.big { font-size: 1.1rem; margin: 8px 0 20px; color: #37474F; }
+
+  /* ── FINAL REVEAL ── */
+  #reveal-glossary {
+    font-size: 0.93rem; line-height: 2;
+  }
+  #reveal-glossary .entry {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 5px 0; border-bottom: 1px solid #E0F0FF;
+  }
+  #reveal-glossary .wd { font-weight: 800; min-width: 90px; }
+  #reveal-glossary .ps { font-style: italic; color: var(--sun-dark); min-width: 32px; font-size: 0.85rem; }
+  #reveal-glossary .df { flex: 1; }
+  .hl-alpha  { background: #B3E5FC; border-radius: 4px; padding: 1px 4px; }
+  .hl-alpha2 { background: #FFE0B2; border-radius: 4px; padding: 1px 4px; }
+  .hl-pos    { background: #F3E5F5; border-radius: 4px; padding: 1px 4px; }
+  .hl-def    { background: #E8F5E9; border-radius: 4px; padding: 1px 4px; }
+  .hl-glos   { background: #FFF9C4; border-radius: 4px; padding: 1px 4px; }
+
+  #legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 16px; font-size: 0.83rem;
+  }
+  #legend span {
+    padding: 4px 10px; border-radius: 6px; font-weight: 700;
+  }
+
+  /* ── COMPLETION BANNER ── */
+  #completion-banner {
+    display: none;
+    background: linear-gradient(135deg, var(--leaf), var(--sky-dark));
+    color: #fff; text-align: center;
+    padding: 20px; border-radius: var(--radius);
+    margin-bottom: 24px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    box-shadow: var(--shadow);
+  }
+
+  @media (max-width: 480px) {
+    #app { padding: 16px 10px 40px; }
+    .card { padding: 20px 16px; }
+    h2.q-title { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<div id="header">
+  <div id="step-counter">1 / 13</div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+  <div id="score-display">⭐ 0</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- Writing Preview -->
+  <div id="preview-box" style="display:none">
+    <div id="preview-label">📖 Your Glossary So Far</div>
+    <div id="preview-content">— your entries will appear here —</div>
+  </div>
+
+  <!-- Completion Banner (hidden until done) -->
+  <div id="completion-banner">🎉 Amazing! You've completed the quiz!</div>
+
+  <!-- Dynamic content rendered here -->
+  <div id="stage"></div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────
+
+const TOTAL_STEPS = 13;
+
+// Glossary entries added to preview as student progresses
+// Each entry: { word, pos, def, concept }
+const glossaryEntries = [];
+
+// Preview renderer
+function renderPreview() {
+  const box = document.getElementById('preview-box');
+  const content = document.getElementById('preview-content');
+  if (glossaryEntries.length === 0) return;
+  box.style.display = 'block';
+  let html = '';
+  const sorted = [...glossaryEntries].sort((a, b) => a.word.localeCompare(b.word));
+  sorted.forEach(e => {
+    let wHtml = `<span class="${e.concept}">${e.word}</span>`;
+    html += `<div style="margin-bottom:4px">${wHtml} <em style="color:#90A4AE;font-size:0.85em">(${e.pos})</em> — ${e.def}</div>`;
+  });
+  content.innerHTML = html;
+}
+
+// ─────────────────────────────────────────
+//  SEQUENCE DEFINITION
+// ─────────────────────────────────────────
+
+/*
+  Sequence: Intro → [Choice + Drill] × 4 + extra drill → Final Reveal
+  Steps:
+   0  Intro
+   1  Choice 1 — alphabetical order (1st letter)
+   2  Drill 1  — 1st-letter alphabetical order (4 Qs)
+   3  Choice 2 — alphabetical order (2nd/3rd letter)
+   4  Drill 2  — 2nd/3rd letter alphabetical order (4 Qs)
+   5  Choice 3 — dictionary entry structure
+   6  Drill 3  — dictionary entry structure (4 Qs)
+   7  Choice 4 — parts of speech
+   8  Drill 4  — parts of speech (4 Qs)
+   9  Choice 5 — glossary vs. dictionary
+  10  Drill 5  — glossary vs. dictionary + definitions (4 Qs)
+  11  Drill result screen
+  12  Final Reveal
+*/
+
+// score state
+let stars = 0;
+let currentStep = 0;
+let drillState = null; // { qs, idx, correct, wrong }
+
+// ─────────────────────────────────────────
+//  STEPS
+// ─────────────────────────────────────────
+
+const steps = [
+
+  // ── STEP 0: INTRO ──
+  {
+    type: 'intro',
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-intro">📚 Welcome</span>
+          <h2 class="q-title">Help write the glossary for <em>Our Amazing Body</em>!</h2>
+          <p class="q-body">
+            A class is making a non-fiction book about the human body.
+            They need a <strong>glossary</strong> at the back so readers can look up tricky words.<br><br>
+            You are going to help choose the right words, put them in the right order,
+            write good definitions, and label the parts of speech —
+            just like a real dictionary editor!<br><br>
+            At every step, your best choice gets added to the glossary you're building. Ready?
+          </p>
+          <button class="btn btn-start" onclick="advance()">Let's go! →</button>
+        </div>`;
+    }
+  },
+
+  // ── STEP 1: CHOICE 1 — alphabetical order 1st letter ──
+  {
+    type: 'choice',
+    concept: 'al',
+    entryOnCorrect: { word: 'ankle', pos: 'n', def: 'the joint connecting your foot to your leg', concept: 'al' },
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-choice">Choose the right version</span>
+          <h2 class="q-title">Alphabetical order — first letter</h2>
+          <p class="q-body">
+            The editor has three body-part words to add to the glossary.
+            She needs to put them in <strong>alphabetical order</strong> — ordered by their first letter, A to Z.<br><br>
+            Which list is in the correct alphabetical order?
+          </p>
+          <div class="options" id="choice-opts">
+            <button class="opt-btn" onclick="choiceAnswer(0, false, 'Not quite. Look at the first letter of each word: <strong>e</strong>lbow, <strong>h</strong>ip, <strong>s</strong>houlder. e comes before h, but h comes before s — so the order should be: elbow → hip → shoulder.')">
+              shoulder, hip, elbow
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(1, false, 'Not quite. Look at the first letter of each word: <strong>e</strong>lbow, <strong>h</strong>ip, <strong>s</strong>houlder. e comes before h, but h comes before s — so the order should be: elbow → hip → shoulder.')">
+              hip, elbow, shoulder
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(2, true, 'Correct! e comes before h, and h comes before s in the alphabet. Alphabetical order always follows the A–Z sequence of first letters.')">
+              elbow, hip, shoulder
+            </button>
+          </div>
+          <div id="feedback-box"></div>
+        </div>`;
+    }
+  },
+
+  // ── STEP 2: DRILL 1 — 1st-letter alphabetical order ──
+  {
+    type: 'drill',
+    title: 'Alphabetical order — first letter',
+    qs: [
+      {
+        q: 'Which word comes <strong>first</strong> in alphabetical order?',
+        opts: ['tongue', 'knee', 'ankle', 'spine'],
+        ans: 2,
+        exp: '"Ankle" starts with <strong>a</strong>, which comes before k, s, and t in the alphabet.'
+      },
+      {
+        q: 'Which word comes <strong>last</strong> in alphabetical order?',
+        opts: ['muscle', 'foot', 'rib', 'wrist'],
+        ans: 3,
+        exp: '"Wrist" starts with <strong>w</strong>, which comes after m, f, and r.'
+      },
+      {
+        q: 'Put these words in order. Which comes <strong>second</strong>?<br><em>thumb &nbsp;·&nbsp; elbow &nbsp;·&nbsp; neck &nbsp;·&nbsp; jaw</em>',
+        opts: ['neck', 'thumb', 'jaw', 'elbow'],
+        ans: 2,
+        exp: 'Alphabetical order: elbow → jaw → neck → thumb. So the second word is <strong>jaw</strong>.'
+      },
+      {
+        q: 'A glossary has the words <em>brain</em>, <em>heart</em>, <em>lung</em>. Which word would be added <strong>between</strong> brain and lung?',
+        opts: ['foot', 'hip', 'arm', 'skull'],
+        ans: 1,
+        exp: '"Hip" starts with <strong>h</strong>. h comes after b (brain) and before l (lung), so it fits between them.'
+      }
+    ],
+    ref: null
+  },
+
+  // ── STEP 3: CHOICE 2 — alphabetical order 2nd/3rd letter ──
+  {
+    type: 'choice',
+    concept: 'al',
+    entryOnCorrect: { word: 'shin', pos: 'n', def: 'the front of your lower leg, below the knee', concept: 'al' },
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-choice">Choose the right version</span>
+          <h2 class="q-title">Alphabetical order — second and third letters</h2>
+          <p class="q-body">
+            Some body-part words all start with the same letter!
+            When first letters are the same, you look at the <strong>second letter</strong>.
+            If those are the same too, look at the <strong>third letter</strong>.<br><br>
+            Which list correctly orders: <em>skull, shin, skin, shoulder</em>?
+          </p>
+          <div class="options" id="choice-opts">
+            <button class="opt-btn" onclick="choiceAnswer(0, false, 'Not quite. All four words start with <strong>sh</strong>... wait — skull starts with sk, not sh! So skull comes after shoulder, shin, and skin (sk > sh). Try again.')">
+              skull, shin, skin, shoulder
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(1, true, 'Correct! sh– words come before sk– (h before k). Among the sh– words: shi comes before sho (i before o), and ski before sku (i before u). Order: shin → shoulder → skin → skull.')">
+              shin, shoulder, skin, skull
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(2, false, 'Not quite. All four words start with s. Look at the second letter: <strong>h</strong>in, <strong>h</strong>oulder, <strong>k</strong>in, <strong>k</strong>ull. h comes before k, so shin and shoulder both come before skin and skull.')">
+              shoulder, skin, shin, skull
+            </button>
+          </div>
+          <div id="feedback-box"></div>
+        </div>`;
+    }
+  },
+
+  // ── STEP 4: DRILL 2 — 2nd/3rd letter alphabetical order ──
+  {
+    type: 'drill',
+    title: 'Alphabetical order — 2nd and 3rd letters',
+    qs: [
+      {
+        q: 'All these words start with <strong>s</strong>. Which comes <strong>first</strong> in alphabetical order?<br><em>stomach &nbsp;·&nbsp; spine &nbsp;·&nbsp; skull &nbsp;·&nbsp; skin</em>',
+        opts: ['stomach', 'spine', 'skull', 'skin'],
+        ans: 1,
+        exp: 'Second letters: <strong>t</strong>omach, <strong>p</strong>ine, <strong>k</strong>ull, <strong>k</strong>in. p comes before k, so "spine" comes first.'
+      },
+      {
+        q: 'Which pair is in the correct alphabetical order?',
+        opts: ['toenail, toe', 'toe, toenail', 'toenail, tongue', 'tongue, toe'],
+        ans: 1,
+        exp: 'toe and toenail both start with "toe". The shorter word has no 4th letter, so it comes before toenail. toe → toenail.'
+      },
+      {
+        q: 'Between which two words would <strong>back</strong> be placed?<br><em>arm &nbsp;·&nbsp; body &nbsp;·&nbsp; brain &nbsp;·&nbsp; bone</em>',
+        opts: ['arm and body', 'body and brain', 'brain and bone', 'arm and brain'],
+        ans: 0,
+        exp: 'a comes before b, so "back" follows "arm". b-a-c-k comes before b-o-dy (a before o). So: arm → <strong>back</strong> → body.'
+      },
+      {
+        q: 'Put in order. Which word comes <strong>third</strong>?<br><em>thigh &nbsp;·&nbsp; thumb &nbsp;·&nbsp; throat &nbsp;·&nbsp; tongue</em>',
+        opts: ['tongue', 'thigh', 'throat', 'thumb'],
+        ans: 3,
+        exp: 'th + i, th + r, th + u, th + u. i before r before u. "thigh" 1st, "throat" 2nd, then "thu": thu-m-b before thu-n-b? thumb vs tongue: m before n, so "thumb" 3rd, "tongue" 4th.'
+      }
+    ],
+    ref: null
+  },
+
+  // ── STEP 5: CHOICE 3 — dictionary entry structure ──
+  {
+    type: 'choice',
+    concept: 'pe',
+    entryOnCorrect: { word: 'rib', pos: 'n', def: 'a bone that protects your heart and lungs', concept: 'pe' },
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-choice">Choose the right version</span>
+          <h2 class="q-title">Dictionary entry — the right structure</h2>
+          <p class="q-body">
+            A dictionary entry always has three parts: the <strong>word</strong> (in bold),
+            the <strong>part of speech</strong> in brackets, and the <strong>definition</strong>.<br>
+            Some words have more than one meaning — these are numbered.<br><br>
+            Which of these is a correctly structured dictionary entry for the word <em>soft</em>?
+          </p>
+          <div class="options" id="choice-opts">
+            <button class="opt-btn" onclick="choiceAnswer(0, false, 'Not quite. This version is missing the part of speech. A dictionary entry must show the part of speech in brackets after the word, like (adj) or (n).')">
+              <strong>soft</strong> — something that changes shape easily; a soft sound is quiet and gentle
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(1, true, 'Correct! The entry has: the word in bold, (adj) for adjective, and two numbered meanings. This follows the full dictionary entry format.')">
+              <strong>soft</strong> <em>(adj)</em> &nbsp; 1. something that changes shape easily &nbsp; 2. a soft sound is quiet and gentle
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(2, false, 'Not quite. The part of speech label needs to be in brackets directly after the word — not at the end of the definition.')">
+              <strong>soft</strong> — something that changes shape easily, adjective
+            </button>
+          </div>
+          <div id="feedback-box"></div>
+        </div>`;
+    }
+  },
+
+  // ── STEP 6: DRILL 3 — dictionary entry structure ──
+  {
+    type: 'drill',
+    title: 'Dictionary entry structure',
+    qs: [
+      {
+        q: 'In a dictionary entry, where does the <strong>part of speech</strong> appear?',
+        opts: [
+          'At the very end of the entry',
+          'In brackets, right after the word',
+          'On the line below the definition',
+          'Before the word, in capital letters'
+        ],
+        ans: 1,
+        exp: 'The part of speech appears <strong>in brackets right after the word</strong>, like this: <em>snack (n)</em>'
+      },
+      {
+        q: 'Look at this entry: <em><strong>soft</strong> (adj) &nbsp; 1. changes shape easily &nbsp; 2. a quiet, gentle sound</em><br>Why are the meanings numbered?',
+        opts: [
+          'Because it is a long word',
+          'Because the word "soft" has more than one meaning',
+          'Because adjectives always have two meanings',
+          'Because the definition is too short'
+        ],
+        ans: 1,
+        exp: 'Meanings are numbered when a <strong>word has more than one meaning</strong>. "Soft" can describe texture (meaning 1) or sound (meaning 2).'
+      },
+      {
+        q: 'Which abbreviation means <strong>noun</strong> in a dictionary entry?',
+        opts: ['(adj)', '(v)', '(n)', '(adv)'],
+        ans: 2,
+        exp: '(n) = noun, (adj) = adjective, (v) = verb.'
+      },
+      {
+        q: 'A student writes: <em>ticket — something that shows you are allowed to enter a place or travel</em>. What is missing?',
+        opts: [
+          'The definition is too short',
+          'The word should not be in bold',
+          'The part of speech is missing',
+          'There should be two meanings'
+        ],
+        ans: 2,
+        exp: 'The entry is missing the <strong>part of speech</strong> — it should read: <em>ticket (n)</em> — something that shows you are allowed to enter…'
+      }
+    ],
+    ref: {
+      title: 'Dictionary entry structure',
+      heads: ['Part', 'Example', 'What it shows'],
+      rows: [
+        ['Word (bold)', 'soft', 'The word being defined'],
+        ['Part of speech', '(adj)', 'The type of word'],
+        ['Definition', 'something that changes shape easily', 'What the word means'],
+        ['Second meaning', '2. a soft sound is quiet and gentle', 'Used only when a word has more than one meaning']
+      ]
+    }
+  },
+
+  // ── STEP 7: CHOICE 4 — parts of speech ──
+  {
+    type: 'choice',
+    concept: 'pe',
+    entryOnCorrect: { word: 'sniff', pos: 'v / n', def: 'to breathe in through your nose noisily', concept: 'pe' },
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-choice">Choose the right version</span>
+          <h2 class="q-title">Parts of speech — nouns, verbs, adjectives</h2>
+          <p class="q-body">
+            Parts of speech tell us the <strong>type</strong> of a word:
+            a <strong>noun</strong> names a thing, a <strong>verb</strong> describes an action,
+            an <strong>adjective</strong> describes what something is like.<br><br>
+            ⚠️ Watch out — some words can be <strong>more than one</strong> type!<br><br>
+            The word <em>smell</em> — which entry is correct?
+          </p>
+          <div class="options" id="choice-opts">
+            <button class="opt-btn" onclick="choiceAnswer(0, false, 'Not quite. "Smell" is definitely a noun (a smell coming from the kitchen), but it can also be used as a verb (to smell the flowers). It fits two categories.')">
+              <strong>smell</strong> <em>(n)</em> &nbsp; something your nose detects
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(1, false, 'Not quite. "Smell" can be a verb (I smell something nice), but it can also be a noun (a lovely smell). It fits two categories.')">
+              <strong>smell</strong> <em>(v)</em> &nbsp; to detect a scent through your nose
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(2, true, 'Correct! "Smell" can be a noun (a beautiful smell) AND a verb (to smell the roses). When a word fits two parts of speech, a good dictionary notes both.')">
+              <strong>smell</strong> <em>(n / v)</em> &nbsp; a scent you can detect through your nose; also to detect a scent
+            </button>
+          </div>
+          <div id="feedback-box"></div>
+        </div>`;
+    }
+  },
+
+  // ── STEP 8: DRILL 4 — parts of speech ──
+  {
+    type: 'drill',
+    title: 'Parts of speech',
+    qs: [
+      {
+        q: 'What part of speech is the word <strong>elbow</strong> in this sentence?<br><em>"She bumped her <u>elbow</u> on the desk."</em>',
+        opts: ['verb', 'adjective', 'noun', 'adverb'],
+        ans: 2,
+        exp: '"Elbow" names a body part — it is a <strong>noun</strong>.'
+      },
+      {
+        q: 'What part of speech is <strong>snatch</strong> in: <em>"He tried to <u>snatch</u> the ball."</em>',
+        opts: ['noun', 'adjective', 'adverb', 'verb'],
+        ans: 3,
+        exp: '"Snatch" describes an action (taking something quickly) — it is a <strong>verb</strong>.'
+      },
+      {
+        q: 'Which word from this list can be <strong>both a noun and a verb</strong>?',
+        opts: ['long', 'shoulder', 'sniff', 'smooth'],
+        ans: 2,
+        exp: '"Sniff" can be a noun (he gave a loud sniff) or a verb (she sniffed the flower). "Long" and "smooth" are adjectives; "shoulder" is mainly a noun.'
+      },
+      {
+        q: 'Which part of speech describes how things look, feel, taste, smell, or sound?',
+        opts: ['noun', 'verb', 'adjective', 'adverb'],
+        ans: 2,
+        exp: 'An <strong>adjective</strong> describes a noun — how something looks, feels, sounds, tastes, or smells. Examples: soft, smooth, long, shiny.'
+      }
+    ],
+    ref: {
+      title: 'Parts of speech',
+      heads: ['Abbreviation', 'Type', 'What it does', 'Example'],
+      rows: [
+        ['(n)', 'Noun', 'Names a person, place, or thing', 'elbow, rib, stomach'],
+        ['(v)', 'Verb', 'Describes an action or state', 'snatch, sneeze, hold'],
+        ['(adj)', 'Adjective', 'Describes a noun', 'soft, smooth, long']
+      ]
+    }
+  },
+
+  // ── STEP 9: CHOICE 5 — glossary vs dictionary ──
+  {
+    type: 'choice',
+    concept: 'gls',
+    entryOnCorrect: { word: 'tongue', pos: 'n', def: 'a muscle in your mouth that tastes things and helps you talk', concept: 'gls' },
+    render() {
+      return `
+        <div class="card">
+          <span class="card-tag tag-choice">Choose the right version</span>
+          <h2 class="q-title">Glossary vs. dictionary — what is the difference?</h2>
+          <p class="q-body">
+            A class is deciding whether to add a <em>dictionary</em> page or a <em>glossary</em>
+            to the back of their book <em>Our Amazing Body</em>.<br><br>
+            Which statement best explains why a <strong>glossary</strong> is the right choice?
+          </p>
+          <div class="options" id="choice-opts">
+            <button class="opt-btn" onclick="choiceAnswer(0, false, 'Not quite. A dictionary does list parts of speech, but that is not the main reason it differs from a glossary. Think about what words each type of text includes.')">
+              A glossary does not show parts of speech, but a dictionary does.
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(1, false, 'Not quite. Both dictionaries and glossaries use alphabetical order, so this is not the key difference.')">
+              A glossary uses alphabetical order, but a dictionary does not.
+            </button>
+            <button class="opt-btn" onclick="choiceAnswer(2, true, 'Correct! A glossary only explains the specific words used in <em>that book</em> which might be unfamiliar to the reader. A dictionary covers all words in the language.')">
+              A glossary only explains the words found in that specific book. A dictionary explains any word in the language.
+            </button>
+          </div>
+          <div id="feedback-box"></div>
+        </div>`;
+    }
+  },
+
+  // ── STEP 10: DRILL 5 — glossary / dictionary / definitions ──
+  {
+    type: 'drill',
+    title: 'Glossary, dictionary, and definitions',
+    qs: [
+      {
+        q: 'Where would you most likely find a glossary?',
+        opts: [
+          'At the beginning of any story book',
+          'At the back of a non-fiction book',
+          'On the first page of a dictionary',
+          'In a recipe book index'
+        ],
+        ans: 1,
+        exp: 'Glossaries are found <strong>at the back of factual/non-fiction books</strong> to explain subject-specific words that readers might not know.'
+      },
+      {
+        q: 'A student looks up the word "telescope" in a book about space. The book has a glossary. Which is more useful?',
+        opts: [
+          'The dictionary, because it has more words',
+          'The glossary, because it explains words used in that specific book',
+          'Neither — both give exactly the same information',
+          'The dictionary, because it shows parts of speech'
+        ],
+        ans: 1,
+        exp: 'The <strong>glossary</strong> is more useful here because it will explain "telescope" in the context of the space book. It is written for that specific reader and topic.'
+      },
+      {
+        q: 'Which definition of <em>ribs</em> is better?',
+        opts: [
+          '"Ribs" are the bones that wrap around your heart and lungs to protect them from being hurt or damaged during knocks.',
+          'Bones that protect your heart and lungs.'
+        ],
+        ans: 1,
+        exp: 'The second definition is better. A good definition is <strong>short and clear</strong>, giving only the essential information. The first version is too wordy.'
+      },
+      {
+        q: 'The word "muscle" appears in a book called <em>Our Amazing Body</em>. A glossary entry for it should…',
+        opts: [
+          'List every meaning "muscle" has in the English language',
+          'Explain only what "muscle" means in the context of that book',
+          'Include a picture of every muscle in the body',
+          'Use the same definition as the Oxford English Dictionary'
+        ],
+        ans: 1,
+        exp: 'A glossary entry explains <strong>what the word means in that specific book</strong>. It is not a full dictionary entry — it is tailored to the reader and topic.'
+      }
+    ],
+    ref: {
+      title: 'Glossary vs. dictionary',
+      heads: ['Feature', 'Dictionary', 'Glossary'],
+      rows: [
+        ['Alphabetical order?', '✓ Yes', '✓ Yes'],
+        ['Parts of speech?', '✓ Yes', '✗ Usually no'],
+        ['All words?', '✓ Any word in the language', '✗ Only words in that book'],
+        ['Where found?', 'Standalone reference book', 'Back of a non-fiction book'],
+        ['Multiple meanings?', '✓ Yes (numbered)', 'Usually only the relevant one']
+      ]
+    }
+  },
+
+  // ── STEP 11: DRILL RESULT ──
+  {
+    type: 'drill-result',
+    render() {
+      const pct = Math.round((stars / (TOTAL_STEPS - 3)) * 100);
+      let msg, starStr;
+      if (stars >= 8)      { msg = "Brilliant work! You're a real glossary expert!"; starStr = '⭐⭐⭐'; }
+      else if (stars >= 5) { msg = "Good job! You know your glossary skills well!";   starStr = '⭐⭐'; }
+      else                 { msg = "Nice try! Every attempt helps you learn.";        starStr = '⭐'; }
+      return `
+        <div class="card" id="result-screen">
+          <span class="card-tag tag-result">All done!</span>
+          <h2 class="q-title">Quiz complete!</h2>
+          <div class="stars">${starStr}</div>
+          <p class="big">You scored <strong>${stars}</strong> out of <strong>${TOTAL_STEPS - 3}</strong> drill questions correctly.</p>
+          <p class="q-body">${msg}</p>
+          <button class="btn btn-next" onclick="advance()">See the final glossary →</button>
+        </div>`;
+    }
+  },
+
+  // ── STEP 12: FINAL REVEAL ──
+  {
+    type: 'reveal',
+    render() {
+      const allEntries = [
+        { word: 'ankle',    pos: 'n',     def: 'the joint connecting your foot to your leg',             concept: 'alpha' },
+        { word: 'rib',      pos: 'n',     def: 'a bone that protects your heart and lungs',              concept: 'dict' },
+        { word: 'shin',     pos: 'n',     def: 'the front of your lower leg, below the knee',            concept: 'alpha2' },
+        { word: 'sniff',    pos: 'v / n', def: 'to breathe in through your nose noisily',                concept: 'pos' },
+        { word: 'stomach',  pos: 'n',     def: 'the part of your body where food is digested',           concept: 'dict' },
+        { word: 'tongue',   pos: 'n',     def: 'a muscle in your mouth that tastes things and helps you talk', concept: 'glos' },
+      ];
+      const sorted = [...allEntries].sort((a, b) => a.word.localeCompare(b.word));
+      let rows = '';
+      sorted.forEach(e => {
+        let wCls = '', wLabel = '';
+        if (e.concept === 'alpha')  { wCls = 'hl-alpha';  wLabel = 'Alphabetical order (1st letter)'; }
+        if (e.concept === 'alpha2') { wCls = 'hl-alpha2'; wLabel = 'Alphabetical order (2nd letter)'; }
+        if (e.concept === 'dict')   { wCls = 'hl-def';    wLabel = 'Dictionary entry structure'; }
+        if (e.concept === 'pos')    { wCls = 'hl-pos';    wLabel = 'Parts of speech'; }
+        if (e.concept === 'glos')   { wCls = 'hl-glos';   wLabel = 'Glossary purpose'; }
+        rows += `<div class="entry">
+          <span class="wd"><span class="${wCls}" title="${wLabel}">${e.word}</span></span>
+          <span class="ps">(${e.pos})</span>
+          <span class="df">${e.def}</span>
+        </div>`;
+      });
+      return `
+        <div class="card">
+          <span class="card-tag tag-reveal">📖 Final Reveal</span>
+          <h2 class="q-title">Your completed glossary!</h2>
+          <p class="q-body" style="margin-bottom:16px">
+            Here is the glossary for <em>Our Amazing Body</em>. Each colour shows a different skill you practised.
+            Hover over a highlighted word to see which skill it represents!
+          </p>
+          <div id="legend">
+            <span class="hl-alpha">Alphabetical order — 1st letter</span>
+            <span class="hl-alpha2">Alphabetical order — 2nd letter</span>
+            <span class="hl-def">Dictionary entry structure</span>
+            <span class="hl-pos">Parts of speech</span>
+            <span class="hl-glos">Glossary purpose</span>
+          </div>
+          <div id="reveal-glossary">${rows}</div>
+          <br>
+          <button class="btn btn-restart" onclick="restartQuiz()">↩ Start again</button>
+        </div>`;
+    }
+  }
+];
+
+// ─────────────────────────────────────────
+//  DRILL ENGINE
+// ─────────────────────────────────────────
+
+function startDrill(stepIdx) {
+  const step = steps[stepIdx];
+  drillState = {
+    qs: step.qs,
+    idx: 0,
+    correct: 0,
+    wrong: 0,
+    stepIdx
+  };
+  renderDrillQ();
+}
+
+function renderDrillQ() {
+  const { qs, idx, stepIdx } = drillState;
+  const q = qs[idx];
+  const step = steps[stepIdx];
+
+  // dot tracker
+  let dots = '';
+  for (let i = 0; i < qs.length; i++) {
+    let cls = 'drill-dot';
+    if (i < idx) cls += ' answered';
+    dots += `<div class="${cls}" id="dot-${i}"></div>`;
+  }
+
+  // reference table
+  let refHtml = '';
+  if (step.ref) {
+    const r = step.ref;
+    refHtml = `<table class="ref-table"><thead><tr>`;
+    r.heads.forEach(h => { refHtml += `<th>${h}</th>`; });
+    refHtml += `</tr></thead><tbody>`;
+    r.rows.forEach(row => {
+      refHtml += '<tr>';
+      row.forEach(cell => { refHtml += `<td>${cell}</td>`; });
+      refHtml += '</tr>';
+    });
+    refHtml += '</tbody></table>';
+  }
+
+  let optsHtml = '';
+  q.opts.forEach((opt, i) => {
+    optsHtml += `<button class="opt-btn" id="dopt-${i}" onclick="drillAnswer(${i})">${opt}</button>`;
+  });
+
+  document.getElementById('stage').innerHTML = `
+    <div class="card">
+      <span class="card-tag tag-drill">🎯 ${step.title} — Question ${idx + 1} of ${qs.length}</span>
+      <div id="drill-tracker">${dots}</div>
+      ${refHtml}
+      <h2 class="q-title">${q.q}</h2>
+      <div class="options" id="drill-opts">${optsHtml}</div>
+      <div id="feedback-box"></div>
+    </div>`;
+}
+
+function drillAnswer(chosen) {
+  const { qs, idx } = drillState;
+  const q = qs[idx];
+  const correct = chosen === q.ans;
+
+  // disable all buttons
+  q.opts.forEach((_, i) => {
+    const btn = document.getElementById(`dopt-${i}`);
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('correct-ans');
+    else if (i === chosen && !correct) btn.classList.add('wrong-ans');
+  });
+
+  // update dot
+  const dot = document.getElementById(`dot-${idx}`);
+  if (dot) {
+    dot.classList.add(correct ? 'correct' : 'wrong');
+    dot.classList.remove('answered');
+  }
+
+  // feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box show ' + (correct ? 'fb-correct' : 'fb-wrong');
+  fb.style.display = 'block';
+  fb.innerHTML = (correct ? '✅ ' : '❌ ') + q.exp;
+
+  if (correct) {
+    drillState.correct++;
+    stars++;
+    updateHeader();
+  } else {
+    drillState.wrong++;
+  }
+  drillState.idx++;
+
+  // next button
+  const nextLabel = drillState.idx < qs.length ? 'Next question →' : 'See result →';
+  fb.innerHTML += `<br><button class="btn btn-next" style="margin-top:10px" onclick="drillNext()">${nextLabel}</button>`;
+}
+
+function drillNext() {
+  if (drillState.idx < drillState.qs.length) {
+    renderDrillQ();
+  } else {
+    // move to next step
+    currentStep++;
+    updateHeader();
+    renderStep();
+  }
+}
+
+// ─────────────────────────────────────────
+//  CHOICE ENGINE
+// ─────────────────────────────────────────
+
+function choiceAnswer(idx, isCorrect, explanation) {
+  const btns = document.querySelectorAll('#choice-opts .opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box show ' + (isCorrect ? 'fb-correct' : 'fb-wrong');
+  fb.style.display = 'block';
+  fb.innerHTML = (isCorrect ? '✅ ' : '❌ ') + explanation;
+
+  if (isCorrect) {
+    const step = steps[currentStep];
+    if (step.entryOnCorrect) {
+      glossaryEntries.push(step.entryOnCorrect);
+      renderPreview();
+    }
+    stars++;
+    updateHeader();
+    fb.innerHTML += `<br><button class="btn btn-next" style="margin-top:10px" onclick="advance()">Continue →</button>`;
+  } else {
+    fb.innerHTML += `<br><button class="btn btn-again" style="margin-top:10px" onclick="renderStep()">Try again →</button>`;
+  }
+}
+
+// ─────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────
+
+function advance() {
+  currentStep++;
+  updateHeader();
+  renderStep();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderStep() {
+  const step = steps[currentStep];
+  if (!step) return;
+
+  if (step.type === 'intro' || step.type === 'choice' || step.type === 'drill-result' || step.type === 'reveal') {
+    document.getElementById('stage').innerHTML = step.render();
+    if (step.type === 'reveal') {
+      document.getElementById('completion-banner').style.display = 'block';
+    }
+  } else if (step.type === 'drill') {
+    startDrill(currentStep);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateHeader() {
+  document.getElementById('step-counter').textContent = `${currentStep + 1} / ${TOTAL_STEPS}`;
+  const pct = Math.round((currentStep / (TOTAL_STEPS - 1)) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('score-display').textContent = `⭐ ${stars}`;
+}
+
+function restartQuiz() {
+  currentStep = 0;
+  stars = 0;
+  glossaryEntries.length = 0;
+  drillState = null;
+  document.getElementById('preview-content').innerHTML = '— your entries will appear here —';
+  document.getElementById('preview-box').style.display = 'none';
+  document.getElementById('completion-banner').style.display = 'none';
+  updateHeader();
+  renderStep();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────
+updateHeader();
+renderStep();
+</script>
+</body>
+</html>
