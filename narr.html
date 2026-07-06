@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Quest: Grammar & Writing Adventure</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #16a085;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --gold: #f1c40f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f7;
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 { margin: 0; color: var(--primary); font-size: 28px; }
+        p.subtitle { margin: 5px 0 0; color: #7f8c8d; font-style: italic; }
+
+        /* Progress Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .stat-card {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .stat-val {
+            font-size: 20px;
+            color: var(--primary);
+            display: block;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: #dcdde1;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Question Styles */
+        .quest-box {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .quest-box.correct { border-color: var(--success); background-color: #f2fbf5; }
+        .quest-box.incorrect { border-color: var(--danger); background-color: #fdf3f2; }
+
+        .quest-txt {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .opt-btn {
+            padding: 12px;
+            background: var(--light);
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .opt-btn:hover:not([disabled]) {
+            background: #e9ecef;
+        }
+
+        .opt-btn.selected-correct {
+            background: var(--success) !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .opt-btn.selected-incorrect {
+            background: var(--danger) !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Feedback text */
+        .feedback-msg {
+            margin-top: 12px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* Writing Sandbox */
+        .prompt-card {
+            background: #fdf9f2;
+            border-left: 5px solid var(--gold);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .toolbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-item {
+            background: #f1f2f6;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px dashed #aaa;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 8px 15px;
+            background: #e0e0e0;
+            color: #999;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .badge.unlocked {
+            background: var(--gold);
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-action {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Story Quest: Settings & Endings</h1>
+        <p class="subtitle">Master grammar mechanics to unlock your creative writing powers!</p>
+    </header>
+
+    <!-- Progress Dashboard (Core Drive 2 Metric Display) -->
+    <div class="dashboard">
+        <div class="stat-card">
+            <span class="stat-val" id="score-display">0 / 14</span>
+            Quest Progress
+        </div>
+        <div class="stat-card">
+            <span class="stat-val" id="xp-display">0 XP</span>
+            Experience Earned
+        </div>
+        <div class="stat-card">
+            <span class="stat-val" id="rank-display">Novice Scribe</span>
+            Writer Rank
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tenses-tab')">Past Tenses Quest</button>
+        <button class="tab-btn" onclick="switchTab('adjectives-tab')">Adjectives Quest</button>
+        <button class="tab-btn" onclick="switchTab('writing-tab')">Guided Writing Sandbox</button>
+    </div>
+
+    <!-- PHASE 1: PAST TENSES QUEST -->
+    <div id="tenses-tab" class="tab-content active">
+        <div id="tenses-questions"></div>
+    </div>
+
+    <!-- PHASE 2: ADJECTIVES QUEST -->
+    <div id="adjectives-tab" class="tab-content">
+        <div id="adjectives-questions"></div>
+    </div>
+
+    <!-- PHASE 3: GUIDED WRITING SANDBOX -->
+    <div id="writing-tab" class="tab-content">
+        <div class="prompt-card">
+            <h3>Your Mission: The Grand Escape</h3>
+            <p><strong>Scenario:</strong> You discover a secret, rusty door hidden behind the tall bushes at the corner of the school playground. You hear a mysterious ticking sound behind it.</p>
+        </div>
+
+        <h3>Writer's Toolbox (Live Validation Checklist)</h3>
+        <div class="toolbox-grid">
+            <div class="tool-item"><input type="checkbox" id="chk-past" disabled> <span>Past Tense Verb</span></div>
+            <div class="tool-item"><input type="checkbox" id="chk-adj" disabled> <span>Descriptive Adjective</span></div>
+            <div class="tool-item"><input type="checkbox" id="chk-sensory" disabled> <span>Sensory Detail</span></div>
+            <div class="tool-item"><input type="checkbox" id="chk-length" disabled> <span>At least 20 words</span></div>
+        </div>
+
+        <textarea id="writing-input" placeholder="Type your story opening or ending here... Use past tenses and descriptive words!" oninput="validateWriting()"></textarea>
+        
+        <div style="text-align: right;">
+            <button class="btn-action" onclick="claimWritingXP()">Submit to the Guild</button>
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #ddd; margin: 30px 0;">
+    
+    <div style="text-align: center;">
+        <h3>Unlocked Achievement Badges</h3>
+        <div class="badge-container">
+            <span class="badge" id="badge-tense">Time Traveler (Tenses Mastered)</span>
+            <span class="badge" id="badge-adj">Word Painter (Adjectives Mastered)</span>
+            <span class="badge" id="badge-author">Guild Author (Writing Completed)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Question Databases
+    const tenseQuestions = [
+        { q: "Choose the verb that shows an action already happened.", opts: ["runs", "ran", "running", "will run"], ans: 1, hint: "Think about what happened yesterday." },
+        { q: "Identify the past continuous tense phrase in this sentence: 'Children were shouting in the playground.'", opts: ["Children", "shouting", "were shouting", "playground"], ans: 2, hint: "Look for a helper verb paired with an -ing verb." },
+        { q: "Complete the sentence: Seline carefully ______ up the tall school fence.", opts: ["climbs", "climbed", "climbing", "will climb"], ans: 1, hint: "The story matches past actions." },
+        { q: "Which of the following sentences is written entirely in a past tense?", opts: ["Tony looks sad.", "Tony is looking sad.", "Tony looked sad.", "Tony will look sad."], ans: 2, hint: "Look for the sentence ending with an -ed suffix." },
+        { q: "Complete the ongoing past action: Teachers ______ cold drinks while watching the children.", opts: ["are sipping", "were sipping", "sipped", "sip"], ans: 1, hint: "It was an action happening continuously in the past." },
+        { q: "What is the past tense form of the action word 'to catch'?", opts: ["catched", "catches", "caught", "catching"], ans: 2, hint: "This is an irregular verb—it changes its spelling entirely!" },
+        { q: "Identify the past tense verb in this line: 'The ball flew over the fence.'", opts: ["ball", "flew", "over", "fence"], ans: 1, hint: "Which word tells you what the ball *did*?" }
+    ];
+
+    const adjQuestions = [
+        { q: "Which word is an adjective describing a noun?", opts: ["playground", "busy", "running", "shouted"], ans: 1, hint: "Which word tells us *what kind* of playground it was?" },
+        { q: "In the phrase 'excited children', which word is the adjective?", opts: ["excited", "children", "both words", "neither word"], ans: 0, hint: "Identify the word that describes the feelings of the children." },
+        { q: "Pick the best adjectives to describe a creepy, abandoned house setting.", opts: ["Bright and sunny", "Spooky and dark", "Loud and busy", "Clean and new"], ans: 1, hint: "Choose words that invoke mystery and fear." },
+        { q: "Identify the adjective in this sentence: 'Tony watched his favorite ball land in a tree.'", opts: ["watched", "favorite", "ball", "land"], ans: 1, hint: "Which word shows how much Tony valued that specific ball?" },
+        { q: "Which word describes the cold drinks the teachers were sipping?", opts: ["teachers", "sipping", "cold", "drinks"], ans: 2, hint: "Look for the sensory word describing temperature." },
+        { q: "Select the adjective that tells you about size: 'The tiny cat was stuck up a tall tree.'", opts: ["tiny", "cat", "stuck", "up"], ans: 0, hint: "Which word explains how small the animal is?" },
+        { q: "Why do story writers use descriptive adjectives when painting settings?", opts: ["To make sentences longer", "To help readers imagine the scene", "To list character names", "To ask questions"], ans: 1, hint: "Think about building a picture in the reader's mind." }
+    ];
+
+    // App State
+    let score = 0;
+    let xp = 0;
+    let tensesCorrect = 0;
+    let adjectivesCorrect = 0;
+    let writingSubmitted = false;
+
+    // Word lists for quick client-side toolbox verification
+    const samplePastVerbs = ['was', 'were', 'had', 'did', 'said', 'asked', 'ran', 'walked', 'shouted', 'looked', 'climbed', 'jumped', 'sat', 'watched', 'heard', 'discovered', 'decided', 'ed '];
+    const sampleAdjectives = ['busy', 'hot', 'cold', 'excited', 'competitive', 'cool', 'quiet', 'fruit', 'worried', 'sad', 'favourite', 'long', 'disappointed', 'taller', 'concerned', 'big', 'small', 'rusty', 'secret', 'tall', 'mysterious'];
+    const sampleSensory = ['hear', 'heard', 'listen', 'sound', 'ticking', 'see', 'saw', 'look', 'looked', 'smell', 'scent', 'aroma', 'touch', 'feel', 'felt', 'cold', 'hot', 'loud', 'quiet'];
+
+    // Render Quizzes
+    function renderQuiz(questions, containerId, dynamicPrefix) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        
+        questions.forEach((q, qIdx) => {
+            const box = document.createElement('div');
+            box.className = 'quest-box';
+            box.id = `${dynamicPrefix}-qbox-${qIdx}`;
+            
+            const qText = document.createElement('div');
+            qText.className = 'quest-txt';
+            qText.innerText = `${qIdx + 1}. ${q.q}`;
+            box.appendChild(qText);
+            
+            const optGrid = document.createElement('div');
+            optGrid.className = 'options-grid';
+            
+            q.opts.forEach((opt, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(dynamicPrefix, qIdx, oIdx, q.ans, box, optGrid);
+                optGrid.appendChild(btn);
+            });
+            
+            box.appendChild(optGrid);
+            
+            const feedback = document.createElement('div');
+            feedback.className = 'feedback-msg';
+            feedback.id = `${dynamicPrefix}-feed-${qIdx}`;
+            box.appendChild(feedback);
+            
+            container.appendChild(box);
+        });
+    }
+
+    function checkAnswer(prefix, qIdx, selectedIdx, correctIdx, box, optGrid) {
+        const buttons = optGrid.querySelectorAll('.opt-btn');
+        buttons.forEach(btn => btn.disabled = true); // Prevent multi-clicks
+
+        const feedback = document.getElementById(`${prefix}-feed-${qIdx}`);
+        feedback.style.display = "block";
+
+        if (selectedIdx === correctIdx) {
+            buttons[selectedIdx].classList.add('selected-correct');
+            box.classList.add('correct');
+            feedback.innerText = "🎉 Correct! +10 XP gained.";
+            feedback.style.color = "var(--success)";
+            
+            score++;
+            xp += 10;
+            if (prefix === 'tense') tensesCorrect++;
+            if (prefix === 'adj') adjectivesCorrect++;
+        } else {
+            buttons[selectedIdx].classList.add('selected-incorrect');
+            buttons[correctIdx].classList.add('selected-correct');
+            box.classList.add('incorrect');
+            
+            const hintStr = prefix === 'tense' ? tenseQuestions[qIdx].hint : adjQuestions[qIdx].hint;
+            feedback.innerText = `❌ Not quite. Hint: ${hintStr}`;
+            feedback.style.color = "var(--danger)";
+        }
+        
+        updateDashboard();
+    }
+
+    function validateWriting() {
+        const text = document.getElementById('writing-input').value.toLowerCase();
+        
+        const hasPast = samplePastVerbs.some(verb => text.includes(verb)) || text.match(/\b\w+ed\b/);
+        const hasAdj = sampleAdjectives.some(adj => text.includes(adj));
+        const hasSensory = sampleSensory.some(sense => text.includes(sense));
+        const hasLength = text.trim().split(/\s+/).filter(w => w.length > 0).length >= 20;
+
+        document.getElementById('chk-past').checked = !!hasPast;
+        document.getElementById('chk-adj').checked = !!hasAdj;
+        document.getElementById('chk-sensory').checked = !!hasSensory;
+        document.getElementById('chk-length').checked = hasLength;
+    }
+
+    function claimWritingXP() {
+        if (writingSubmitted) {
+            alert("This narrative has already been turned into the Guild log!");
+            return;
+        }
+        
+        const text = document.getElementById('writing-input').value.trim();
+        if (text.length < 10) {
+            alert("Draft your entry before turning it into the guild master!");
+            return;
+        }
+
+        writingSubmitted = true;
+        xp += 50;
+        alert("📜 Story documented! You have been awarded +50 Master Scribe XP!");
+        updateDashboard();
+    }
+
+    function updateDashboard() {
+        document.getElementById('score-display').innerText = `${score} / 14`;
+        document.getElementById('xp-display').innerText = `${xp} XP`;
+        
+        // Dynamic Ranking Updates
+        let rank = "Novice Scribe";
+        if (xp >= 50) rank = "Word Apprentice";
+        if (xp >= 100) rank = "Lore Keeper";
+        if (xp >= 150) rank = "Grand Storyteller";
+        document.getElementById('rank-display').innerText = rank;
+
+        // Badge Unlocks (Accomplishment Feedback Loop)
+        if (tensesCorrect >= 5) document.getElementById('badge-tense').classList.add('unlocked');
+        if (adjectivesCorrect >= 5) document.getElementById('badge-adj').classList.add('unlocked');
+        if (writingSubmitted) document.getElementById('badge-author').classList.add('unlocked');
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // Initialization
+    window.onload = () => {
+        renderQuiz(tenseQuestions, 'tenses-questions', 'tense');
+        renderQuiz(adjQuestions, 'adjectives-questions', 'adj');
+    };
+</script>
+
+</body>
+</html>
