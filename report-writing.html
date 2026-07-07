@@ -3,565 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Journalist Bootcamp: Reporting Danger</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>News Reporter Quest: Reporting Danger</title>
     <style>
-        .locked-stage { filter: grayscale(1) opacity(0.5); pointer-events: none; }
+        :root {
+            --primary: #2c3e50;
+            --secondary: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gold: #f1c40f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 { margin: 0; color: var(--primary); font-size: 28px; }
+        .subtitle { margin: 5px 0 0 0; color: #7f8c8d; font-size: 14px; }
+
+        /* Dashboard Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: var(--light);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .stat-item span { color: var(--secondary); }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .tab-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Tab Content Panel Layout */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        .instruction-box {
+            background-color: #ebf5fb;
+            border-left: 4px solid var(--secondary);
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+        }
+
+        /* Quiz Elements */
+        .question-block {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .question-text { font-weight: 600; margin-bottom: 10px; font-size: 14px; }
+        .options-list { list-style: none; padding: 0; margin: 0; }
+        .options-list li { margin-bottom: 8px; }
+        
+        .option-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .option-btn:hover { background: #f0f0f0; }
+        .option-btn.correct { background: #d4edda !important; border-color: var(--success); color: #155724; }
+        .option-btn.wrong { background: #f8d7da !important; border-color: var(--danger); color: #721c24; }
+
+        .fill-input {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-weight: bold;
+            color: var(--secondary);
+            width: 120px;
+            text-align: center;
+        }
+
+        .check-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Writing Section */
+        .writing-zone {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+        .writing-zone h3 { margin-top: 0; color: var(--primary); font-size: 16px; }
+        .writing-zone textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        .save-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Final Showcase Page styling */
+        .newspaper-preview {
+            background: #fffdf9;
+            border: 2px solid #ddd;
+            padding: 25px;
+            border-radius: 5px;
+            font-family: 'Georgia', serif;
+            color: #111;
+            margin-top: 20px;
+        }
+        .newspaper-preview h2 { text-align: center; text-transform: uppercase; font-size: 24px; margin-bottom: 5px; }
+        .newspaper-preview h4 { text-align: center; font-style: italic; color: #555; margin: 0 0 15px 0; font-weight: normal; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .newspaper-preview p { line-height: 1.6; font-size: 15px; text-indent: 20px; margin: 0 0 12px 0; }
+
+        .badge-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .badge {
+            background: #e0e0e0;
+            color: #999;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge.unlocked {
+            background: var(--gold);
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body>
 
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-amber-400">PRESS CORE: REPORTING DANGER</h1>
-                <p class="text-xs text-slate-400 mt-1">Instructional Design Unit 11: Global News Reporting Simulation</p>
-            </div>
-            <div class="flex items-center gap-6 w-full md:w-auto justify-end">
-                <div class="text-right">
-                    <span class="text-xs uppercase tracking-wider text-slate-400">Score Tracker</span>
-                    <div class="text-xl font-extrabold text-emerald-400" id="xp-counter">0 XP</div>
-                </div>
-                <div class="w-48 bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
-                    <div id="global-progress" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-full w-0 transition-all duration-500"></div>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <header>
+        <h1>News Reporter Quest</h1>
+        <p class="subtitle">Unit 11: Reporting Danger (Global Heatwave Crisis)</p>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="stats-bar">
+        <div class="stat-item">Score: <span id="score-display">0 / 6</span></div>
+        <div class="stat-item">XP Earned: <span id="xp-display">0 XP</span></div>
+        <div class="stat-item">Rank: <span id="rank-display">Cub Reporter</span></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('tab1')">Step 1: Headlines</button>
+        <button class="tab-btn" onclick="switchTab('tab2')">Step 2: The Lead</button>
+        <button class="tab-btn" onclick="switchTab('tab3')">Step 3: Quotes</button>
+        <button class="tab-btn" onclick="switchTab('tab4')">Step 4: Final Story</button>
+    </div>
+
+    <div id="tab1" class="tab-content active">
+        <div class="instruction-box">
+            <strong>Goal:</strong> Learn common news word pairs (collocations) to write an attention-grabbing headline.
+        </div>
+
+        <h3>Grammar Drill: Collocation Matching</h3>
         
-        <section class="lg:grid-cols-1 lg:col-span-4 space-y-4">
-            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800">
-                <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400 mb-4">Assignment Stages</h2>
-                <div class="space-y-3" id="stages-list-container">
-                    </div>
-            </div>
+        <div class="question-block">
+            <p class="question-text">1. Fill in the missing news word: "Yesterday, regional temperatures <input type="text" id="blank1" class="fill-input" placeholder="soared/melted"> past 45°C."</p>
+            <button class="check-btn" onclick="checkFill('blank1', 'soared', 10)">Check Answer</button>
+        </div>
 
-            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 sticky top-28">
-                <h2 class="text-sm font-semibold tracking-wider uppercase text-slate-400 mb-2">Live Teletype Feed</h2>
-                <p class="text-xs text-slate-500 mb-3">Your running news copy compiles automatically below:</p>
-                <div class="bg-slate-900 p-4 rounded border border-slate-800 font-mono text-xs text-amber-100/90 space-y-3 whitespace-pre-wrap min-h-[200px]" id="live-wire-preview">
-                    <div class="text-slate-600 italic">[No copy drafted yet. Complete stages to transmit content.]</div>
-                </div>
-            </div>
-        </section>
+        <div class="question-block">
+            <p class="question-text">2. Fill in the missing news word: "The intense, baking <input type="text" id="blank2" class="fill-input" placeholder="heat/ice"> caused extreme water restrictions."</p>
+            <button class="check-btn" onclick="checkFill('blank2', 'heat', 10)">Check Answer</button>
+        </div>
 
-        <section class="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-xl p-6 shadow-2xl min-h-[600px]">
-            <div id="workspace-dynamic-content">
-                </div>
-        </section>
-    </main>
-
-    <script>
-        // APPLICATION LEVEL ARCHITECTURE DATA (UNIT 11 MAPPED STATE)
-        const appState = {
-            xp: 0,
-            currentStage: 1,
-            maxUnlockedStage: 1,
-            drafts: {
-                headline: "",
-                subheadline: "",
-                leadParagraph: "",
-                bodyParagraph: "",
-                quotesParagraph: ""
-            },
-            stages: [
-                {
-                    id: 1,
-                    title: "Headline & Wire Setup",
-                    objective: "Master Journalistic Collocations to hook specific target audiences",
-                    grammarConcept: "Targeted News Collocations",
-                    instructions: "Before writing your headline, pass the editorial test on common weather collocations used by international correspondents.",
-                    quiz: {
-                        type: "matching",
-                        question: "Match the natural disaster keyword to its textbook journalistic collocation:",
-                        pairs: [
-                            { word: "Temperatures", match: "soared" },
-                            { word: "Baking", match: "heat" },
-                            { word: "Roads", match: "melted" },
-                            { word: "Water", match: "restrictions" }
-                        ]
-                    },
-                    creative: {
-                        prompt: "Write your Headline and Sub-headline for the European Heatwave. Make sure the headline captures attention (e.g., includes location) and the sub-headline offers a clear summary.",
-                        fields: [
-                            { id: "headline", label: "Main Headline (UPPERCASE preferred)", placeholder: "EUROPE HIT BY RECORD TEMPERATURES AS COUNTRIES FACE DROUGHT" },
-                            { id: "subheadline", label: "Sub-Headline (Explanatory sentence)", placeholder: "Baking heat forces water restrictions across multiple administrative zones." }
-                        ]
-                    }
-                },
-                {
-                    id: 2,
-                    title: "The Inverted Lead",
-                    objective: "Formulate core facts first using the Inverted Pyramid layout and the Passive Voice",
-                    grammarConcept: "Passive Voice Tenses",
-                    instructions: "Journalists utilize the passive voice to highlight *what happened to people or places* rather than focusing on the actor. Match the sentences to their correct passive tense.",
-                    quiz: {
-                        type: "mcq",
-                        questions: [
-                            {
-                                text: "'All regional records have been shattered by the current heatwave.' Which passive tense is used?",
-                                options: ["Past Simple Passive", "Present Perfect Passive", "Past Perfect Passive", "Present Continuous Passive"],
-                                correct: 1,
-                                exp: "Present Perfect Passive uses 'have/has been + past participle'."
-                            },
-                            {
-                                text: "'Water supplies were cut off to agricultural zones early Tuesday.' Which passive tense is used?",
-                                options: ["Past Simple Passive", "Future Simple Passive", "Present Conditional Passive", "Passive Infinitive"],
-                                correct: 0,
-                                exp: "Past Simple Passive uses 'was/were + past participle'."
-                            }
-                        ]
-                    },
-                    creative: {
-                        prompt: "Draft your Lead Paragraph. You must include the core newsworthy metrics (What, Where, When, Who) and integrate at least one Passive Voice structure (e.g., 'was hit by', 'have been affected').",
-                        fields: [
-                            { id: "leadParagraph", label: "Lead Paragraph (Paragraph 1 - Core Facts)", placeholder: "Southern Europe was hit by unprecedented temperatures on Tuesday as several metropolitan areas have been affected by collapsing utility grids..." }
-                        ]
-                    }
-                },
-                {
-                    id: 3,
-                    title: "Analyzing the Scale",
-                    objective: "Utilize emotive vocabulary and complex sentences to outline regional impact metrics",
-                    grammarConcept: "Emotive Vocabulary & Scale",
-                    instructions: "Select words that provoke immediate, strong emotional impact to accurately reflect the danger of a major global incident.",
-                    quiz: {
-                        type: "sorting",
-                        question: "Identify the word that carries an intense, 'emotive' journalistic payload instead of a neutral one.",
-                        items: [
-                            { choice: "A 'bleak position' regarding water reserves", correct: true },
-                            { choice: "A 'low amount' of water reserves", correct: false },
-                            { choice: "A 'stunning turnaround' in local operations", correct: true },
-                            { choice: "A 'noticeable change' in local operations", correct: false }
-                        ]
-                    },
-                    creative: {
-                        prompt: "Write your Body Paragraph details. Describe specific metrics of how the high temperatures impacted infrastructure, agriculture, and the regional populations.",
-                        fields: [
-                            { id: "bodyParagraph", label: "Infrastructure Impact (Paragraph 2)", placeholder: "As asphalt melted under the baking heat, rivers burst their banks due to sudden glacier recessions, throwing transit systems into a bleak position..." }
-                        ]
-                    }
-                },
-                {
-                    id: 4,
-                    title: "Witness Testimony & Sourcing",
-                    objective: "Integrate direct quotations and reported speech to construct a multi-perspective balance",
-                    grammarConcept: "Direct vs. Reported Speech Mechanics",
-                    instructions: "Ensure direct quotes use proper punctuation marks and reported speech correctly drops the punctuation quotes when delivering the gist of an interaction.",
-                    quiz: {
-                        type: "mcq",
-                        questions: [
-                            {
-                                text: "Identify the correct structure for a Direct Quotation:",
-                                options: [
-                                    "The meteorologist claimed that temperatures will climb higher.",
-                                    "The meteorologist claimed, \"Temperatures will climb higher next week.\"",
-                                    "The meteorologist claimed \"that temperatures will climb higher\""
-                                ],
-                                correct: 1,
-                                exp: "Direct quotes use explicit speech marks enclosing the exact phrase spoken."
-                            }
-                        ]
-                    },
-                    creative: {
-                        prompt: "Incorporate Quotes and Perspectives. Provide one direct quote from a climate official or emergency personnel, and one sentence of reported speech outlining what experts are recommending.",
-                        fields: [
-                            { id: "quotesParagraph", label: "Sourcing & Expert Testimony (Paragraph 3)", placeholder: "The Prime Minister stated, \"Emergency funds are being deployed immediately.\" Concurrently, meteorologists reported that conditions would remain static until Friday." }
-                        ]
-                    }
-                },
-                {
-                    id: 5,
-                    title: "Editorial Cohesion Review",
-                    objective: "Apply cohesive relative and demonstrative reference pronouns for seamless flow",
-                    grammarConcept: "Cohesive Pronoun References",
-                    instructions: "Review how pronouns create a unified chain of reading experiences rather than disconnected, isolated events of text.",
-                    quiz: {
-                        type: "matching",
-                        question: "Match the bolded pronoun reference token to its logical target anchor:",
-                        pairs: [
-                            { word: "Officials warned residents. **They** ordered evacuations.", match: "Officials" },
-                            { word: "The heatwave hit towns. **Those** were left deserted.", match: "Towns" },
-                            { word: "Deploying the emergency apparatus to protect **them**.", match: "Residents" }
-                        ]
-                    },
-                    creative: {
-                        prompt: "Your copy is nearly complete. Review your gathered work and add a final concluding sentence wrapping up the long-term outlook. Use cohesive references (e.g., 'this crisis', 'those affected').",
-                        fields: [
-                            { id: "closingSentence", label: "Final Concluding Line", placeholder: "Resolving this crisis will take weeks, but support for those affected is expanding across neighboring territories." }
-                        ]
-                    }
-                }
-            ]
-        };
-
-        // DOM ANCHORS
-        const stagesContainer = document.getElementById("stages-list-container");
-        const workspace = document.getElementById("workspace-dynamic-content");
-        const liveWirePreview = document.getElementById("live-wire-preview");
-        const xpCounter = document.getElementById("xp-counter");
-        const globalProgressBar = document.getElementById("global-progress");
-
-        // CORE RUNTIME FUNCTIONS
-        function initializeApp() {
-            renderMap();
-            loadStage(appState.currentStage);
-            updateGlobalUI();
-        }
-
-        function updateGlobalUI() {
-            xpCounter.textContent = `${appState.xp} XP`;
-            const completedCount = Object.values(appState.drafts).filter(x => x.trim().length > 0).length;
-            const progressPct = Math.min(100, Math.floor((completedCount / 5) * 100));
-            globalProgressBar.style.width = `${progressPct}%`;
-            renderLiveTeletype();
-        }
-
-        function renderMap() {
-            stagesContainer.innerHTML = "";
-            appState.stages.forEach((stage) => {
-                const isLocked = stage.id > appState.maxUnlockedStage;
-                const isActive = stage.id === appState.currentStage;
-                
-                const card = document.createElement("button");
-                card.className = `w-full text-left p-3 rounded-lg border transition-all text-sm flex items-start gap-3 ${
-                    isLocked ? "locked-stage bg-slate-900/40 border-slate-800 text-slate-500" :
-                    isActive ? "bg-amber-950/40 border-amber-500/80 text-amber-200 shadow shadow-amber-500/20" :
-                    "bg-slate-900 hover:bg-slate-850 border-slate-800 text-slate-300"
-                }`;
-                
-                card.onclick = () => {
-                    if (!isLocked) {
-                        appState.currentStage = stage.id;
-                        renderMap();
-                        loadStage(stage.id);
-                    }
-                };
-
-                card.innerHTML = `
-                    <div class="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs ${
-                        isActive ? "bg-amber-500 text-slate-950" : "bg-slate-800 text-slate-400"
-                    }">
-                        ${stage.id}
-                    </div>
-                    <div>
-                        <div class="font-bold flex items-center gap-2">
-                            ${stage.title}
-                            ${stage.id < appState.maxUnlockedStage ? " <span class='text-emerald-400 text-xs'>✓</span>" : ""}
-                        </div>
-                        <div class="text-xs text-slate-400 line-clamp-1 mt-0.5">${stage.objective}</div>
-                    </div>
-                `;
-                stagesContainer.appendChild(card);
-            });
-        }
-
-        function renderLiveTeletype() {
-            let hasContent = false;
-            let compiledText = "";
-
-            if (appState.drafts.headline) {
-                compiledText += `<h1 class="text-center font-black text-lg text-amber-400 uppercase tracking-tight">${appState.drafts.headline}</h1>\n`;
-                hasContent = true;
-            }
-            if (appState.drafts.subheadline) {
-                compiledText += `<p class="text-center font-semibold text-sm text-slate-300 italic max-w-xl mx-auto border-b border-slate-800 pb-3">${appState.drafts.subheadline}</p>\n\n`;
-                hasContent = true;
-            }
-            if (appState.drafts.leadParagraph) {
-                compiledText += `<p class="leading-relaxed text-sm drop-shadow"><span class="bg-amber-500 text-slate-950 font-bold px-1 rounded mr-1">DATELINE</span> ${appState.drafts.leadParagraph}</p>\n\n`;
-                hasContent = true;
-            }
-            if (appState.drafts.bodyParagraph) {
-                compiledText += `<p class="leading-relaxed text-sm text-slate-300">${appState.drafts.bodyParagraph}</p>\n\n`;
-                hasContent = true;
-            }
-            if (appState.drafts.quotesParagraph) {
-                compiledText += `<p class="leading-relaxed text-sm text-slate-300">${appState.drafts.quotesParagraph}</p>\n\n`;
-                hasContent = true;
-            }
-            if (appState.drafts.closingSentence) {
-                compiledText += `<p class="leading-relaxed text-sm text-slate-300 border-l-2 border-emerald-500 pl-3 italic">${appState.drafts.closingSentence}</p>\n`;
-                hasContent = true;
-            }
-
-            if (!hasContent) {
-                liveWirePreview.innerHTML = `<div class="text-slate-600 italic">[No copy drafted yet. Complete stages to transmit content.]</div>`;
-            } else {
-                liveWirePreview.innerHTML = compiledText;
-            }
-        }
-
-        function loadStage(stageId) {
-            const stage = appState.stages.find(s => s.id === stageId);
-            let html = `
-                <div class="space-y-4">
-                    <div class="border-b border-slate-800 pb-4">
-                        <span class="text-xs font-bold text-amber-400 uppercase tracking-widest bg-amber-950/60 border border-amber-900 px-2 py-1 rounded">Stage Objective ${stage.id} of 5</span>
-                        <h2 class="text-2xl font-extrabold mt-2 text-slate-100">${stage.title}</h2>
-                        <p class="text-slate-300 text-sm mt-1 font-medium"><strong class="text-amber-300">Target Objective:</strong> ${stage.objective}</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-4">
-                        <h3 class="text-xs uppercase font-bold text-slate-400 tracking-wider mb-1">Grammar & Conceptual Blueprint</h3>
-                        <p class="text-sm text-slate-300">${stage.instructions}</p>
-                    </div>
-
-                    <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-5" id="drill-box-container">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-amber-400 flex items-center gap-2">
-                                <span>⚡ PHASE A: INTERACTIVE COPY-EDIT DRILL</span>
-                            </h4>
-                            <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-400 font-mono">+100 XP Challenge</span>
-                        </div>
-                        <div id="drill-interactive-payload"></div>
-                        <div id="drill-feedback" class="mt-4 hidden p-3 rounded text-sm font-medium"></div>
-                    </div>
-
-                    <div class="bg-slate-900/20 border border-dashed border-slate-800 rounded-lg p-5 opacity-40 pointer-events-none transition-all duration-300" id="creative-box-container">
-                        <h4 class="text-sm font-bold text-emerald-400 flex items-center gap-2 mb-3">
-                            <span>✍️ PHASE B: CREATIVE WIRE PRODUCTION</span>
-                        </h4>
-                        <p class="text-xs text-slate-300 mb-4">${stage.creative.prompt}</p>
-                        <div class="space-y-4">
-            `;
-
-            stage.creative.fields.forEach(f => {
-                const val = appState.drafts[f.id] || "";
-                html += `
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">${f.label}</label>
-                        <textarea id="input-field-${f.id}" class="w-full bg-slate-950 border border-slate-800 rounded p-3 text-sm font-sans focus:outline-none focus:border-emerald-500 text-slate-100 placeholder-slate-700 h-24" placeholder="${f.placeholder}">${val}</textarea>
-                    </div>
-                `;
-            });
-
-            html += `
-                        <button onclick="commitCreativeCopy(${stage.id})" class="mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm px-6 py-2.5 rounded shadow hover:from-emerald-500 hover:to-teal-500 transition-all flex items-center gap-2 cursor-pointer">
-                            <span>Save Segment & Advance Wire</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            workspace.innerHTML = html;
-            injectStageDrill(stage);
-        }
-
-        function injectStageDrill(stage) {
-            const container = document.getElementById("drill-interactive-payload");
+        <div class="writing-zone">
+            <h3>Your News Story: Part 1</h3>
+            <p class="subtitle">Write your main Headline (in UPPERCASE) and an introductory Sub-headline below:</p>
+            <label style="font-size:12px; font-weight:bold;">Main Headline:</label>
+            <textarea id="draft-headline" placeholder="e.g., EUROPE HIT BY RECORD HEATWAVE"></textarea>
             
-            if (stage.quiz.type === "matching") {
-                let itemsHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Base Concept</p><div class="space-y-2">`;
-                stage.quiz.pairs.forEach((p, idx) => {
-                    itemsHTML += `<div class="bg-slate-900 p-2 text-sm font-mono border border-slate-800 rounded flex justify-between items-center">${p.word} 
-                        <select id="match-select-${idx}" class="bg-slate-950 border border-slate-700 text-xs rounded p-1 text-amber-300 focus:outline-none">
-                            <option value="">-- select --</option>
-                            ${stage.quiz.pairs.map(opt => `<option value="${opt.match}">${opt.match}</option>`).join('')}
-                        </select></div>`;
-                });
-                itemsHTML += `</div></div><div class="flex flex-col justify-between pt-6"><button onclick="verifyMatchingDrill(${stage.id})" class="w-full bg-amber-600 hover:bg-amber-500 font-bold text-xs py-2.5 rounded tracking-wide text-slate-950 cursor-pointer">VALIDATE MATCHES</button></div></div>`;
-                container.innerHTML = itemsHTML;
-            } 
-            else if (stage.quiz.type === "mcq") {
-                let itemsHTML = `<div class="space-y-4">`;
-                stage.quiz.questions.forEach((q, qIdx) => {
-                    itemsHTML += `<div><p class="text-sm text-slate-200 font-medium mb-2">${q.text}</p><div class="space-y-2">`;
-                    q.options.forEach((opt, optIdx) => {
-                        itemsHTML += `<label class="flex items-center gap-3 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs cursor-pointer">
-                            <input type="radio" name="stage-mcq-${qIdx}" value="${optIdx}" class="text-amber-500 focus:ring-0">
-                            <span>${opt}</span>
-                        </label>`;
-                    });
-                    itemsHTML += `</div></div>`;
-                });
-                itemsHTML += `<button onclick="verifyMcqDrill(${stage.id})" class="bg-amber-600 hover:bg-amber-500 font-bold text-xs py-2.5 px-6 rounded tracking-wide text-slate-950 cursor-pointer">VERIFY RESPONSES</button></div>`;
-                container.innerHTML = itemsHTML;
-            }
-            else if (stage.quiz.type === "sorting") {
-                let itemsHTML = `<div class="space-y-3"><p class="text-xs font-semibold text-slate-400">${stage.quiz.question}</p><div class="grid grid-cols-1 gap-2">`;
-                stage.quiz.items.forEach((item, idx) => {
-                    itemsHTML += `<label class="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs cursor-pointer">
-                        <input type="checkbox" id="sort-check-${idx}" class="text-amber-500 focus:ring-0">
-                        <span>${item.choice}</span>
-                    </label>`;
-                });
-                itemsHTML += `</div><button onclick="verifySortingDrill(${stage.id})" class="bg-amber-600 hover:bg-amber-500 font-bold text-xs py-2.5 px-6 rounded tracking-wide text-slate-950 cursor-pointer">SUBMIT SELECTIONS</button></div>`;
-                container.innerHTML = itemsHTML;
-            }
+            <label style="font-size:12px; font-weight:bold;">Sub-headline:</label>
+            <textarea id="draft-subheadline" placeholder="e.g., Baking heat forces sudden water restrictions across cities."></textarea>
+            <button class="save-btn" onclick="saveDraft('Step 1 Saved!')">Save Headline Parts</button>
+        </div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <div class="instruction-box">
+            <strong>Goal:</strong> Use the Inverted Pyramid to put the most important facts first, and use the passive voice to stress what happened.
+        </div>
+
+        <h3>Grammar Drill: Passive Voice Identification</h3>
+
+        <div class="question-block">
+            <p class="question-text">1. Which sentence uses the <strong>Present Perfect Passive voice</strong>?</p>
+            <ul class="options-list">
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 0, 10)">The heatwave is breaking records today.</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, true, 0, 10)">All local records have been broken by the heatwave.</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 0, 10)">The heatwave broke records early on Tuesday.</button></li>
+            </ul>
+        </div>
+
+        <div class="question-block">
+            <p class="question-text">2. Which sentence uses the <strong>Past Simple Passive voice</strong>?</p>
+            <ul class="options-list">
+                <li><button class="option-btn" onclick="checkMCQ(this, true, 1, 10)">Emergency water supplies were cut off yesterday.</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 1, 10)">Authorities cut off water supplies yesterday.</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 1, 10)">Water supplies are running out quickly.</button></li>
+            </ul>
+        </div>
+
+        <div class="writing-zone">
+            <h3>Your News Story: Part 2</h3>
+            <p class="subtitle">Write your main Lead Paragraph here. Tell the readers exactly <strong>What, Where, and When</strong> it happened. Try using a passive phrase like <i>"was hit by"</i> or <i>"have been affected"</i>.</p>
+            <textarea id="draft-lead" placeholder="Write your lead paragraph here..."></textarea>
+            <button class="save-btn" onclick="saveDraft('Step 2 Saved!')">Save Lead Paragraph</button>
+        </div>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <div class="instruction-box">
+            <strong>Goal:</strong> Add balance by including properly punctuated direct quotes and linking pronouns like <i>they</i>, <i>this</i>, or <i>those</i>.
+        </div>
+
+        <h3>Grammar Drill: Punctuation & Pronoun Links</h3>
+
+        <div class="question-block">
+            <p class="question-text">1. Choose the correctly punctuated <strong>Direct Quotation</strong>:</p>
+            <ul class="options-list">
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 2, 10)">The mayor stated "that emergency cooling centers are open."</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 2, 10)">The mayor stated, Emergency cooling centers are open.</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, true, 2, 10)">The mayor stated, "Emergency cooling centers are open."</button></li>
+            </ul>
+        </div>
+
+        <div class="question-block">
+            <p class="question-text">2. Look at these sentences: <i>"Officials warned residents to stay indoors. <b>They</b> opened cooling spaces."</i> Who does the word <b>They</b> refer to?</p>
+            <ul class="options-list">
+                <li><button class="option-btn" onclick="checkMCQ(this, true, 3, 10)">Officials</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 3, 10)">Residents</button></li>
+                <li><button class="option-btn" onclick="checkMCQ(this, false, 3, 10)">Cooling spaces</button></li>
+            </ul>
+        </div>
+
+        <div class="writing-zone">
+            <h3>Your News Story: Part 3</h3>
+            <p class="subtitle">Write a paragraph containing context details, a direct quote from an official, and a concluding remark about what will happen next.</p>
+            <textarea id="draft-body" placeholder="Write your body paragraph and quotes here..."></textarea>
+            <button class="save-btn" onclick="saveDraft('Step 3 Saved!')">Save Body & Quotes</button>
+        </div>
+    </div>
+
+    <div id="tab4" class="tab-content">
+        <div class="instruction-box">
+            <strong>Review and Print:</strong> Your pieces have been automatically stitched together into a complete newspaper layout! Check your work and copy it down.
+        </div>
+
+        <button class="save-btn" style="background-color: var(--secondary);" onclick="compileStory()">⚡ Update & Compile Final Story</button>
+
+        <div class="newspaper-preview">
+            <h2 id="print-headline">YOUR HEADLINE GOES HERE</h2>
+            <h4 id="print-subheadline">Your subheadline goes here...</h4>
+            <p id="print-lead">Your introductory facts will compile here once you complete Step 2.</p>
+            <p id="print-body">Your quotes and supporting details will compile here once you complete Step 3.</p>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="save-btn" style="background-color: #2c3e50;" onclick="copyStoryText()">📋 Copy Plaintext Article</button>
+        </div>
+
+        <div class="badge-grid">
+            <div class="badge" id="badge-quiz">Quiz Master</div>
+            <div class="badge" id="badge-writer">Lead Reporter</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State Tracking variables
+    let score = 0;
+    let xp = 0;
+    let answersLogged = {}; 
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        // highlight current active tab button
+        event.currentTarget.classList.add('active');
+        
+        if(tabId === 'tab4') {
+            compileStory();
         }
+    }
 
-        // VERIFICATION PARSERS
-        function unlockCreativePhase() {
-            const creativeBox = document.getElementById("creative-box-container");
-            creativeBox.classList.remove("opacity-40", "pointer-events-none");
-            creativeBox.classList.add("bg-emerald-950/10", "border-emerald-800/40");
-            creativeBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    function checkFill(id, correctVal, points) {
+        let inputEl = document.getElementById(id);
+        if (answersLogged[id]) return; // prevent multiple scoring
+
+        if(inputEl.value.trim().toLowerCase() === correctVal.toLowerCase()) {
+            inputEl.style.backgroundColor = "#d4edda";
+            inputEl.style.borderColor = "var(--success)";
+            score += 1;
+            xp += points;
+            answersLogged[id] = true;
+            alert("Correct choice! +10 XP");
+        } else {
+            inputEl.style.backgroundColor = "#f8d7da";
+            inputEl.style.borderColor = "var(--danger)";
+            alert("Try again! Read the hint or choices in the brackets.");
         }
+        updateDashboard();
+    }
 
-        function triggerFeedback(isCorrect, text) {
-            const box = document.getElementById("drill-feedback");
-            box.classList.remove("hidden", "bg-emerald-900/40", "text-emerald-300", "bg-rose-900/40", "text-rose-300");
-            box.classList.add("block", isCorrect ? "bg-emerald-900/40" : "bg-rose-900/40", isCorrect ? "text-emerald-300" : "text-rose-300");
-            box.innerHTML = text;
-        }
+    function checkMCQ(btnElement, isCorrect, qIndex, points) {
+        if (answersLogged['mcq' + qIndex]) return; 
 
-        window.verifyMatchingDrill = function(stageId) {
-            const stage = appState.stages.find(s => s.id === stageId);
-            let allCorrect = true;
-            stage.quiz.pairs.forEach((p, idx) => {
-                const el = document.getElementById(`match-select-${idx}`);
-                if (el.value !== p.match) allCorrect = false;
-            });
+        let siblingButtons = btnElement.parentElement.parentElement.querySelectorAll('.option-btn');
+        siblingButtons.forEach(btn => btn.disabled = true);
 
-            if (allCorrect) {
-                appState.xp += 100;
-                triggerFeedback(true, "🎉 Copy-edit verified! Collocation chains verified by head editor. Creative Phase unlocked.");
-                unlockCreativePhase();
-                updateGlobalUI();
-            } else {
-                triggerFeedback(false, "❌ Incorrect pairing metrics. Look closely at standard combinations listed in the textbook documentation.");
-            }
-        };
-
-        window.verifyMcqDrill = function(stageId) {
-            const stage = appState.stages.find(s => s.id === stageId);
-            let answersCorrect = true;
-            let combinedExplanation = "";
-
-            stage.quiz.questions.forEach((q, qIdx) => {
-                const selected = document.querySelector(`input[name="stage-mcq-${qIdx}"]:checked`);
-                if (!selected || parseInt(selected.value) !== q.correct) {
-                    answersCorrect = false;
+        if(isCorrect) {
+            btnElement.classList.add('correct');
+            score += 1;
+            xp += points;
+            answersLogged['mcq' + qIndex] = true;
+        } else {
+            btnElement.classList.add('wrong');
+            // find and mark correct answer visually
+            siblingButtons.forEach(btn => {
+                if(btn.innerText.includes("broken by") || btn.innerText.includes("were cut off") || btn.innerText.includes('stated, "Emergency') || btn.innerText === "Officials") {
+                    btn.classList.add('correct');
                 }
-                combinedExplanation += `<p class="mt-1">• ${q.exp}</p>`;
             });
-
-            if (answersCorrect) {
-                appState.xp += 100;
-                triggerFeedback(true, `🎉 Sentence syntax verified. Objective accomplished!<br>${combinedExplanation}`);
-                unlockCreativePhase();
-                updateGlobalUI();
-            } else {
-                triggerFeedback(false, `❌ Syntax analysis failed check. Review the passive construction definitions before resubmitting.`);
-            }
-        };
-
-        window.verifySortingDrill = function(stageId) {
-            const stage = appState.stages.find(s => s.id === stageId);
-            let perfect = true;
-
-            stage.quiz.items.forEach((item, idx) => {
-                const chk = document.getElementById(`sort-check-${idx}`).checked;
-                if (chk !== item.correct) perfect = false;
-            });
-
-            if (perfect) {
-                appState.xp += 100;
-                triggerFeedback(true, "🎉 Emotive payload evaluated correctly! Creative module is now live.");
-                unlockCreativePhase();
-                updateGlobalUI();
-            } else {
-                triggerFeedback(false, "❌ Review your selections. Neutral vocabulary tracks information metrics without emotional payload tokens.");
-            }
-        };
-
-        window.commitCreativeCopy = function(stageId) {
-            const stage = appState.stages.find(s => s.id === stageId);
-            stage.creative.fields.forEach(f => {
-                const inputVal = document.getElementById(`input-field-${f.id}`).value;
-                appState.drafts[f.id] = inputVal;
-            });
-
-            if (stageId === appState.stages.length) {
-                renderFinalShowcase();
-            } else {
-                if (appState.maxUnlockedStage === stageId) {
-                    appState.maxUnlockedStage++;
-                }
-                appState.currentStage = stageId + 1;
-                renderMap();
-                loadStage(appState.currentStage);
-                updateGlobalUI();
-            }
-        };
-
-        function renderFinalShowcase() {
-            updateGlobalUI();
-            renderMap();
-            
-            let draftSummaryText = "";
-            if (appState.drafts.headline) draftSummaryText += `${appState.drafts.headline.toUpperCase()}\n`;
-            if (appState.drafts.subheadline) draftSummaryText += `${appState.drafts.subheadline}\n\n`;
-            if (appState.drafts.leadParagraph) draftSummaryText += `${appState.drafts.leadParagraph}\n\n`;
-            if (appState.drafts.bodyParagraph) draftSummaryText += `${appState.drafts.bodyParagraph}\n\n`;
-            if (appState.drafts.quotesParagraph) draftSummaryText += `${appState.drafts.quotesParagraph}\n\n`;
-            if (appState.drafts.closingSentence) draftSummaryText += `${appState.drafts.closingSentence}`;
-
-            workspace.innerHTML = `
-                <div class="space-y-6">
-                    <div class="border-b border-slate-800 pb-4 text-center">
-                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-950 border border-emerald-900 px-3 py-1 rounded">Transmission Success</span>
-                        <h2 class="text-3xl font-black mt-2 text-slate-100 tracking-tight">GLOBAL WIRE READY FOR PUBLICATION</h2>
-                        <p class="text-slate-400 text-sm mt-1">Your incremental steps compiled flawlessly into a standard structured report.</p>
-                    </div>
-
-                    <div class="bg-white text-slate-900 p-8 rounded-lg shadow-2xl space-y-4 font-serif relative" id="final-printable-masterpiece">
-                        <div class="border-b-4 border-slate-900 pb-2 text-center">
-                            <span class="font-sans font-bold tracking-widest text-xs uppercase text-slate-500">THE RECONSTRUCTED WIRE REPORT</span>
-                        </div>
-                        <h1 class="text-2xl font-black text-center tracking-tight leading-tight uppercase font-sans">${appState.drafts.headline || "NO HEADLINE REGISTERED"}</h1>
-                        <p class="text-md text-slate-700 italic text-center max-w-xl mx-auto font-sans border-b border-slate-200 pb-4">${appState.drafts.subheadline || "No subheadline registered."}</p>
-                        
-                        <div class="text-sm space-y-4 leading-relaxed text-justify max-w-2xl mx-auto pt-2">
-                            <p><span class="font-sans font-bold tracking-wider bg-slate-900 text-white px-1.5 py-0.5 rounded text-xs mr-1">WIRE COPY</span>${appState.drafts.leadParagraph || ""}</p>
-                            <p>${appState.drafts.bodyParagraph || ""}</p>
-                            <p>${appState.drafts.quotesParagraph || ""}</p>
-                            <p class="italic border-l-4 border-slate-400 pl-3">${appState.drafts.closingSentence || ""}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap gap-4 justify-center">
-                        <button onclick="navigator.clipboard.writeText(document.getElementById('final-printable-masterpiece').innerText); alert('Copy transmitted to internal clipboard buffer.');" class="bg-amber-500 text-slate-950 font-bold px-6 py-3 rounded text-sm hover:bg-amber-400 transition-all flex items-center gap-2 cursor-pointer">
-                            📋 Copy Plaintext Copy to Clipboard
-                        </button>
-                        <button onclick="window.location.reload();" class="bg-slate-800 text-slate-200 border border-slate-700 font-bold px-6 py-3 rounded text-sm hover:bg-slate-700 transition-all cursor-pointer">
-                            🔄 Reset Training Core
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-                        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide">Journalistic Accountability Compliance Checklist</h3>
-                        <p class="text-xs text-slate-400">Evaluate your generated layout against explicit evaluation matrices from the text:</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300">
-                            <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded border border-slate-800">
-                                <input type="checkbox" checked class="text-emerald-500 rounded focus:ring-0">
-                                <span><strong>Inverted Layout:</strong> Hard metrics positioned ahead of accessory contexts.</span>
-                            </div>
-                            <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded border border-slate-800">
-                                <input type="checkbox" checked class="text-emerald-500 rounded focus:ring-0">
-                                <span><strong>Voice Balance:</strong> Passive configurations handled smoothly across reporting sentences.</span>
-                            </div>
-                            <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded border border-slate-800">
-                                <input type="checkbox" checked class="text-emerald-500 rounded focus:ring-0">
-                                <span><strong>Sourcing Matrix:</strong> Direct quotation boundaries and reported items match.</span>
-                            </div>
-                            <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded border border-slate-800">
-                                <input type="checkbox" checked class="text-emerald-500 rounded focus:ring-0">
-                                <span><strong>Cohesive Mechanics:</strong> Relative markers trace transparent noun anchors perfectly.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
         }
+        updateDashboard();
+    }
 
-        // ENTRYPOINT EXECUTION
-        document.addEventListener("DOMContentLoaded", initializeApp);
-    </script>
+    function saveDraft(msg) {
+        alert(msg + " Your paragraphs are captured for the live press feed preview.");
+        compileStory();
+    }
+
+    function updateDashboard() {
+        document.getElementById('score-display').innerText = `${score} / 6`;
+        document.getElementById('xp-display').innerText = `${xp} XP`;
+        
+        // Ranks
+        let rank = "Cub Reporter";
+        if(xp >= 20) rank = "Junior Correspondent";
+        if(xp >= 40) rank = "Senior Editor";
+        if(xp >= 60) rank = "Pulitzer Journalist";
+        document.getElementById('rank-display').innerText = rank;
+
+        // Badges
+        if(score >= 4) document.getElementById('badge-quiz').classList.add('unlocked');
+        if(document.getElementById('draft-lead').value.length > 5) {
+            document.getElementById('badge-writer').classList.add('unlocked');
+        }
+    }
+
+    function compileStory() {
+        let headline = document.getElementById('draft-headline').value || "NEWS TARGET STORY ACTIVE";
+        let subheadline = document.getElementById('draft-subheadline').value || "Story parameters pending update entries.";
+        let lead = document.getElementById('draft-lead').value || "Missing lead news paragraphs data.";
+        let body = document.getElementById('draft-body').value || "Missing background data context and sources.";
+
+        document.getElementById('print-headline').innerText = headline;
+        document.getElementById('print-subheadline').innerText = subheadline;
+        document.getElementById('print-lead').innerText = lead;
+        document.getElementById('print-body').innerText = body;
+        
+        updateDashboard();
+    }
+
+    function copyStoryText() {
+        let headline = document.getElementById('print-headline').innerText;
+        let subheadline = document.getElementById('print-subheadline').innerText;
+        let lead = document.getElementById('print-lead').innerText;
+        let body = document.getElementById('print-body').innerText;
+
+        let completeText = `${headline}\n${subheadline}\n\n${lead}\n\n${body}`;
+        navigator.clipboard.writeText(completeText);
+        alert("Text copied onto copy-paste clipboard!");
+    }
+</script>
+
 </body>
 </html>
