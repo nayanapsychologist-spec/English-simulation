@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Press &amp; Stage — Grade 8 English Revision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151c;
+    --panel:#1b2130;
+    --panel-2:#212a3c;
+    --paper:#f1ecdd;
+    --paper-line:#d9d0b6;
+    --brass:#d1a13a;
+    --brass-dim:#8a6b28;
+    --wine:#9a3454;
+    --wine-dim:#5e2434;
+    --wire:#3f8d84;
+    --ink-soft:#9aa3b6;
+    --text-dark:#221f1a;
+    --good:#4f9d5c;
+    --bad:#c1503f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(209,161,58,0.07), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(154,52,84,0.08), transparent 45%);
+    color:var(--paper);
+    font-family:'Literata', serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  h1,h2,h3,h4{font-family:'Special Elite', monospace; letter-spacing:0.02em; margin:0 0 8px;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  /* ---------- HEADER ---------- */
+  header.top{
+    padding:22px 5vw 10px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    border-bottom:1px dashed rgba(241,236,221,0.25);
+  }
+  .masthead{display:flex; align-items:baseline; gap:12px;}
+  .masthead h1{font-size:clamp(22px,3vw,34px); color:var(--paper);}
+  .masthead .sub{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.12em;}
+  .xp{display:flex; align-items:center; gap:10px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--brass);}
+  .xp .badge{
+    background:var(--panel-2); border:1px solid var(--brass-dim); border-radius:999px;
+    padding:6px 14px; color:var(--brass); font-weight:600;
+  }
+  /* ---------- NAV TICKETS ---------- */
+  nav.tickets{
+    display:flex; gap:14px; padding:18px 5vw 6px; flex-wrap:wrap;
+  }
+  .ticket{
+    position:relative;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px; letter-spacing:0.05em; text-transform:uppercase;
+    background:var(--panel);
+    color:var(--ink-soft);
+    border:1px solid rgba(241,236,221,0.18);
+    border-radius:8px;
+    padding:10px 22px 10px 16px;
+    cursor:pointer;
+    transition:all .2s ease;
+    display:flex; align-items:center; gap:8px;
+  }
+  .ticket::after{
+    content:""; position:absolute; right:-6px; top:50%; transform:translateY(-50%);
+    width:12px; height:12px; border-radius:50%; background:var(--ink);
+    border:1px solid rgba(241,236,221,0.18);
+  }
+  .ticket:hover{ color:var(--paper); border-color:var(--brass-dim); }
+  .ticket.active{
+    background:var(--brass); color:#241a05; border-color:var(--brass);
+    box-shadow:0 4px 14px rgba(209,161,58,0.35);
+  }
+  .ticket.active.stage{ background:var(--wine); color:#fbe9ee; box-shadow:0 4px 14px rgba(154,52,84,0.35); }
+  .dot{width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.7;}
+
+  main{padding:0 5vw 40px;}
+  .view{display:none; animation:fadeIn .35s ease;}
+  .view.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  /* ---------- OVERVIEW ---------- */
+  .obj-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-top:20px;}
+  .obj-card{background:var(--panel); border-radius:var(--radius); padding:22px; border-top:4px solid var(--brass);}
+  .obj-card.stage{border-top-color:var(--wine);}
+  .obj-card h3{color:var(--paper); font-size:19px;}
+  .obj-card .tag{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--brass); letter-spacing:0.1em;}
+  .obj-card.stage .tag{color:var(--wine);}
+  .obj-card ul{margin:10px 0 0; padding-left:18px; color:var(--ink-soft); font-size:14.5px; line-height:1.55;}
+  .obj-card li{margin-bottom:6px;}
+  .obj-card b{color:var(--paper);}
+  .intro-line{color:var(--ink-soft); max-width:720px; line-height:1.6; font-size:15.5px;}
+
+  /* ---------- SPLIT LAYOUT: PASSAGE + QUESTIONS ---------- */
+  .split{
+    display:grid; grid-template-columns:1.1fr 1fr; gap:22px; margin-top:22px; align-items:start;
+  }
+  @media (max-width:900px){ .split{grid-template-columns:1fr;} }
+  .passage-pane{
+    background:var(--paper); color:var(--text-dark); border-radius:var(--radius);
+    padding:26px 28px; max-height:78vh; overflow-y:auto; position:sticky; top:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    border:1px solid var(--paper-line);
+  }
+  @media (max-width:900px){ .passage-pane{position:static; max-height:none;} }
+  .passage-pane h2{font-family:'Special Elite',monospace; font-size:20px; color:var(--text-dark); line-height:1.3;}
+  .byline{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:#6b6350; letter-spacing:0.08em; margin-bottom:14px;}
+  .passage-pane p{line-height:1.75; font-size:15.5px; margin:0 0 14px;}
+  .passage-pane .sub-hed{font-style:italic; color:#5c5445; margin-bottom:16px; font-size:14.5px;}
+  .dialogue-line{margin-bottom:14px;}
+  .char-name{font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:0.05em; color:#5e2434;}
+  .stage-dir{font-style:italic; color:#7a7360; font-size:14px;}
+  .scene-head{font-family:'Special Elite',monospace; text-align:center; letter-spacing:0.1em; margin-bottom:10px;}
+
+  .questions-pane{display:flex; flex-direction:column; gap:14px;}
+  .task-block{background:var(--panel); border-radius:var(--radius); padding:6px 6px 14px;}
+  .task-title{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--brass); padding:14px 16px 6px;}
+  .stage .task-title{color:var(--wine);}
+  .qcard{
+    border-top:1px dashed rgba(241,236,221,0.15); padding:12px 16px;
+  }
+  .qcard .qtext{font-size:14.5px; line-height:1.5; color:var(--paper); cursor:pointer; display:flex; gap:10px; align-items:flex-start;}
+  .qcard .qtext .qnum{font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); flex-shrink:0;}
+  .reveal-btn{
+    margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase;
+    color:var(--wire); border:1px solid var(--wire); background:transparent; border-radius:6px;
+    padding:4px 10px; cursor:pointer; letter-spacing:0.06em;
+  }
+  .reveal-btn:hover{background:var(--wire); color:var(--ink);}
+  .answer{
+    display:none; margin-top:10px; background:rgba(241,236,221,0.06); border-left:3px solid var(--wire);
+    padding:10px 12px; font-size:13.8px; color:var(--ink-soft); line-height:1.55; border-radius:0 6px 6px 0;
+  }
+  .answer.show{display:block;}
+
+  /* ---------- GAME SECTION ---------- */
+  .games{margin-top:32px; display:flex; flex-direction:column; gap:26px;}
+  .game-card{background:var(--panel-2); border-radius:var(--radius); padding:22px 24px; border:1px solid rgba(241,236,221,0.1);}
+  .game-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .game-head h3{color:var(--paper); font-size:17px; margin:0;}
+  .game-desc{color:var(--ink-soft); font-size:13.5px; margin:-6px 0 14px; max-width:640px;}
+  .score-pill{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--ink);
+    border:1px solid var(--brass-dim); color:var(--brass); padding:5px 12px; border-radius:999px;
+  }
+  .stage-pill{border-color:var(--wine); color:#e79bb0;}
+  .btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.06em;
+    background:var(--brass); color:#241a05; border:none; border-radius:7px; padding:8px 16px; cursor:pointer;
+  }
+  .btn.stage{background:var(--wine); color:#fbe9ee;}
+  .btn.ghost{background:transparent; border:1px solid var(--ink-soft); color:var(--ink-soft);}
+  .btn:hover{filter:brightness(1.08);}
+
+  /* MCQ quiz */
+  .quiz-item{background:var(--panel); border-radius:10px; padding:16px 18px; margin-bottom:12px;}
+  .quiz-item .stem{font-size:14.5px; margin-bottom:10px; color:var(--paper); line-height:1.5;}
+  .quiz-item .stem .lead{font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:11px; display:block; margin-bottom:4px; text-transform:uppercase;}
+  .opts{display:flex; flex-direction:column; gap:8px;}
+  .opt{
+    text-align:left; background:var(--panel-2); border:1px solid rgba(241,236,221,0.14); color:var(--paper);
+    border-radius:8px; padding:9px 12px; font-size:13.8px; cursor:pointer; font-family:'Literata',serif;
+    transition:all .15s ease;
+  }
+  .opt:hover{border-color:var(--brass);}
+  .opt.correct{background:rgba(79,157,92,0.25); border-color:var(--good); color:#c9f0cd;}
+  .opt.wrong{background:rgba(193,80,63,0.25); border-color:var(--bad); color:#f4c9c2;}
+  .opt[disabled]{cursor:default;}
+  .opt.mini{display:inline-block; width:auto; margin-right:8px; margin-bottom:8px;}
+  .optrow{display:flex; flex-wrap:wrap; gap:8px;}
+
+  /* Matching game */
+  .match-wrap{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:700px){ .match-wrap{grid-template-columns:1fr;} }
+  .match-col h4{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:0.08em; margin-bottom:10px;}
+  .match-card{
+    background:var(--panel); border:1px solid rgba(241,236,221,0.15); border-radius:8px; padding:10px 14px;
+    margin-bottom:9px; cursor:pointer; font-size:13.8px; line-height:1.4; color:var(--paper); transition:all .15s ease;
+  }
+  .match-card:hover{border-color:var(--brass);}
+  .match-card.selected{border-color:var(--wire); background:rgba(63,141,132,0.18);}
+  .match-card.locked{opacity:0.45; cursor:default; border-color:var(--good); background:rgba(79,157,92,0.1);}
+  .match-card.shake{animation:shake .3s;}
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+
+  .feedback-line{font-family:'IBM Plex Mono',monospace; font-size:12.5px; margin-top:10px; min-height:16px;}
+  .feedback-line.ok{color:var(--good);}
+  .feedback-line.no{color:var(--bad);}
+
+  /* ---------- GUIDED WRITING SLIDES ---------- */
+  .slide-wrap{position:relative; margin-top:18px;}
+  .slide{
+    display:none; background:var(--paper); color:var(--text-dark); border-radius:var(--radius);
+    padding:32px 36px; box-shadow:0 10px 30px rgba(0,0,0,0.35); border:1px solid var(--paper-line);
+    min-height:60vh;
+  }
+  .slide.active{display:block; animation:fadeIn .3s ease;}
+  .slide .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#8a6b28;}
+  .slide h2{color:var(--text-dark); margin-top:6px;}
+  .slide .task-line{font-style:italic; color:#5c5445; margin-bottom:18px;}
+  .slide p{line-height:1.85; font-size:15px;}
+  .slide .blank{color:#7a2e45; font-weight:600;}
+  .slide .keywords{
+    margin-top:20px; background:rgba(154,52,84,0.06); border-left:3px solid var(--wine);
+    padding:12px 16px; font-size:13.5px; color:#4a2130; border-radius:0 8px 8px 0;
+  }
+  .slide-nav{display:flex; justify-content:center; gap:14px; margin-top:18px;}
+  .slide-dots{display:flex; gap:8px; justify-content:center; margin-top:10px;}
+  .slide-dot{width:8px; height:8px; border-radius:50%; background:rgba(241,236,221,0.25); cursor:pointer;}
+  .slide-dot.active{background:var(--brass);}
+
+  footer{text-align:center; padding:30px 5vw; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.04em;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="masthead">
+    <h1>Press &amp; Stage</h1>
+    <span class="sub">Grade 8 · English Exam Revision Arcade</span>
+  </div>
+  <div class="xp">
+    <span>REVISION SCORE</span>
+    <span class="badge mono" id="global-score">0 pts</span>
+  </div>
+</header>
+
+<nav class="tickets">
+  <div class="ticket active" data-view="overview" onclick="showView('overview', this)"><span class="dot"></span>Briefing</div>
+  <div class="ticket" data-view="ch11" onclick="showView('ch11', this)"><span class="dot"></span>Ch.11 — Reporting Danger</div>
+  <div class="ticket" data-view="ch12" onclick="showView('ch12', this)"><span class="dot"></span>Ch.12 — Dramatic Relationships</div>
+  <div class="ticket" data-view="writing" onclick="showView('writing', this)"><span class="dot"></span>Guided Writing</div>
+</nav>
+
+<main>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="view active" id="view-overview">
+    <p class="intro-line">Two beats, one press pass: the newsroom desk covers <b>Chapter 11 — Reporting Danger</b>, and the backstage call sheet covers <b>Chapter 12 — Dramatic Relationships</b>. Read the passage, tackle the comprehension questions, then step into the practice arcade to drill the grammar behind each skill.</p>
+    <div class="obj-grid">
+      <div class="obj-card">
+        <span class="tag">Chapter 11 · News Report (300–350 words)</span>
+        <h3>Reporting Danger</h3>
+        <ul>
+          <li><b>Structure:</b> the inverted pyramid — lead with Who/What/When/Where/Why/How, then details, then background.</li>
+          <li><b>Vocabulary:</b> emotive language (stunning turnaround, bleak position) and journalistic collocations (culminating in, as dusk fell).</li>
+          <li><b>Grammar:</b> passive voice across tenses; pronoun reference for cohesion; blending direct and reported speech.</li>
+        </ul>
+      </div>
+      <div class="obj-card stage">
+        <span class="tag">Chapter 12 · Play Script (300–350 words)</span>
+        <h3>Dramatic Relationships</h3>
+        <ul>
+          <li><b>Structure:</b> characterisation through speech, action and gesture; building dramatic irony.</li>
+          <li><b>Vocabulary:</b> delexical verbs (take care, give permission) and speech-sound interjections (Hmmm, Ugh, Phew).</li>
+          <li><b>Grammar:</b> the full range of question types for dialogue; imperatives; italicised stage directions.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAPTER 11 ============ -->
+  <section class="view" id="view-ch11">
+    <div class="split">
+      <article class="passage-pane">
+        <div class="byline">Chronicle News · Front Page</div>
+        <h2>Coastal Communities Devastated as Cyclone Vardon Makes Landfall</h2>
+        <p class="sub-hed">Stunning turnaround for emergency crews as structural defenses are breached by unprecedented storm surges.</p>
+        <div class="byline">By Linda Kerr, Chronicle News</div>
+        <p>A catastrophic category-four storm, Cyclone Vardon, has battered the northeastern coastline, forcing thousands of residents to flee their homes within designated evacuation zones. The core structural defenses of the historic port town were completely breached early Tuesday morning as torrential rain caused local rivers to burst their banks. Major arterial motorways have been completely blocked by rising floodwaters and toppled trees, severely disrupting critical rescue operations.</p>
+        <p>Initially, it was feared that hundreds of vulnerable families would be left stranded overnight. However, in a daring mission coordinated by international disaster recovery teams, over four hundred individuals have been successfully rescued by emergency helicopters and military watercraft. The displaced citizens were immediately transported to temporary emergency shelters, where medical care and supplies are being continuously replenished by humanitarian organizations.</p>
+        <p>Local administrative officials have defended their refusal to release an immediate count of missing persons, stating that they are doing so out of respect for anxious families. Meanwhile, messages of profound solidarity are being mirrored across neighboring nations, with emergency funding pouring into the affected province. Although meteorologists warn that catastrophic water restrictions will be implemented due to damaged infrastructure, relief workers remain optimistic. A senior rescue coordinator observed that while the immediate physical landscape has been utterly ruined, the collective spirit of the community has not been broken.</p>
+      </article>
+
+      <div class="questions-pane">
+        <div class="task-block">
+          <div class="task-title">Task A · Core Facts &amp; Structure</div>
+          <div class="qcard" data-a="0">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">1.</span><span>Identify the core newsworthy event, including the who, what, when, and where from the first paragraph.</span></div>
+            <div class="answer">Cyclone Vardon (what), a category-four storm, has battered the northeastern coastline (where) early Tuesday morning (when), forcing residents (who) to evacuate.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">2.</span><span>Why does the rescue-count detail appear in paragraph two rather than three, under the inverted pyramid structure?</span></div>
+            <div class="answer">The inverted pyramid places the most urgent, newsworthy update — how many people were saved — immediately after the lead, while less time-sensitive material (quotes, general background) is pushed further down.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">3.</span><span>What justification did officials give for withholding the count of missing persons?</span></div>
+            <div class="answer">They said it was out of respect for anxious families who are still waiting for confirmation.</div>
+          </div>
+        </div>
+
+        <div class="task-block">
+          <div class="task-title">Task B · Vocabulary &amp; Collocations</div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">4.</span><span>Find an emotive noun phrase in Paragraph 1 that conveys the scale of the disaster.</span></div>
+            <div class="answer">e.g. "catastrophic category-four storm" or "unprecedented storm surges."</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">5.</span><span>Match: battered · evacuation zones · burst their banks · continuously replenished to their meanings.</span></div>
+            <div class="answer">battered = hit violently and repeatedly; evacuation zones = designated areas residents must leave for safety; burst their banks = overflowed beyond a river's edges; continuously replenished = constantly restocked.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">6.</span><span>Explain what "stunning turnaround" means in the sub-headline.</span></div>
+            <div class="answer">An unexpected, dramatic reversal — from a hopeless, dangerous situation to a successful rescue outcome.</div>
+          </div>
+        </div>
+
+        <div class="task-block">
+          <div class="task-title">Task C · Grammar &amp; Use of English</div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">7.</span><span>Identify the passive tense in "were completely breached" and explain its effect.</span></div>
+            <div class="answer">Past Simple Passive. It foregrounds the defenses (the affected thing) rather than the storm, which suits news style — the impact matters more than naming the agent.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">8.</span><span>Rewrite into Present Continuous Passive: "Humanitarian organizations are continuously replenishing medical care and supplies."</span></div>
+            <div class="answer">"Medical care and supplies are being continuously replenished by humanitarian organizations."</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">9.</span><span>What do "their" (¶1, flee their homes) and "where" (¶2, shelters, where medical care...) refer to?</span></div>
+            <div class="answer">"their" = the residents' own homes; "where" = the temporary emergency shelters.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">10.</span><span>How does the writer blend direct and reported speech in the final paragraph?</span></div>
+            <div class="answer">The direct quote from the rescue coordinator adds authenticity and emotion, while officials' statements are reported indirectly, summarising information efficiently without needing exact wording.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- GAMES CH11 ---- -->
+    <div class="games">
+      <div class="game-card">
+        <div class="game-head">
+          <h3>🗞️ Passive Voice Wire Desk</h3>
+          <span class="score-pill" id="score-passive">0 / 10</span>
+        </div>
+        <p class="game-desc">Pick the correct passive-voice transformation for each active sentence. Ten tenses, ten headlines.</p>
+        <div id="passive-quiz"></div>
+        <button class="btn" onclick="resetPassiveQuiz()">Restart drill</button>
+      </div>
+
+      <div class="game-card">
+        <div class="game-head">
+          <h3>🧷 Reference Wire — Match the Pronoun</h3>
+          <span class="score-pill" id="score-match11">0 / 10</span>
+        </div>
+        <p class="game-desc">Click a pronoun on the left, then click the phrase it refers to on the right. Matched pairs lock in green.</p>
+        <div class="match-wrap">
+          <div class="match-col"><h4>Pronoun / reference word</h4><div id="match-left-11"></div></div>
+          <div class="match-col"><h4>Refers to...</h4><div id="match-right-11"></div></div>
+        </div>
+        <div class="feedback-line" id="match-feedback-11"></div>
+        <button class="btn" onclick="setupMatch11()">Restart drill</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAPTER 12 ============ -->
+  <section class="view" id="view-ch12">
+    <div class="split">
+      <article class="passage-pane">
+        <div class="scene-head">SCENE TWO: THE TENDER SHORE</div>
+        <p class="stage-dir">The setting sun casts a long shadow across an empty wooden pier. ALAN (13), carrying a heavily taped cardboard box, sits on a bench. His older sister, CARA (20), stands a few paces behind him, checking her watch repeatedly.</p>
+        <div class="dialogue-line"><span class="char-name">CARA</span> <span class="stage-dir">(Sighing deeply)</span><br>Alan, you're not still brooding over that old box, are you? We have to move before the tide climbs.</div>
+        <div class="dialogue-line"><span class="char-name">ALAN</span> <span class="stage-dir">(Without looking up)</span><br>But where are the real journals?</div>
+        <div class="dialogue-line"><span class="char-name">CARA</span><br>I already told you. They took it in turns to load the packing crates yesterday. Some items got misplaced. It happens.</div>
+        <div class="dialogue-line"><span class="char-name">ALAN</span><br>No. You're hiding them. You think I can't take care of Grandfather's letters?</div>
+        <div class="dialogue-line"><span class="char-name">CARA</span> <span class="stage-dir">(Correcting him sharply)</span><br>It is "May I" handle them, Alan. And no, you shouldn't be reading them right now.</div>
+        <div class="dialogue-line"><span class="char-name">ALAN</span> <span class="stage-dir">(Echoing mockingly)</span><br>"May I" handle them? Er... we are standing on a collapsing pier and you are giving me a grammar lesson?</div>
+        <div class="dialogue-line"><span class="char-name">CARA</span> <span class="stage-dir">(Frustrated)</span><br>Ugh! Why must you make a mistake out of every decision I try to execute for this family? Look at me. Concentrate! If we do not make tracks to the mainland station immediately, we will get lost in the marshlands after dusk.</div>
+        <div class="dialogue-line"><span class="char-name">ALAN</span> <span class="stage-dir">(Standing up, clutching the box tight)</span><br>Who spent months saving this house from the bank? Grandfather did. Not you.</div>
+        <div class="dialogue-line"><span class="char-name">CARA</span> <span class="stage-dir">(A sharp intake of breath)</span><br>Ah! How should I know how to fix everything perfectly? I am doing my absolute best. You think this move is a wonderful holiday for me?</div>
+        <div class="dialogue-line"><span class="char-name">ALAN</span> <span class="stage-dir">(Looking out at the water, tone dropping into quiet defeat)</span><br>Hmmmm... The horizon looks so small from here. Phew. If I take a deep breath, I can still smell his pipe tobacco on these wooden planks.</div>
+        <div class="dialogue-line"><span class="char-name">CARA</span> <span class="stage-dir">(Softening, stepping closer, she places a hand lightly on his shoulder)</span><br>Give it a chance, Alan. Just take a deep breath and let's walk. Okay?</div>
+      </article>
+
+      <div class="questions-pane stage">
+        <div class="task-block">
+          <div class="task-title">Task A · Characterisation &amp; Irony</div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">1.</span><span>Describe the personality difference between Alan and Cara in their opening exchange.</span></div>
+            <div class="answer">Alan is emotional and stubborn, fixed on the past and Grandfather's belongings; Cara is practical and anxious, trying to manage the move and keep things moving forward.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">2.</span><span>What dramatic irony does the audience experience regarding the packing of the boxes?</span></div>
+            <div class="answer">Cara's tone hints she may know more about the missing journals than she admits, while Alan believes she is simply hiding them — the audience senses a gap between what is said and what is really going on.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">3.</span><span>How do the italicised stage directions show a shifting dynamic between the siblings?</span></div>
+            <div class="answer">Directions move from "sighing," "frustrated," and "a sharp intake of breath" to "softening, stepping closer" — showing Cara move from tension to tenderness by the scene's end.</div>
+          </div>
+        </div>
+
+        <div class="task-block">
+          <div class="task-title">Task B · Dialogue &amp; Question Analysis</div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">4.</span><span>What question type is "But where are the real journals?" and what does it reveal about Alan's goal?</span></div>
+            <div class="answer">An open (Wh-) question. It reveals his immediate goal: locating Grandfather's real journals/letters.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">5.</span><span>What type of question is Alan's ""May I" handle them?" and what tone does it convey?</span></div>
+            <div class="answer">An echo question — repeating Cara's correction. It conveys mockery and irritation at being corrected mid-crisis.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">6.</span><span>Identify Cara's rhetorical question and explain why she doesn't expect an answer.</span></div>
+            <div class="answer">"How should I know how to fix everything perfectly?" — it's an outburst of frustration, not a genuine request for information.</div>
+          </div>
+        </div>
+
+        <div class="task-block">
+          <div class="task-title">Task C · Grammar, Delexical Verbs &amp; Sounds</div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">7.</span><span>Find where Cara corrects Alan's grammar. Explain the rule difference between the two verbs.</span></div>
+            <div class="answer">"It is 'May I' handle them" — "can" expresses ability, while "may" is used to request or grant permission.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">8.</span><span>Identify the imperative Cara uses to demand Alan's attention.</span></div>
+            <div class="answer">"Concentrate!"</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">9.</span><span>State the contextual meaning of "took it in turns" and "make tracks."</span></div>
+            <div class="answer">"took it in turns" = alternated, did it one after another; "make tracks" = leave quickly, hurry away.</div>
+          </div>
+          <div class="qcard">
+            <div class="qtext" onclick="toggleAnswer(this)"><span class="qnum">10.</span><span>What emotional transition do "Ugh!" and "Phew" reflect?</span></div>
+            <div class="answer">"Ugh!" reflects frustration/exasperation; "Phew" reflects relief or a release of built-up tension.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- GAMES CH12 ---- -->
+    <div class="games">
+      <div class="game-card">
+        <div class="game-head">
+          <h3>🎭 Call the Question Type</h3>
+          <span class="score-pill stage-pill" id="score-qtype">0 / 10</span>
+        </div>
+        <p class="game-desc">Read each stage line and tap the correct dialogue-question category.</p>
+        <div id="qtype-quiz"></div>
+        <button class="btn stage" onclick="resetQTypeQuiz()">Restart drill</button>
+      </div>
+
+      <div class="game-card">
+        <div class="game-head">
+          <h3>🎬 Delexical Verb Call Sheet</h3>
+          <span class="score-pill stage-pill" id="score-delex">0 / 10</span>
+        </div>
+        <p class="game-desc">Choose the verb that completes each backstage line correctly — take, get, give, make, or go.</p>
+        <div id="delex-quiz"></div>
+        <button class="btn stage" onclick="resetDelexQuiz()">Restart drill</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GUIDED WRITING ============ -->
+  <section class="view" id="view-writing">
+    <p class="intro-line">Two scaffolds to launch your own writing — the newsroom lead for Chapter 11, and the backstage scene for Chapter 12. Fill these in on paper or in your exercise book.</p>
+    <div class="slide-wrap">
+      <div class="slide active" id="slide-0">
+        <span class="eyebrow">Guided Writing · Chapter 11</span>
+        <h2>Report Writing — Natural Disaster News Report</h2>
+        <p class="task-line">Task: Write a concise news report about a severe flash flood that impacted an urban centre, using the inverted pyramid structure.</p>
+        <p><em>[Insert Catchy Headline Here]</em><br><em>[Insert Explanatory Sub-headline Here]</em><br><br><span class="mono">BY [Writer Name], [Date], [Publication Name]</span></p>
+        <p>A devastating flash flood has 1.<span class="blank">_____________</span> [insert verb collocation, e.g. battered / ripped through] the metropolitan district of downtown metropolis early this morning, forcing an immediate 2.<span class="blank">_____________</span> [insert noun, e.g. evacuation / rescue operation] of thousands of residents. The catastrophic deluge was triggered when structural water barriers 3.<span class="blank">_____________</span> [insert passive verb phrase, e.g. were breached / were overwhelmed] by record-breaking rainfall, causing local canal systems to 4.<span class="blank">_____________</span> [insert collocation, e.g. burst their banks]. Major transport networks have been completely 5.<span class="blank">_____________</span> [insert passive verb phrase, e.g. blocked by toppled trees] , significantly complicating the efforts of emergency services.</p>
+        <p>Initial rescue responses were highly complex, but in a 6.<span class="blank">_____________</span> [insert emotive adjective, e.g. daring / stunning] mission spearheaded by regional emergency crews, hundreds of stranded commuters 7.<span class="blank">_____________</span> [insert passive verb phrase, e.g. have been successfully rescued]. Medical infrastructure has been heavily strained, and clean drinking water supplies must be 8.<span class="blank">_____________</span> [insert passive verb phrase, e.g. continuously replenished] by health authorities to avoid contamination. While local administrators defended their policy of 9.<span class="blank">_____________</span> [insert gerund phrase, e.g. quarantining the affected areas], expressions of solidarity 10.<span class="blank">_____________</span> [insert passive verb phrase, e.g. are being mirrored] across the globe as emergency relief funding begins to arrive.</p>
+        <div class="keywords"><b>Target keywords:</b> battered · evacuation · were breached · burst their banks · blocked · daring · have been successfully rescued · continuously replenished · quarantining · are being mirrored.</div>
+      </div>
+
+      <div class="slide" id="slide-1">
+        <span class="eyebrow">Guided Writing · Chapter 12</span>
+        <h2>Dramatic Writing — Scripted Dialogue</h2>
+        <p class="task-line">Task: Write a play-script scene between a strict School Principal and a nervous newly-arrived Student Trainee on their first morning.</p>
+        <p class="scene-head" style="text-align:left;">SCENE THREE: THE PRINCIPAL'S OFFICE</p>
+        <p class="stage-dir">The room is lined with heavy oak bookshelves. MR. HARRIS (50) stands by the window looking out at the courtyard. ELLEN (19) sits tensely in a chair, twisting a pen between her fingers.</p>
+        <p><span class="char-name">MR. HARRIS</span> <span class="stage-dir">(Turning around, raising an eyebrow)</span><br>So, Ellen, you're not planning to make a habit of arriving late to your teaching assignments, are you?</p>
+        <p><span class="char-name">ELLEN</span> <span class="stage-dir">(Nervously, clearing her throat)</span><br>1.<span class="blank">_____</span> [speech sound, e.g. Er...] No, Mr. Harris. The train system was delayed. I got completely 2.<span class="blank">_____</span> [delexical collocation, e.g. lost on my way] near the eastern junction.</p>
+        <p><span class="char-name">MR. HARRIS</span><br>In this academy, we expect our trainee educators to 3.<span class="blank">_____</span> [delexical collocation, e.g. take care of] their scheduling commitments. 4.<span class="blank">_____</span> [rhetorical question, e.g. How should I expect the students to respect the clock if their instructor does not?]</p>
+        <p><span class="char-name">ELLEN</span><br>I understand, sir. 5.<span class="blank">_____</span> [permission question, e.g. May I please have my classroom allocation now?]</p>
+        <p><span class="char-name">MR. HARRIS</span> <span class="stage-dir">(Walking over to his desk, picking up a heavy file)</span><br>Your class assignment? 6.<span class="blank">_____</span> [echo question] You haven't even reviewed our core safety protocols yet. 7.<span class="blank">_____</span> [imperative, e.g. Concentrate! / Look here!] This manual must be thoroughly memorised before you step in front of the learners.</p>
+        <p><span class="char-name">ELLEN</span> <span class="stage-dir">(Softly, looking down)</span><br>8.<span class="blank">_____</span> [speech sound, e.g. Hmmm...] I see. My instructional design tutor told me I would receive a practical orientation first.</p>
+        <p><span class="char-name">MR. HARRIS</span><br>Your tutor? 9.<span class="blank">_____</span> [subject question, e.g. Who gave her the authorisation to promise that?] Things are managed differently here. We expect trainees to step up and 10.<span class="blank">_____</span> [delexical collocation, e.g. take a decision] under pressure. Now, take this manual and report to Room 4B.</p>
+        <div class="keywords"><b>Include at least:</b> 3 speech sounds · 3 delexical collocations (get lost, take care, take a decision) · 1 imperative · 4 question types (tag, rhetorical, permission, echo, subject).</div>
+      </div>
+
+      <div class="slide-nav">
+        <button class="btn ghost" onclick="changeSlide(-1)">← Previous</button>
+        <button class="btn ghost" onclick="changeSlide(1)">Next →</button>
+      </div>
+      <div class="slide-dots">
+        <div class="slide-dot active" onclick="goSlide(0)"></div>
+        <div class="slide-dot" onclick="goSlide(1)"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>PRESS &amp; STAGE REVISION ARCADE · Grade 8 IGCSE English · Chapters 11 &amp; 12</footer>
+
+<script>
+let globalScore = 0;
+function addScore(n){ globalScore += n; document.getElementById('global-score').textContent = globalScore + ' pts'; }
+
+function showView(name, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.ticket').forEach(t=>t.classList.remove('active','stage'));
+  el.classList.add('active');
+  if(name==='ch12') el.classList.add('stage');
+}
+
+function toggleAnswer(el){
+  const ans = el.parentElement.querySelector('.answer');
+  ans.classList.toggle('show');
+}
+
+/* ---------------- CH11 GAME 1: PASSIVE VOICE MCQ ---------------- */
+const passiveData = [
+  {lead:"Present Simple Passive", active:"The global media monitors the unfolding emergency closely.",
+   correct:"The unfolding emergency is closely monitored by the global media.",
+   distractors:["The unfolding emergency was closely monitored by the global media.","The unfolding emergency closely monitors the global media."]},
+  {lead:"Past Simple Passive", active:"British volunteer divers located the trapped children on a dry slope.",
+   correct:"The trapped children were located on a dry slope by British volunteer divers.",
+   distractors:["The trapped children are located on a dry slope by British volunteer divers.","The trapped children have located a dry slope by British volunteer divers."]},
+  {lead:"Present Perfect Passive", active:"The humanitarian agency has replenished the medical emergency supplies.",
+   correct:"The medical emergency supplies have been replenished by the humanitarian agency.",
+   distractors:["The medical emergency supplies had been replenished by the humanitarian agency.","The medical emergency supplies has replenished by the humanitarian agency."]},
+  {lead:"Past Continuous Passive", active:"The rescue team was giving the young boys special breathing equipment training.",
+   correct:"The young boys were being given special breathing equipment training by the rescue team.",
+   distractors:["The young boys are being given special breathing equipment training by the rescue team.","The young boys were given being special breathing equipment training by the rescue team."]},
+  {lead:"Past Perfect Passive", active:"The rising floodwaters had blocked the narrow subterranean tunnels before the divers arrived.",
+   correct:"The narrow subterranean tunnels had been blocked by the rising floodwaters before the divers arrived.",
+   distractors:["The narrow subterranean tunnels have been blocked by the rising floodwaters before the divers arrived.","The narrow subterranean tunnels were blocking by the rising floodwaters before the divers arrived."]},
+  {lead:"Future Simple Passive", active:"The chief medical officer will discharge the patients from the hospital on Monday morning.",
+   correct:"The patients will be discharged from the hospital by the chief medical officer on Monday morning.",
+   distractors:["The patients will have discharged from the hospital by the chief medical officer on Monday morning.","The patients are discharged from the hospital by the chief medical officer on Monday morning."]},
+  {lead:"Passive Infinitive", active:"The authorities need to quarantine the team immediately to prevent infection.",
+   correct:"The team needs to be quarantined immediately to prevent infection.",
+   distractors:["The team needs to quarantine immediately to prevent infection.","The team needs being quarantined immediately to prevent infection."]},
+  {lead:"Passive Gerund", active:"The prime minister defended the officials choosing to hide the team's identities.",
+   correct:"The prime minister defended the team's identities being hidden by the officials.",
+   distractors:["The prime minister defended the team's identities to be hidden by the officials.","The prime minister defended the officials hidden the team's identities."]},
+  {lead:"Present Continuous Passive", active:"Media outlets across the globe are mirroring the celebrations.",
+   correct:"The celebrations are being mirrored by media outlets across the globe.",
+   distractors:["The celebrations are mirrored by media outlets across the globe.","The celebrations have been mirroring by media outlets across the globe."]},
+  {lead:"Past Conditional Passive", active:"The rescue divers would have completed the mission sooner if torrential rain had not fallen.",
+   correct:"The mission would have been completed sooner by the rescue divers if torrential rain had not fallen.",
+   distractors:["The mission would be completed sooner by the rescue divers if torrential rain had not fallen.","The mission had been completed sooner by the rescue divers if torrential rain had not fallen."]}
+];
+let passiveScore = 0;
+function shuffle(arr){ return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]); }
+function renderPassiveQuiz(){
+  const box = document.getElementById('passive-quiz');
+  box.innerHTML='';
+  passiveScore = 0;
+  document.getElementById('score-passive').textContent = '0 / 10';
+  passiveData.forEach((item, idx)=>{
+    const opts = shuffle([item.correct, ...item.distractors]);
+    const div = document.createElement('div');
+    div.className='quiz-item';
+    div.innerHTML = `<div class="stem"><span class="lead">${item.lead}</span>Active: "${item.active}"</div><div class="opts"></div>`;
+    const optsDiv = div.querySelector('.opts');
+    opts.forEach(o=>{
+      const b = document.createElement('button');
+      b.className='opt'; b.textContent=o;
+      b.onclick = ()=>{
+        const buttons = optsDiv.querySelectorAll('.opt');
+        buttons.forEach(bb=>bb.disabled=true);
+        if(o===item.correct){ b.classList.add('correct'); passiveScore++; addScore(2); }
+        else{
+          b.classList.add('wrong');
+          buttons.forEach(bb=>{ if(bb.textContent===item.correct) bb.classList.add('correct'); });
+        }
+        document.getElementById('score-passive').textContent = passiveScore + ' / 10';
+      };
+      optsDiv.appendChild(b);
+    });
+    box.appendChild(div);
+  });
+}
+function resetPassiveQuiz(){ renderPassiveQuiz(); }
+renderPassiveQuiz();
+
+/* ---------------- CH11 GAME 2: REFERENCE MATCHING ---------------- */
+const refData = [
+  {p:"those who (were brought out first)", r:"the children rescued earliest during the SEAL mission"},
+  {p:"this (the most complex extraction)", r:"the rescue operation itself"},
+  {p:"who ever was weakest", r:"the weakest player in the group of footballers"},
+  {p:"them (breathing apparatus in front of...)", r:"the divers themselves"},
+  {p:"it (an event of major interest)", r:"the rescue scene the prime minister attended"},
+  {p:"they (parents were told...)", r:"the boys' parents"},
+  {p:"it (accepting the invitation)", r:"FIFA's invitation"},
+  {p:"its (loud rotors)", r:"the helicopter"},
+  {p:"those who await them", r:"the family/people waiting for the rescued boys"},
+  {p:"they (had flooded the plains)", r:"the storm cells"}
+];
+let matchScore11=0, selLeft11=null, selRight11=null, locked11=0;
+function setupMatch11(){
+  matchScore11=0; selLeft11=null; selRight11=null; locked11=0;
+  document.getElementById('score-match11').textContent='0 / 10';
+  document.getElementById('match-feedback-11').textContent='';
+  const left = shuffle(refData.map((d,i)=>({...d,idx:i})));
+  const right = shuffle(refData.map((d,i)=>({...d,idx:i})));
+  const leftBox=document.getElementById('match-left-11'), rightBox=document.getElementById('match-right-11');
+  leftBox.innerHTML=''; rightBox.innerHTML='';
+  left.forEach(item=>{
+    const c=document.createElement('div'); c.className='match-card'; c.textContent=item.p; c.dataset.idx=item.idx;
+    c.onclick=()=>pickMatch(c,'left');
+    leftBox.appendChild(c);
+  });
+  right.forEach(item=>{
+    const c=document.createElement('div'); c.className='match-card'; c.textContent=item.r; c.dataset.idx=item.idx;
+    c.onclick=()=>pickMatch(c,'right');
+    rightBox.appendChild(c);
+  });
+}
+function pickMatch(card, side){
+  if(card.classList.contains('locked')) return;
+  if(side==='left'){
+    if(selLeft11) selLeft11.classList.remove('selected');
+    selLeft11 = card; card.classList.add('selected');
+  } else {
+    if(selRight11) selRight11.classList.remove('selected');
+    selRight11 = card; card.classList.add('selected');
+  }
+  if(selLeft11 && selRight11){
+    const fb = document.getElementById('match-feedback-11');
+    if(selLeft11.dataset.idx === selRight11.dataset.idx){
+      selLeft11.classList.add('locked'); selRight11.classList.add('locked');
+      selLeft11.classList.remove('selected'); selRight11.classList.remove('selected');
+      matchScore11++; locked11++; addScore(2);
+      document.getElementById('score-match11').textContent = matchScore11 + ' / 10';
+      fb.textContent='Matched!'; fb.className='feedback-line ok';
+      selLeft11=null; selRight11=null;
+    } else {
+      fb.textContent='Not quite — try again.'; fb.className='feedback-line no';
+      selLeft11.classList.add('shake'); selRight11.classList.add('shake');
+      setTimeout(()=>{
+        selLeft11.classList.remove('selected','shake'); selRight11.classList.remove('selected','shake');
+        selLeft11=null; selRight11=null;
+      },400);
+    }
+  }
+}
+setupMatch11();
+
+/* ---------------- CH12 GAME 1: QUESTION TYPE MCQ ---------------- */
+const qtypeData = [
+  {q:"But where are the other stars?", type:"Open (Wh-)"},
+  {q:"Can I come with you to the walk?", type:"Permission"},
+  {q:"Who wants to see the photos from our trip?", type:"Subject"},
+  {q:'Light Pollution? What on earth does that mean?', type:"Echo"},
+  {q:"You're not leaving the shelter before the storm stops, are you?", type:"Tag"},
+  {q:"How should I know where the map went?", type:"Rhetorical"},
+  {q:"You forgot to complete your assignments again?", type:"Declarative"},
+  {q:"May I request a verification of the tracking details?", type:"Permission"},
+  {q:"What would you like to do after the examination finishes?", type:"Open (Wh-)"},
+  {q:"This is the main computer laboratory for the trainees?", type:"Declarative"}
+];
+const qtypeCats = ["Open (Wh-)","Subject","Permission","Echo","Tag","Rhetorical","Declarative"];
+let qtypeScore=0;
+function renderQTypeQuiz(){
+  const box=document.getElementById('qtype-quiz'); box.innerHTML=''; qtypeScore=0;
+  document.getElementById('score-qtype').textContent='0 / 10';
+  qtypeData.forEach(item=>{
+    const div=document.createElement('div'); div.className='quiz-item';
+    div.innerHTML = `<div class="stem">"${item.q}"</div><div class="optrow"></div>`;
+    const row = div.querySelector('.optrow');
+    shuffle(qtypeCats).forEach(cat=>{
+      const b=document.createElement('button'); b.className='opt mini'; b.textContent=cat;
+      b.onclick=()=>{
+        const buttons=row.querySelectorAll('.opt');
+        buttons.forEach(bb=>bb.disabled=true);
+        if(cat===item.type){ b.classList.add('correct'); qtypeScore++; addScore(2); }
+        else{
+          b.classList.add('wrong');
+          buttons.forEach(bb=>{ if(bb.textContent===item.type) bb.classList.add('correct'); });
+        }
+        document.getElementById('score-qtype').textContent = qtypeScore + ' / 10';
+      };
+      row.appendChild(b);
+    });
+    box.appendChild(div);
+  });
+}
+function resetQTypeQuiz(){ renderQTypeQuiz(); }
+renderQTypeQuiz();
+
+/* ---------------- CH12 GAME 2: DELEXICAL VERB MCQ ---------------- */
+const delexData = [
+  {s:'The stars ___ it in turns to shine brightly across the dark evening sky.', a:'take'},
+  {s:'If the rescue teams work through the night without sleeping, they will ___ incredibly tired.', a:'get'},
+  {s:'Before you can begin the instructional design program, you must ___ a preliminary diagnostic test.', a:'take'},
+  {s:'Do not worry about the children; the local foster family will ___ excellent care of them.', a:'take'},
+  {s:'The weather conditions worsened so quickly that it ___ us a very long time to walk home.', a:'take'},
+  {s:'The administrative board meets at noon to ___ a final decision regarding school safety zones.', a:'make'},
+  {s:'Trainees should use a structured notebook so that they can ___ comprehensive notes during the lecture.', a:'take'},
+  {s:'As I was filling out the scriptwriting exam, I noticed that I had ___ a serious mistake at the start.', a:'made'},
+  {s:'The campus grounds are so vast that several new students ___ completely lost this morning.', a:'get'},
+  {s:'The chief supervisor must ___ you formal permission before you can exit the testing hall.', a:'give'}
+];
+const delexOpts = ["take","get","give","make","made","go"];
+let delexScore=0;
+function renderDelexQuiz(){
+  const box=document.getElementById('delex-quiz'); box.innerHTML=''; delexScore=0;
+  document.getElementById('score-delex').textContent='0 / 10';
+  delexData.forEach(item=>{
+    const div=document.createElement('div'); div.className='quiz-item';
+    div.innerHTML = `<div class="stem">${item.s}</div><div class="optrow"></div>`;
+    const row = div.querySelector('.optrow');
+    let pool = shuffle([item.a, ...shuffle(delexOpts.filter(o=>o!==item.a)).slice(0,3)]);
+    pool.forEach(opt=>{
+      const b=document.createElement('button'); b.className='opt mini'; b.textContent=opt;
+      b.onclick=()=>{
+        const buttons=row.querySelectorAll('.opt');
+        buttons.forEach(bb=>bb.disabled=true);
+        if(opt===item.a){ b.classList.add('correct'); delexScore++; addScore(2); }
+        else{
+          b.classList.add('wrong');
+          buttons.forEach(bb=>{ if(bb.textContent===item.a) bb.classList.add('correct'); });
+        }
+        document.getElementById('score-delex').textContent = delexScore + ' / 10';
+      };
+      row.appendChild(b);
+    });
+    box.appendChild(div);
+  });
+}
+function resetDelexQuiz(){ renderDelexQuiz(); }
+renderDelexQuiz();
+
+/* ---------------- GUIDED WRITING SLIDES ---------------- */
+let currentSlide = 0;
+function goSlide(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.slide-dot').forEach(d=>d.classList.remove('active'));
+  currentSlide = n;
+  document.getElementById('slide-'+n).classList.add('active');
+  document.querySelectorAll('.slide-dot')[n].classList.add('active');
+}
+function changeSlide(dir){
+  let n = currentSlide + dir;
+  if(n<0) n=1; if(n>1) n=0;
+  goSlide(n);
+}
+</script>
+</body>
+</html>
