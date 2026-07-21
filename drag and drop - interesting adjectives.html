@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3rd Grade Word Sorting Game</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f0f4f8; margin: 0; padding: 20px; text-align: center; }
+    h1 { color: #2c3e50; margin-bottom: 5px; }
+    p { color: #555; margin-top: 0; }
+    
+    .stats {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #34495e;
+      margin-bottom: 15px;
+    }
+
+    /* Word Bank */
+    .word-bank-container {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      min-height: 90px;
+    }
+
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .word-card {
+      background-color: #3498db;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s, background-color 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .word-card:hover { transform: scale(1.05); }
+    .word-card.selected { background-color: #f1c40f; color: #2c3e50; ring: 3px solid #f39c12; }
+
+    /* Category Grid */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .category-box {
+      background: white;
+      border-radius: 12px;
+      border: 2px dashed #cbd5e1;
+      padding: 12px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .category-box.hovered { border-color: #3498db; background-color: #ebf5fb; }
+    .category-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+
+    .placed-words {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .placed-card {
+      background-color: #2ecc71;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .shake { animation: shake 0.4s; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .btn-reset {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-reset:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+
+  <h1>Vocabulary Sorting Game</h1>
+  <p>Click or drag a word, then place it into the correct category!</p>
+  
+  <div class="stats">
+    Score: <span id="score">0</span> / <span id="totalScore">0</span>
+  </div>
+
+  <div class="word-bank-container">
+    <div class="word-bank" id="wordBank"></div>
+  </div>
+
+  <div class="categories-grid" id="categoriesGrid"></div>
+
+  <button class="btn-reset" onclick="initGame()">Reset Game</button>
+
+  <script>
+    const data = [
+      { category: "🎭 Character & Feelings", words: ["Cheerful", "Energetic", "Fearless", "Curious", "Grumpy", "Furious"] },
+      { category: "📐 Size & Shape", words: ["Gigantic", "Colossal", "Miniature"] },
+      { category: "👁️ Sight & Looks", words: ["Vibrant", "Sparkling", "Shadowy"] },
+      { category: "✋ Touch & Texture", words: ["Jagged", "Slimy", "Prickly"] },
+      { category: "👂 Sound & Noise", words: ["Booming", "Deafening", "Whispering"] },
+      { category: "🌟 Opinions & Wonder", words: ["Marvelous", "Fantastic", "Amazing", "Wonderful", "Incredible"] }
+    ];
+
+    let selectedWord = null;
+    let score = 0;
+    let totalWords = 0;
+
+    function initGame() {
+      score = 0;
+      selectedWord = null;
+      
+      let allWords = [];
+      data.forEach(cat => {
+        cat.words.forEach(w => allWords.push({ word: w, category: cat.category }));
+      });
+      totalWords = allWords.length;
+
+      document.getElementById("score").innerText = score;
+      document.getElementById("totalScore").innerText = totalWords;
+      
+      const wordBank = document.getElementById("wordBank");
+      const categoriesGrid = document.getElementById("categoriesGrid");
+      wordBank.innerHTML = "";
+      categoriesGrid.innerHTML = "";
+
+      // Shuffle words
+      allWords.sort(() => Math.random() - 0.5);
+
+      // Populate Word Bank
+      allWords.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "word-card";
+        card.innerText = item.word;
+        card.draggable = true;
+        card.dataset.category = item.category;
+
+        // Click selection
+        card.addEventListener("click", () => {
+          document.querySelectorAll(".word-card").forEach(c => c.classList.remove("selected"));
+          if (selectedWord === card) {
+            selectedWord = null;
+          } else {
+            selectedWord = card;
+            card.classList.add("selected");
+          }
+        });
+
+        // Drag handlers
+        card.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", JSON.stringify({
+            word: item.word,
+            category: item.category
+          }));
+          selectedWord = card;
+        });
+
+        wordBank.appendChild(card);
+      });
+
+      // Populate Category Boxes
+      data.forEach(cat => {
+        const box = document.createElement("div");
+        box.className = "category-box";
+        box.dataset.category = cat.category;
+
+        box.innerHTML = `
+          <div class="category-title">${cat.category}</div>
+          <div class="placed-words"></div>
+        `;
+
+        // Click to drop
+        box.addEventListener("click", () => {
+          if (selectedWord) {
+            checkAndMove(selectedWord, box);
+          }
+        });
+
+        // Drag & Drop
+        box.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          box.classList.add("hovered");
+        });
+        box.addEventListener("dragleave", () => box.classList.remove("hovered"));
+        box.addEventListener("drop", (e) => {
+          e.preventDefault();
+          box.classList.remove("hovered");
+          if (selectedWord) {
+            checkAndMove(selectedWord, box);
+          }
+        });
+
+        categoriesGrid.appendChild(box);
+      });
+    }
+
+    function checkAndMove(cardEl, boxEl) {
+      const cardCategory = cardEl.dataset.category;
+      const boxCategory = boxEl.dataset.category;
+
+      if (cardCategory === boxCategory) {
+        // Correct match
+        const placedContainer = boxEl.querySelector(".placed-words");
+        const placedCard = document.createElement("div");
+        placedCard.className = "placed-card";
+        placedCard.innerText = cardEl.innerText;
+        placedContainer.appendChild(placedCard);
+
+        cardEl.remove();
+        selectedWord = null;
+        score++;
+        document.getElementById("score").innerText = score;
+
+        if (score === totalWords) {
+          setTimeout(() => alert("🎉 Excellent job! You classified all the words correctly!"), 200);
+        }
+      } else {
+        // Incorrect match
+        boxEl.classList.add("shake");
+        setTimeout(() => boxEl.classList.remove("shake"), 400);
+      }
+    }
+
+    initGame();
+  </script>
+</body>
+</html>
